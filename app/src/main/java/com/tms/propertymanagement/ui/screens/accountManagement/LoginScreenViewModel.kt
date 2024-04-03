@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.accountManagement
+package com.tms.propertymanagement.ui.screens.accountManagement
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +32,7 @@ data class LoginScreenUiState(
     val loginStatus: LoginStatus = LoginStatus.INITIAL,
     val loginResponseMessage: String = "",
 
-)
+    )
 class LoginScreenViewModel(
     private val apiRepository: ApiRepository,
     private val dsRepository: DSRepository

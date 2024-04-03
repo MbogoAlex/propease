@@ -1,5 +1,6 @@
 package com.tms.propertymanagement
 
+import HomeScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,8 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.tms.propertymanagement.accountManagement.LoginScreen
-import com.tms.propertymanagement.accountManagement.RegistrationScreen
+import com.tms.propertymanagement.ui.screens.accountManagement.LoginScreen
+import com.tms.propertymanagement.ui.screens.accountManagement.RegistrationScreen
 import com.tms.propertymanagement.ui.theme.PropEaseTheme
 
 class MainActivity : ComponentActivity() {
@@ -26,7 +27,8 @@ class MainActivity : ComponentActivity() {
                 ) {
 //                    WelcomeScreen()
 //                    RegistrationScreen()
-                    LoginScreen()
+//                    LoginScreen()
+                    HomeScreen()
                 }
             }
         }

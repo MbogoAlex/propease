@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.tms.propertymanagement.accountManagement.LoginScreenViewModel
-import com.tms.propertymanagement.accountManagement.RegistrationScreenViewModel
+import com.tms.propertymanagement.ui.screens.accountManagement.LoginScreenViewModel
+import com.tms.propertymanagement.ui.screens.accountManagement.RegistrationScreenViewModel
 
 object PropEaseViewModelFactory {
     val Factory = viewModelFactory {

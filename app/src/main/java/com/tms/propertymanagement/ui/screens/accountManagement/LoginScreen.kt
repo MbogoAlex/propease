@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.accountManagement
+package com.tms.propertymanagement.ui.screens.accountManagement
 
 import android.widget.Toast
 import androidx.compose.foundation.Image

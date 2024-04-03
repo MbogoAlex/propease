@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.accountManagement
+package com.tms.propertymanagement.ui.screens.accountManagement
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
