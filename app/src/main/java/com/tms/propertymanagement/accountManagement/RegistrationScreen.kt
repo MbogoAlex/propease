@@ -82,7 +82,7 @@ fun RegistrationScreen(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            InputForm(
+            RegistrationInputForm(
                 leadingIcon = painterResource(id = R.drawable.person),
                 labelText = "first name",
                 value = uiState.registrationDetails.firstName,
@@ -98,7 +98,7 @@ fun RegistrationScreen(
                     .weight(1f)
             )
             Spacer(modifier = Modifier.width(20.dp))
-            InputForm(
+            RegistrationInputForm(
                 leadingIcon = painterResource(id = R.drawable.person),
                 labelText = "last name",
                 value = uiState.registrationDetails.lastName,
@@ -115,7 +115,7 @@ fun RegistrationScreen(
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
-        InputForm(
+        RegistrationInputForm(
             leadingIcon = painterResource(id = R.drawable.phone),
             labelText = "Phone number",
             value = uiState.registrationDetails.phoneNumber,
@@ -131,7 +131,7 @@ fun RegistrationScreen(
                 .fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(20.dp))
-        InputForm(
+        RegistrationInputForm(
             leadingIcon = painterResource(id = R.drawable.email),
             labelText = "Email",
             value = uiState.registrationDetails.email,
@@ -148,7 +148,7 @@ fun RegistrationScreen(
                 .fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(20.dp))
-        InputForm(
+        RegistrationInputForm(
             leadingIcon = painterResource(id = R.drawable.password),
             labelText = "Password",
             value = uiState.registrationDetails.password,
@@ -163,7 +163,7 @@ fun RegistrationScreen(
             modifier = Modifier
                 .fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.weight(1f))
         Button(
             enabled = uiState.registrationButtonEnabled,
             onClick = {
@@ -177,10 +177,13 @@ fun RegistrationScreen(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(text = "Register")
-//            CircularProgressIndicator(
-//                color = Color.White
-//            )
+            if(uiState.registrationStatus == RegistrationStatus.LOADING) {
+                CircularProgressIndicator()
+            }
+            else {
+                Text(text = "Register")
+            }
+
         }
         Spacer(modifier = Modifier.height(20.dp))
         OutlinedButton(
@@ -195,7 +198,7 @@ fun RegistrationScreen(
 }
 
 @Composable
-fun InputForm(
+fun RegistrationInputForm(
     isError: Boolean,
     leadingIcon: Painter,
     labelText: String,
@@ -228,7 +231,7 @@ fun InputForm(
 @Composable
 fun InputFormPreview() {
     PropEaseTheme {
-        InputForm(
+        RegistrationInputForm(
             leadingIcon = painterResource(id = R.drawable.person),
             labelText = "Name",
             value = "",
