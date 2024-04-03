@@ -36,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tms.propertymanagement.PropEaseViewModelFactory
 import com.tms.propertymanagement.R
 import com.tms.propertymanagement.ui.theme.PropEaseTheme
 
@@ -43,7 +44,7 @@ import com.tms.propertymanagement.ui.theme.PropEaseTheme
 fun LoginScreen(
     modifier: Modifier = Modifier
 ) {
-    val viewModel: LoginScreenViewModel = viewModel()
+    val viewModel: LoginScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
     Column(
         modifier = Modifier

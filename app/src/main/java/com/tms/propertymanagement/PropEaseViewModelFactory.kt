@@ -1,0 +1,25 @@
+package com.tms.propertymanagement
+
+import android.text.Spannable.Factory
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.tms.propertymanagement.accountManagement.LoginScreenViewModel
+
+object PropEaseViewModelFactory {
+    val Factory = viewModelFactory {
+        // initialize LoginScreen ViewModel
+        initializer {
+            val apiRepository = propEaseApplication().container.apiRepository
+            val dsRepository = propEaseApplication().dsRepository
+            LoginScreenViewModel(
+                apiRepository = apiRepository,
+                dsRepository = dsRepository
+            )
+        }
+    }
+}
+
+fun CreationExtras.propEaseApplication(): PropEaseApp =
+    (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as PropEaseApp)
