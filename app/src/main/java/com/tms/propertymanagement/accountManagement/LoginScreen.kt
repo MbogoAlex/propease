@@ -103,7 +103,7 @@ fun LoginScreen(
         )
         Spacer(modifier = Modifier.weight(1f))
         Button(
-            enabled = true,
+            enabled = uiState.loginButtonEnabled,
             onClick = {
                 
             },

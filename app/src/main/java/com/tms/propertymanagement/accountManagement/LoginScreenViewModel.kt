@@ -79,7 +79,8 @@ class LoginScreenViewModel(
     fun loginUser() {
         _uiState.update {
             it.copy(
-                loginStatus = LoginStatus.LOADING
+                loginStatus = LoginStatus.LOADING,
+                loginButtonEnabled = false
             )
         }
         val userLoginRequestBody = UserLoginRequestBody(
@@ -98,7 +99,7 @@ class LoginScreenViewModel(
 
                     val dsUserModel = DSUserModel(
                         userId = response.body()?.data?.user?.userInfo?.id!!,
-                        userName = "${response.body()?.data?.user?.userInfo?.fname!!} ${response.body()?.data?.user?.userInfo?.mname!!}",
+                        userName = "${response.body()?.data?.user?.userInfo?.fname!!} ${response.body()?.data?.user?.userInfo?.lname!!}",
                         phoneNumber = response.body()?.data?.user?.userInfo?.phoneNumber!!,
                         email = response.body()?.data?.user?.userInfo?.email!!,
                         password = loginDetails.password,
@@ -118,7 +119,7 @@ class LoginScreenViewModel(
                     _uiState.update {
                         it.copy(
                             loginStatus = LoginStatus.FAILURE,
-                            loginResponseMessage = response.message()
+                            loginResponseMessage = "Invalid credentials"
                         )
                     }
                 }
@@ -126,7 +127,7 @@ class LoginScreenViewModel(
                 _uiState.update {
                     it.copy(
                         loginStatus = LoginStatus.FAILURE,
-                        loginResponseMessage = e.message.toString()
+                        loginResponseMessage = "Failed to login. Try again later"
                     )
                 }
             }

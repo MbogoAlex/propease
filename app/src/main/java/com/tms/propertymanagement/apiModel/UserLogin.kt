@@ -28,7 +28,6 @@ data class UserLoginResponseBodyDataUserInfo(
     val email: String,
     val phoneNumber: String,
     val imageUrl: String?,
-    val mname: String,
     val fname: String,
     val lname: String
 )

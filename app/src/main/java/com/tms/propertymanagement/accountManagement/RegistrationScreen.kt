@@ -42,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tms.propertymanagement.PropEaseViewModelFactory
 import com.tms.propertymanagement.R
 import com.tms.propertymanagement.ui.theme.PropEaseTheme
 import com.tms.propertymanagement.utils.ReusableFunctions
@@ -169,7 +170,7 @@ fun RegistrationScreen(
             onClick = {
                 checkIfEmailIsValid()
                 if(isEmailValid) {
-
+                    viewModel.registerUser()
                 } else {
                     Toast.makeText(context, "Enter a valid email", Toast.LENGTH_SHORT).show()
                 }

@@ -1,14 +1,19 @@
 package com.tms.propertymanagement.accountManagement
 
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.tms.propertymanagement.apiModel.UserRegistrationRequestBody
+import com.tms.propertymanagement.network.ApiRepository
+import com.tms.propertymanagement.propEaseDataStore.DSRepository
+import com.tms.propertymanagement.utils.ReusableFunctions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 enum class RegistrationStatus {
     INITIAL,
@@ -19,7 +24,8 @@ enum class RegistrationStatus {
 data class RegistrationScreenUIState(
     val registrationDetails: RegistrationDetails = RegistrationDetails(),
     val registrationButtonEnabled: Boolean = false,
-    val registrationStatus: RegistrationStatus = RegistrationStatus.INITIAL
+    val registrationStatus: RegistrationStatus = RegistrationStatus.INITIAL,
+    val registrationResponseMessage: String = ""
 )
 
 data class RegistrationDetails(
@@ -29,7 +35,10 @@ data class RegistrationDetails(
     val email: String = "",
     val password: String = ""
 )
-class RegistrationScreenViewModel: ViewModel() {
+class RegistrationScreenViewModel(
+    private val apiRepository: ApiRepository,
+    private val dsRepository: DSRepository,
+): ViewModel() {
     private val _uiState = MutableStateFlow(value = RegistrationScreenUIState())
     val uiState: StateFlow<RegistrationScreenUIState> = _uiState.asStateFlow()
 
@@ -103,6 +112,52 @@ class RegistrationScreenViewModel: ViewModel() {
                 registrationDetails.email.isNotEmpty() &&
                 registrationDetails.password.isNotEmpty() &&
                 registrationDetails.phoneNumber.isNotEmpty()
+    }
+
+    fun registerUser() {
+        if(ReusableFunctions.checkIfEmailIsValid(registrationDetails.email)) {
+            _uiState.update {
+                it.copy(
+                    registrationStatus = RegistrationStatus.LOADING,
+                    registrationButtonEnabled = false
+                )
+            }
+            val userRegistrationRequestBody = UserRegistrationRequestBody(
+                fname = registrationDetails.firstName,
+                lname = registrationDetails.lastName,
+                email = registrationDetails.email,
+                phoneNumber = registrationDetails.phoneNumber,
+                password = registrationDetails.password
+            )
+            viewModelScope.launch {
+                try {
+                    val response = apiRepository.registerUser(userRegistrationRequestBody)
+                    if(response.isSuccessful) {
+                        _uiState.update {
+                            it.copy(
+                                registrationStatus = RegistrationStatus.SUCCESS,
+                                registrationResponseMessage = "Registration success"
+                            )
+                        }
+                    } else {
+                        _uiState.update {
+                            it.copy(
+                                registrationStatus = RegistrationStatus.FAIL,
+                                registrationResponseMessage = "Failed to register. Try again later"
+                            )
+                        }
+                    }
+                } catch (e: Exception) {
+                    _uiState.update {
+                        it.copy(
+                            registrationStatus = RegistrationStatus.FAIL,
+                            registrationResponseMessage = "Failed to register. Try again later"
+                        )
+                    }
+                }
+            }
+        }
+
     }
 
 
