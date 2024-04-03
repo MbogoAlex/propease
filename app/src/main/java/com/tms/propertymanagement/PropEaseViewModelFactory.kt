@@ -18,6 +18,14 @@ object PropEaseViewModelFactory {
                 dsRepository = dsRepository
             )
         }
+
+        // initialize SplashScreen ViewModel
+        initializer {
+            val dsRepository = propEaseApplication().dsRepository
+            SplashScreenViewModel(
+                dsRepository = dsRepository
+            )
+        }
     }
 }
 
