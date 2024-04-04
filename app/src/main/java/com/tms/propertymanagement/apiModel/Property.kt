@@ -2,7 +2,7 @@ package com.tms.propertymanagement.apiModel
 
 import kotlinx.serialization.Serializable
 
-// load categorized properties
+// load filtered properties
 @Serializable
 data class PropertyResponseBody(
     val statusCode: Int,
@@ -11,10 +11,10 @@ data class PropertyResponseBody(
 )
 @Serializable
 data class PropertyResponseBodyData(
-    val properties: List<CategorizedProperty>
+    val properties: List<PropertyData>
 )
 @Serializable
-data class CategorizedProperty(
+data class PropertyData(
     val user: PropertyOwner,
     val propertyId: Int,
     val title: String,
@@ -47,6 +47,18 @@ data class PropertyLocation(
 data class PropertyImage(
     val id: Int,
     val name: String
+)
+
+// fetch specific property
+@Serializable
+data class SpecificPropertyResponseBody(
+    val statusCode: Int,
+    val message: String,
+    val data: SpecificPropertyResponseBodyData
+)
+@Serializable
+data class SpecificPropertyResponseBodyData(
+    val property: PropertyData
 )
 
 

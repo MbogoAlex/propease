@@ -9,6 +9,7 @@ import com.tms.propertymanagement.ui.screens.SplashScreenViewModel
 import com.tms.propertymanagement.ui.screens.accountManagement.LoginScreenViewModel
 import com.tms.propertymanagement.ui.screens.accountManagement.RegistrationScreenViewModel
 import com.tms.propertymanagement.ui.screens.appContentPages.HomeScreenViewModel
+import com.tms.propertymanagement.ui.screens.appContentPages.ListingDetailsScreenViewModel
 import com.tms.propertymanagement.ui.screens.appContentPages.ListingsScreenViewModel
 
 object PropEaseViewModelFactory {
@@ -59,6 +60,18 @@ object PropEaseViewModelFactory {
             ListingsScreenViewModel(
                 apiRepository = apiRepository,
                 dsRepository = dsRepository
+            )
+        }
+
+        // initialize ListingDetailsScreen ViewModel
+        initializer {
+            val apiRepository = propEaseApplication().container.apiRepository
+            val dsRepository = propEaseApplication().dsRepository
+            val savedStateHandle = this.createSavedStateHandle()
+            ListingDetailsScreenViewModel(
+                apiRepository = apiRepository,
+                dsRepository = dsRepository,
+                savedStateHandle = savedStateHandle
             )
         }
     }

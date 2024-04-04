@@ -1,9 +1,11 @@
 package com.tms.propertymanagement.ui.screens.appContentPages
 
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,79 +23,129 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
+import com.tms.propertymanagement.PropEaseViewModelFactory
 import com.tms.propertymanagement.R
+import com.tms.propertymanagement.nav.NavigationDestination
 import com.tms.propertymanagement.ui.theme.PropEaseTheme
+import com.tms.propertymanagement.utils.ReusableFunctions
 
+object ListingDetailsDestination: NavigationDestination {
+    override val title: String = "Listing Details Screen"
+    override val route: String = "listing-details-screen"
+    val propertyId: String = "propertyId"
+    val routeWithArgs: String = "$route/{$propertyId}"
+}
 @Composable
-fun ListingDetails(
+fun ListingDetailsScreen(
+    navigateToPreviousScreen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val viewModel: ListingDetailsScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
+    val uiState by viewModel.uiState.collectAsState()
     Column(
         modifier = Modifier
             .padding(16.dp)
             .fillMaxSize()
     ) {
-        ImageSlider()
+        IconButton(onClick = { navigateToPreviousScreen() }) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Previous screen"
+            )
+        }
+        ImageSlider(
+            uiState = uiState
+        )
         Spacer(
             modifier = Modifier
                 .height(20.dp)
         )
-        ListingTextDetails()
+        ListingTextDetails(
+            uiState = uiState
+        )
     }
 }
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun ImageSlider(
+    uiState: ListingDetailsScreenUiState,
     modifier: Modifier = Modifier
 ) {
-    Card {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
+    Log.i("IMAGES_ARE: ", uiState.property.images.toString())
+    val pagerState = rememberPagerState(initialPage = 0)
+    Column {
 
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.sample_property),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-
-            )
+        Card {
             Box(
                 modifier = Modifier
-                    .padding(20.dp)
                     .fillMaxWidth()
-                    .align(Alignment.BottomEnd)
+
             ) {
-                Text(
-                    text = "2/5",
-                    color = Color.White,
+                HorizontalPager(count = uiState.property.images.size, state = pagerState) { page ->
+                    AsyncImage(
+                        model = ImageRequest.Builder(context = LocalContext.current)
+                            .data(uiState.property.images[page].name)
+                            .crossfade(true)
+                            .build(),
+                        placeholder = painterResource(id = R.drawable.loading_img),
+                        error = painterResource(id = R.drawable.ic_broken_image),
+                        contentScale = ContentScale.Crop,
+                        contentDescription = uiState.property.title,
+                        modifier = Modifier
+                            .height(250.dp)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                    )
+
+                }
+                Box(
                     modifier = Modifier
-                        .alpha(0.5f)
-                        .background(Color.Black)
-                        .padding(
-                            start = 10.dp,
-                            end = 10.dp,
-                        )
+                        .padding(20.dp)
+                        .fillMaxWidth()
                         .align(Alignment.BottomEnd)
-                )
+                ) {
+                    Text(
+                        text = "${pagerState.currentPage + 1}/${pagerState.pageCount}",
+                        color = Color.White,
+                        modifier = Modifier
+                            .alpha(0.5f)
+                            .background(Color.Black)
+                            .padding(
+                                start = 10.dp,
+                                end = 10.dp,
+                            )
+                            .align(Alignment.BottomEnd)
+                    )
+                }
             }
         }
     }
@@ -101,9 +153,10 @@ fun ImageSlider(
 
 @Composable
 fun ListingTextDetails(
+    uiState: ListingDetailsScreenUiState,
     modifier: Modifier = Modifier
 ) {
-    var features = listOf<String>("Wi-Fi", "Swimming", "Water", "Security", "Lighting")
+    val context = LocalContext.current
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -117,7 +170,7 @@ fun ListingTextDetails(
                         .background(Color.Black)
                 ) {
                     Text(
-                        text = "Rental",
+                        text = uiState.property.category,
                         color = Color.White,
                         modifier = Modifier
                             .padding(
@@ -129,9 +182,22 @@ fun ListingTextDetails(
                     )
                 }
             }
+            Spacer(modifier = Modifier.width(5.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.house),
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(
+                    text = "${uiState.property.rooms} room".takeIf { it.length == 1 } ?: "${uiState.property.rooms} rooms"
+                )
+            }
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = "Posted on 1-3-2024",
+                text = "Posted on ${uiState.property.availableDate}",
                 fontWeight = FontWeight.Light
             )
 
@@ -139,13 +205,13 @@ fun ListingTextDetails(
         }
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = "Gracious Apartment in Nairobi",
+            text = uiState.property.title,
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(20.dp))
         LazyVerticalGrid(columns = GridCells.Fixed(2)) {
-            items(features.size) {
+            items(uiState.property.features.size) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -156,7 +222,7 @@ fun ListingTextDetails(
                             .size(10.dp)
                     )
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = features[it])
+                    Text(text = uiState.property.features[it])
                 }
 
             }
@@ -170,7 +236,7 @@ fun ListingTextDetails(
                 .verticalScroll(rememberScrollState())
         ) {
             Text(
-                text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. ",
+                text = uiState.property.description,
                 fontSize = 16.sp
             )
         }
@@ -181,7 +247,7 @@ fun ListingTextDetails(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "KES 80,000",
+                text = ReusableFunctions.formatMoneyValue(uiState.property.price),
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
@@ -195,25 +261,42 @@ fun ListingTextDetails(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.profile_placeholder),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .size(120.dp)
-            )
+            if(uiState.property.user.profilePic.isEmpty()) {
+                Image(
+                    painter = painterResource(id = R.drawable.profile_placeholder),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .size(70.dp)
+                )
+            } else {
+                AsyncImage(
+                    model = ImageRequest.Builder(context = LocalContext.current)
+                        .data(uiState.property.user.profilePic)
+                        .crossfade(true)
+                        .build(),
+                    placeholder = painterResource(id = R.drawable.loading_img),
+                    error = painterResource(id = R.drawable.ic_broken_image),
+                    contentScale = ContentScale.Crop,
+                    contentDescription = uiState.property.title,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .size(70.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(20.dp))
             Column(
             ) {
                 Text(
-                    text = "Evans K",
+                    text = "${uiState.property.user.fname} ${uiState.property.user.lname}",
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Owner"
                 )
                 Text(
-                    text = "0794649027"
+                    text = uiState.property.user.phoneNumber
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -223,6 +306,12 @@ fun ListingTextDetails(
                     modifier = Modifier
                         .background(Color.Green)
                         .padding(10.dp)
+                        .clickable {
+                            val phoneIntent = Intent(Intent.ACTION_DIAL).apply {
+                                data = Uri.parse("tel:${uiState.property.user.phoneNumber}")
+                            }
+                            context.startActivity(phoneIntent)
+                        }
                 ) {
                     Icon(
                         tint = Color.White,
@@ -240,6 +329,12 @@ fun ListingTextDetails(
                     modifier = Modifier
                         .background(Color.Blue)
                         .padding(10.dp)
+                        .clickable {
+                            val smsIntent = Intent(Intent.ACTION_SENDTO).apply {
+                                data = Uri.parse("smsto:${uiState.property.user.phoneNumber}")
+                            }
+                            context.startActivity(smsIntent)
+                        }
                 ) {
                     Icon(
                         tint = Color.White,
@@ -259,7 +354,9 @@ fun ListingTextDetails(
 @Composable
 fun ImageSliderPreview() {
     PropEaseTheme {
-        ImageSlider()
+        ImageSlider(
+            uiState = ListingDetailsScreenUiState()
+        )
     }
 }
 
@@ -267,6 +364,8 @@ fun ImageSliderPreview() {
 @Composable
 fun ListingDetailsPreview() {
     PropEaseTheme {
-        ListingDetails()
+        ListingDetailsScreen(
+            navigateToPreviousScreen = {}
+        )
     }
 }

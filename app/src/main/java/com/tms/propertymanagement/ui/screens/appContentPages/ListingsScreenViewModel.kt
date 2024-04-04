@@ -3,8 +3,8 @@ package com.tms.propertymanagement.ui.screens.appContentPages
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tms.propertymanagement.apiModel.CategorizedProperty
 import com.tms.propertymanagement.apiModel.Category
+import com.tms.propertymanagement.apiModel.PropertyData
 import com.tms.propertymanagement.network.ApiRepository
 import com.tms.propertymanagement.propEaseDataStore.DSRepository
 import com.tms.propertymanagement.utils.ReusableFunctions
@@ -23,7 +23,7 @@ enum class FetchingStatus {
 }
 
 data class ListingsScreenUiState(
-    val properties: List<CategorizedProperty> = emptyList(),
+    val properties: List<PropertyData> = emptyList(),
     val categories: List<Category> = emptyList(),
     val fetchingStatus: FetchingStatus = FetchingStatus.INITIAL,
 //    val categoryId: Int = 1,

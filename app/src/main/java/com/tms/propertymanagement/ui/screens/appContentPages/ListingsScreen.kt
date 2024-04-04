@@ -1,7 +1,6 @@
 package com.tms.propertymanagement.ui.screens.appContentPages
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -19,24 +17,20 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -50,7 +44,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -64,12 +57,13 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.tms.propertymanagement.PropEaseViewModelFactory
 import com.tms.propertymanagement.R
-import com.tms.propertymanagement.apiModel.CategorizedProperty
+import com.tms.propertymanagement.apiModel.PropertyData
 import com.tms.propertymanagement.ui.theme.PropEaseTheme
 
 @Composable
 fun ListingsScreen(
     token: String,
+    navigateToSpecificProperty: (propertyId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: ListingsScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
@@ -84,6 +78,7 @@ fun ListingsScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
         ListingItems(
+            navigateToSpecificProperty = navigateToSpecificProperty,
             uiState = uiState,
             viewModel = viewModel
         )
@@ -304,6 +299,7 @@ fun CategorySelection(
 
 @Composable
 fun ListingItems(
+    navigateToSpecificProperty: (propertyId: String) -> Unit,
     uiState: ListingsScreenUiState,
     viewModel: ListingsScreenViewModel,
     modifier: Modifier = Modifier
@@ -313,6 +309,7 @@ fun ListingItems(
     ) {
         items(uiState.properties.size) {
             ListingItem(
+                navigateToSpecificProperty = navigateToSpecificProperty,
                 property = uiState.properties[it],
                 modifier = Modifier
                     .padding(8.dp)
@@ -323,11 +320,15 @@ fun ListingItems(
 
 @Composable
 fun ListingItem(
-    property: CategorizedProperty,
+    property: PropertyData,
+    navigateToSpecificProperty: (propertyId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
+            .clickable {
+                navigateToSpecificProperty(property.propertyId.toString())
+            }
     ) {
         Column {
             if(property.images.isNotEmpty()) {
@@ -419,7 +420,10 @@ fun ListingItemPreview(
 ) {
     val uiState = ListingsScreenUiState()
     PropEaseTheme {
-        ListingItem(uiState.properties[0])
+        ListingItem(
+            uiState.properties[0],
+            navigateToSpecificProperty = {}
+        )
     }
 }
 
@@ -458,7 +462,8 @@ fun ListingsScreenPreview(
 ) {
     PropEaseTheme {
         ListingsScreen(
-            token = ""
+            token = "",
+            navigateToSpecificProperty = {}
         )
     }
 }

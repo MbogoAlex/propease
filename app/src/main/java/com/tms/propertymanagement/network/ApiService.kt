@@ -2,6 +2,7 @@ package com.tms.propertymanagement.network
 
 import com.tms.propertymanagement.apiModel.CategoryResponseBody
 import com.tms.propertymanagement.apiModel.PropertyResponseBody
+import com.tms.propertymanagement.apiModel.SpecificPropertyResponseBody
 import com.tms.propertymanagement.apiModel.UserLoginRequestBody
 import com.tms.propertymanagement.apiModel.UserLoginResponseBody
 import com.tms.propertymanagement.apiModel.UserRegistrationRequestBody
@@ -49,4 +50,11 @@ interface ApiService {
         @Query("rooms") rooms: String,
         @Query("categoryId") categoryId: String
     ): Response<PropertyResponseBody>
+
+    // fetch specific property
+    @GET("api/property/propertyId={propertyId}")
+    suspend fun fetchSpecificProperty(
+        @Header("Authorization") token: String,
+        @Path("propertyId") propertyId: String
+    ): Response<SpecificPropertyResponseBody>
 }

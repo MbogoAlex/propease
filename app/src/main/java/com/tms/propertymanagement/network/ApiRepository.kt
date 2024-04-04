@@ -2,6 +2,7 @@ package com.tms.propertymanagement.network
 
 import com.tms.propertymanagement.apiModel.CategoryResponseBody
 import com.tms.propertymanagement.apiModel.PropertyResponseBody
+import com.tms.propertymanagement.apiModel.SpecificPropertyResponseBody
 import com.tms.propertymanagement.apiModel.UserLoginRequestBody
 import com.tms.propertymanagement.apiModel.UserLoginResponseBody
 import com.tms.propertymanagement.apiModel.UserRegistrationRequestBody
@@ -15,6 +16,7 @@ interface ApiRepository {
     suspend fun fetchCategories(token: String): Response<CategoryResponseBody>
 
     suspend fun fetchFilteredProperties(token: String, location: String, rooms: String, categoryId: String): Response<PropertyResponseBody>
+    suspend fun fetchSpecificProperty(token: String, propertyId: String): Response<SpecificPropertyResponseBody>
 }
 
 class NetworkApiRepository(private val apiService: ApiService): ApiRepository {
@@ -35,6 +37,11 @@ class NetworkApiRepository(private val apiService: ApiService): ApiRepository {
         location = location,
         rooms = rooms,
         categoryId = categoryId
+    )
+
+    override suspend fun fetchSpecificProperty(token: String, propertyId: String): Response<SpecificPropertyResponseBody> = apiService.fetchSpecificProperty(
+        token = "Bearer $token",
+        propertyId = propertyId
     )
 
 }

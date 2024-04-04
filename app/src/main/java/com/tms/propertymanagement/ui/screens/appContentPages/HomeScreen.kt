@@ -62,6 +62,7 @@ data class MainMenuItem (
 )
 @Composable
 fun HomeScreen(
+    navigateToSpecificProperty: (propertyId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: HomeScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
@@ -186,7 +187,8 @@ fun HomeScreen(
             }
             when(currentScreen) {
                 MainNavigationPages.LISTINGS_SCREEN -> ListingsScreen(
-                    token = uiState.userDetails.token
+                    token = uiState.userDetails.token,
+                    navigateToSpecificProperty = navigateToSpecificProperty
                 )
                 MainNavigationPages.MY_UNITS_SCREEN -> {}
                 MainNavigationPages.ADVERTISE_SCREEN -> {}
@@ -203,6 +205,8 @@ fun HomeScreen(
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen()
+    HomeScreen(
+        navigateToSpecificProperty = {}
+    )
 }
 

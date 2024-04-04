@@ -17,6 +17,8 @@ import com.tms.propertymanagement.ui.screens.accountManagement.LoginScreen
 import com.tms.propertymanagement.ui.screens.accountManagement.LoginScreenDestination
 import com.tms.propertymanagement.ui.screens.accountManagement.RegistrationScreen
 import com.tms.propertymanagement.ui.screens.accountManagement.RegistrationScreenDestination
+import com.tms.propertymanagement.ui.screens.appContentPages.ListingDetailsDestination
+import com.tms.propertymanagement.ui.screens.appContentPages.ListingDetailsScreen
 
 @Composable
 fun NavigationGraph(
@@ -87,7 +89,26 @@ fun NavigationGraph(
             )
         }
         composable(HomeScreenDestination.route) {
-            HomeScreen()
+            HomeScreen(
+                navigateToSpecificProperty = {
+                    navController.navigate("${ListingDetailsDestination.route}/${it}")
+                }
+            )
+        }
+        composable(
+            ListingDetailsDestination.routeWithArgs,
+            arguments = listOf(
+                navArgument(ListingDetailsDestination.propertyId) {
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            ListingDetailsScreen(
+                navigateToPreviousScreen = {
+                    navController.popBackStack(ListingDetailsDestination.routeWithArgs, true)
+                    navController.navigateUp()
+                }
+            )
         }
     }
 }
