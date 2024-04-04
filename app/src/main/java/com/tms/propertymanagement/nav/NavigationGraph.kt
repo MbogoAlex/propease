@@ -106,7 +106,7 @@ fun NavigationGraph(
             ListingDetailsScreen(
                 navigateToPreviousScreen = {
                     navController.popBackStack(ListingDetailsDestination.routeWithArgs, true)
-                    navController.navigateUp()
+                    navController.enableOnBackPressed(true)
                 }
             )
         }
