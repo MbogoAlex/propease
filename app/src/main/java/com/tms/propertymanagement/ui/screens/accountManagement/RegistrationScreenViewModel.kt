@@ -160,5 +160,13 @@ class RegistrationScreenViewModel(
 
     }
 
+    fun resetRegistrationStatus() {
+        _uiState.update {
+            it.copy(
+                registrationStatus = RegistrationStatus.INITIAL
+            )
+        }
+    }
+
 
 }

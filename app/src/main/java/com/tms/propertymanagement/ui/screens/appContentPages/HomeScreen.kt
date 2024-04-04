@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,10 +35,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tms.propertymanagement.PropEaseViewModelFactory
 import com.tms.propertymanagement.R
+import com.tms.propertymanagement.nav.NavigationDestination
+import com.tms.propertymanagement.ui.screens.appContentPages.HomeScreenViewModel
 import com.tms.propertymanagement.ui.screens.appContentPages.ListingsScreen
 import kotlinx.coroutines.launch
 
+object HomeScreenDestination: NavigationDestination {
+    override val title: String = "Home Screen"
+    override val route: String = "home-screen"
+
+}
 enum class MainNavigationPages {
     LISTINGS_SCREEN,
     MY_UNITS_SCREEN,
@@ -54,6 +64,8 @@ data class MainMenuItem (
 fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
+    val viewModel: HomeScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
+    val uiState by viewModel.uiState.collectAsState()
     var currentScreen by rememberSaveable {
         mutableStateOf(MainNavigationPages.LISTINGS_SCREEN)
     }
@@ -113,7 +125,7 @@ fun HomeScreen(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "John Doe",
+                        text = uiState.userDetails.userName,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -153,19 +165,29 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            IconButton(onClick = {
-                scope.launch {
-                    if(drawerState.isClosed) drawerState.open() else drawerState.close()
-                }
-            }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.drawable_menu),
-                    contentDescription = "Navigation menu"
-                )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = {
+                    scope.launch {
+                        if(drawerState.isClosed) drawerState.open() else drawerState.close()
+                    }
+                }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.drawable_menu),
+                        contentDescription = "Navigation menu"
+                    )
 
+                }
+                Text(
+                    text = "Hey, ${uiState.userDetails.userName}",
+                    fontWeight = FontWeight.Bold
+                )
             }
             when(currentScreen) {
-                MainNavigationPages.LISTINGS_SCREEN -> ListingsScreen()
+                MainNavigationPages.LISTINGS_SCREEN -> ListingsScreen(
+                    token = uiState.userDetails.token
+                )
                 MainNavigationPages.MY_UNITS_SCREEN -> {}
                 MainNavigationPages.ADVERTISE_SCREEN -> {}
                 MainNavigationPages.NOTIFICATIONS_SCREEN -> {}

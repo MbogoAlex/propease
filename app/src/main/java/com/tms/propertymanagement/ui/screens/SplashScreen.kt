@@ -1,4 +1,4 @@
-package com.tms.propertymanagement
+package com.tms.propertymanagement.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -16,8 +16,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tms.propertymanagement.PropEaseViewModelFactory
+import com.tms.propertymanagement.R
+import com.tms.propertymanagement.nav.NavigationDestination
 import com.tms.propertymanagement.ui.theme.PropEaseTheme
 
+object SplashScreenDestination: NavigationDestination {
+    override val title: String = "Splash Screen"
+    override val route: String = "splash-screen"
+
+}
 @Composable
 fun SplashScreen(
     navigateToWelcomeScreen: () -> Unit,

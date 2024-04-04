@@ -44,16 +44,33 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tms.propertymanagement.PropEaseViewModelFactory
 import com.tms.propertymanagement.R
+import com.tms.propertymanagement.nav.NavigationDestination
 import com.tms.propertymanagement.ui.theme.PropEaseTheme
 import com.tms.propertymanagement.utils.ReusableFunctions
 
+object RegistrationScreenDestination: NavigationDestination {
+    override val title: String = "Registration Screen"
+    override val route: String = "registration-screen"
+
+}
 @Composable
 fun RegistrationScreen(
+    navigateToPreviousScreen: () -> Unit,
+    navigateToLoginScreen: (phoneNumber: String, password: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val viewModel: RegistrationScreenViewModel = viewModel()
+    val viewModel: RegistrationScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
+
+    if(uiState.registrationStatus == RegistrationStatus.SUCCESS) {
+        viewModel.resetRegistrationStatus()
+        navigateToLoginScreen(
+            uiState.registrationDetails.phoneNumber,
+            uiState.registrationDetails.password
+        )
+    }
+
     var isEmailValid by rememberSaveable {
         mutableStateOf(true)
     }
@@ -66,7 +83,7 @@ fun RegistrationScreen(
             .padding(16.dp)
     ) {
         Row {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = { navigateToPreviousScreen() }) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Previous page"
@@ -188,7 +205,7 @@ fun RegistrationScreen(
         }
         Spacer(modifier = Modifier.height(20.dp))
         OutlinedButton(
-            onClick = { /*TODO*/ },
+            onClick = { navigateToLoginScreen("", "") },
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -250,6 +267,9 @@ fun InputFormPreview() {
 @Composable
 fun RegistrationScreenPreview() {
     PropEaseTheme {
-        RegistrationScreen()
+        RegistrationScreen(
+            navigateToPreviousScreen = {},
+            navigateToLoginScreen = {phoneNumber: String, password: String ->  }
+        )
     }
 }

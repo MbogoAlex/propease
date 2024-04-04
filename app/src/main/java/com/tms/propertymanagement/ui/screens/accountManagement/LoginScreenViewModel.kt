@@ -3,6 +3,7 @@ package com.tms.propertymanagement.ui.screens.accountManagement
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tms.propertymanagement.apiModel.UserLoginRequestBody
@@ -35,17 +36,19 @@ data class LoginScreenUiState(
     )
 class LoginScreenViewModel(
     private val apiRepository: ApiRepository,
-    private val dsRepository: DSRepository
+    private val dsRepository: DSRepository,
+    private val savedStateHandle: SavedStateHandle
 ): ViewModel() {
     private val _uiState = MutableStateFlow(value = LoginScreenUiState())
     val uiState: StateFlow<LoginScreenUiState> = _uiState.asStateFlow()
 
+    private val phoneNumber: String? = savedStateHandle[LoginScreenDestination.phoneNumber]
+    private val password: String? = savedStateHandle[LoginScreenDestination.password]
+
+
     private var loginDetails by mutableStateOf(
         LoginDetails()
     )
-
-
-
 
     fun updatePhoneNumber(phoneNumber: String) {
         loginDetails = loginDetails.copy(
@@ -140,6 +143,24 @@ class LoginScreenViewModel(
                 loginStatus = LoginStatus.INITIAL
             )
         }
+    }
+
+    fun initializeFields() {
+        loginDetails = loginDetails.copy(
+            phoneNumber = phoneNumber.takeIf { it != null } ?: "phone number",
+            password = password.takeIf { it != null } ?: "password"
+        )
+        _uiState.update {
+            it.copy(
+                loginDetails = loginDetails,
+                loginButtonEnabled = allFieldsFilled()
+            )
+        }
+
+    }
+
+    init {
+        initializeFields()
     }
 
 }

@@ -1,6 +1,5 @@
 package com.tms.propertymanagement.ui.screens.accountManagement
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,7 +25,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,21 +36,39 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tms.propertymanagement.PropEaseViewModelFactory
 import com.tms.propertymanagement.R
+import com.tms.propertymanagement.nav.NavigationDestination
 import com.tms.propertymanagement.ui.theme.PropEaseTheme
 
+object LoginScreenDestination: NavigationDestination {
+    override val title: String = "Login Screen"
+    override val route: String = "login-screen"
+    val phoneNumber: String = "phoneNumber"
+    val password: String = "password"
+    val routeArgs: String = "$route/{$phoneNumber}/{$password}"
+
+}
 @Composable
 fun LoginScreen(
+    navigateToPreviousScreen: () -> Unit,
+    navigateToRegistrationScreen: () -> Unit,
+    navigateToHomeScreen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: LoginScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
+
+    if(uiState.loginStatus == LoginStatus.SUCCESS) {
+        viewModel.resetLoginStatus()
+        navigateToHomeScreen()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
         Row {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = { navigateToPreviousScreen() }) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Previous page"
@@ -105,7 +121,7 @@ fun LoginScreen(
         Button(
             enabled = uiState.loginButtonEnabled,
             onClick = {
-                
+                viewModel.loginUser()
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -120,7 +136,7 @@ fun LoginScreen(
         }
         Spacer(modifier = Modifier.height(20.dp))
         OutlinedButton(
-            onClick = { /*TODO*/ },
+            onClick = { navigateToRegistrationScreen() },
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -161,6 +177,10 @@ fun LoginInputForm(
 @Composable
 fun LoginScreenPreview() {
     PropEaseTheme {
-        LoginScreen()
+        LoginScreen(
+            navigateToPreviousScreen = {},
+            navigateToRegistrationScreen = {},
+            navigateToHomeScreen = {}
+        )
     }
 }

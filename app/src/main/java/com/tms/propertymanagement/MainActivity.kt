@@ -28,7 +28,8 @@ class MainActivity : ComponentActivity() {
 //                    WelcomeScreen()
 //                    RegistrationScreen()
 //                    LoginScreen()
-                    HomeScreen()
+//                    HomeScreen()
+                    StartScreen()
                 }
             }
         }

@@ -1,10 +1,7 @@
-package com.tms.propertymanagement
+package com.tms.propertymanagement.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,17 +31,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tms.propertymanagement.R
+import com.tms.propertymanagement.nav.NavigationDestination
 import com.tms.propertymanagement.ui.theme.PropEaseTheme
+object WelcomeScreenDestination: NavigationDestination {
+    override val title: String = "Welcome Screen"
+    override val route: String = "welcome-screen"
 
+}
 @Composable
 fun WelcomeScreen(
+    navigateToRegistrationPage: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var items = listOf<Int>(1, 2, 3)
@@ -149,7 +152,7 @@ fun WelcomeScreen(
                 }
             }
             if(currentIndex == 2) {
-                Button(onClick = { /*TODO*/ }) {
+                Button(onClick = { navigateToRegistrationPage() }) {
                     Text(text = "Signup")
                 }
             }
@@ -230,6 +233,8 @@ fun CircleDotCurIndexPreview() {
 @Composable
 fun WelcomeScreenPreview() {
     PropEaseTheme {
-        WelcomeScreen()
+        WelcomeScreen(
+            navigateToRegistrationPage = {},
+        )
     }
 }

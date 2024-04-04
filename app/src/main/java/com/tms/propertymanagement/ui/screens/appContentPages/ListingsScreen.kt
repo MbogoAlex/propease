@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -50,49 +51,78 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tms.propertymanagement.PropEaseViewModelFactory
 import com.tms.propertymanagement.R
+import com.tms.propertymanagement.apiModel.CategorizedProperty
 import com.tms.propertymanagement.ui.theme.PropEaseTheme
 
 @Composable
 fun ListingsScreen(
+    token: String,
     modifier: Modifier = Modifier
 ) {
+    val viewModel: ListingsScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
+    val uiState by viewModel.uiState.collectAsState()
     Column(
         modifier = modifier
             .fillMaxSize()
     ) {
-        ListingsFilterSection()
+        ListingsFilterSection(
+            uiState = uiState,
+            viewModel = viewModel
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        ListingItems(
+            uiState = uiState,
+            viewModel = viewModel
+        )
     }
 }
 
 @Composable
 fun ListingsFilterSection(
+    uiState: ListingsScreenUiState,
+    viewModel: ListingsScreenViewModel,
     modifier: Modifier = Modifier
 ) {
     Column {
         LocationSearchForm(
             leadingIcon = painterResource(id = R.drawable.locations),
             labelText = "Location",
-            value = "",
+            value = uiState.location,
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Done,
                 keyboardType = KeyboardType.Text,
             ),
-            onValueChanged = {},
+            onValueChanged = {
+                             viewModel.fetchFilteredProperties(
+                                 location = it,
+                                 rooms = null,
+                                 categoryId = null,
+                                 categoryName = null
+                             )
+            },
             modifier = Modifier
                 .fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
         Row {
-            NumberOfRoomsSelection()
+            NumberOfRoomsSelection(
+                uiState = uiState,
+                viewModel = viewModel
+            )
             Spacer(modifier = Modifier.width(20.dp))
-            CategorySelection()
+            CategorySelection(
+                uiState = uiState,
+                viewModel = viewModel
+            )
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        ListingItems()
+
     }
 }
 
@@ -131,12 +161,14 @@ fun LocationSearchForm(
 
 @Composable
 fun NumberOfRoomsSelection(
+    uiState: ListingsScreenUiState,
+    viewModel: ListingsScreenViewModel,
     modifier: Modifier = Modifier
 ) {
     val rooms = listOf<Int>(1, 2, 3, 4, 5, 6, 7, 8)
-    var selectedRoom by remember {
-        mutableIntStateOf(0)
-    }
+//    var selectedRoom by remember {
+//        mutableIntStateOf(0)
+//    }
     var expanded by remember {
         mutableStateOf(false)
     }
@@ -160,9 +192,9 @@ fun NumberOfRoomsSelection(
                     }
             ) {
                 Text(
-                    text = "No. Rooms".takeIf { selectedRoom == 0 }
-                        ?: "$selectedRoom room".takeIf { selectedRoom == 1 }
-                        ?: "$selectedRoom rooms",
+                    text = "No. Rooms".takeIf { uiState.numberOfRoomsSelected.isEmpty() }
+                        ?: "${uiState.numberOfRoomsSelected} room".takeIf { uiState.numberOfRoomsSelected.toInt() == 1 }
+                        ?: "${uiState.numberOfRoomsSelected} rooms",
                     modifier = Modifier
                         .padding(10.dp)
                         .widthIn(120.dp)
@@ -185,7 +217,12 @@ fun NumberOfRoomsSelection(
                            )
                     },
                     onClick = {
-                        selectedRoom = i
+                        viewModel.fetchFilteredProperties(
+                            location = null,
+                            rooms = i,
+                            categoryId = null,
+                            categoryName = null
+                        )
                         expanded = !expanded
                     }
                 )
@@ -196,12 +233,11 @@ fun NumberOfRoomsSelection(
 
 @Composable
 fun CategorySelection(
+    uiState: ListingsScreenUiState,
+    viewModel: ListingsScreenViewModel,
     modifier: Modifier = Modifier
 ) {
-    val categories = listOf<String>("Rental", "Airbnb", "On Sale", "Shop")
-    var selectedCategory by remember {
-        mutableStateOf("")
-    }
+
     var expanded by remember {
         mutableStateOf(false)
     }
@@ -223,7 +259,7 @@ fun CategorySelection(
                     }
             ) {
                 Text(
-                    text = "Category".takeIf { selectedCategory.isEmpty() } ?: selectedCategory,
+                    text = "Category".takeIf { uiState.categoryNameSelected.isEmpty() } ?: uiState.categoryNameSelected,
                     modifier = Modifier
                         .padding(10.dp)
                         .widthIn(120.dp)
@@ -238,15 +274,20 @@ fun CategorySelection(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            categories.forEachIndexed { index, i ->
+            uiState.categories.forEachIndexed { index, i ->
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = i
+                            text = i.name
                         )
                     },
                     onClick = {
-                        selectedCategory = i
+                        viewModel.fetchFilteredProperties(
+                            location = null,
+                            rooms = null,
+                            categoryId = i.id,
+                            categoryName = i.name
+                        )
                         expanded = !expanded
                     }
                 )
@@ -257,13 +298,16 @@ fun CategorySelection(
 
 @Composable
 fun ListingItems(
+    uiState: ListingsScreenUiState,
+    viewModel: ListingsScreenViewModel,
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2)
     ) {
-        items(10) {
+        items(uiState.properties.size) {
             ListingItem(
+                property = uiState.properties[it],
                 modifier = Modifier
                     .padding(8.dp)
             )
@@ -273,6 +317,7 @@ fun ListingItems(
 
 @Composable
 fun ListingItem(
+    property: CategorizedProperty,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -298,9 +343,11 @@ fun ListingItem(
                     .padding(8.dp)
             ) {
                 Text(
-                    text = "Gracious Apartment in Nairobi",
+                    text = property.title,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(10.dp))
@@ -312,11 +359,11 @@ fun ListingItem(
                 ) {
                     Icon(
                         imageVector = Icons.Default.LocationOn,
-                        contentDescription = "Nairobi"
+                        contentDescription = property.location.county
                     )
                     Spacer(modifier = Modifier.width(5.dp))
                     Text(
-                        text = "Nairobi",
+                        text = property.location.county.takeIf { property.location.county.length <= 6 } ?: "${property.location.county.substring(0, 4)}...",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Light
                     )
@@ -327,7 +374,7 @@ fun ListingItem(
                         )
                     ) {
                         Text(
-                            text = "Rental",
+                            text = property.category.takeIf { it.length <= 6 } ?: "${property.category.substring(0, 4)}...",
                             fontSize = 14.sp,
                             modifier = Modifier
                                 .padding(
@@ -349,8 +396,9 @@ fun ListingItem(
 fun ListingItemPreview(
     modifier: Modifier = Modifier
 ) {
+    val uiState = ListingsScreenUiState()
     PropEaseTheme {
-        ListingItem()
+        ListingItem(uiState.properties[0])
     }
 }
 
@@ -359,8 +407,12 @@ fun ListingItemPreview(
 fun NumberOfRoomsSelectionPreview(
     modifier: Modifier = Modifier
 ) {
+    val viewModel: ListingsScreenViewModel = viewModel()
     PropEaseTheme {
-        NumberOfRoomsSelection()
+        NumberOfRoomsSelection(
+            uiState = ListingsScreenUiState(),
+            viewModel = viewModel
+        )
     }
 }
 
@@ -369,8 +421,12 @@ fun NumberOfRoomsSelectionPreview(
 fun ListingsFilterSectionPreview(
     modifier: Modifier = Modifier
 ) {
+    val viewModel: ListingsScreenViewModel = viewModel()
     PropEaseTheme {
-        ListingsFilterSection()
+        ListingsFilterSection(
+            uiState = ListingsScreenUiState(),
+            viewModel = viewModel
+        )
     }
 }
 
@@ -380,6 +436,8 @@ fun ListingsScreenPreview(
     modifier: Modifier = Modifier
 ) {
     PropEaseTheme {
-        ListingsScreen()
+        ListingsScreen(
+            token = ""
+        )
     }
 }
