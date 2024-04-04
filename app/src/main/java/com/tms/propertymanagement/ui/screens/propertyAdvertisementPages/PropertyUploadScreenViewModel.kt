@@ -53,14 +53,15 @@ data class PropertyUploadScreenUiState(
     val categories: List<Category> = emptyList(),
     val title: String = "",
     val description: String = "",
-    val price: String = "",
+    val price: String = "0",
     val county: String = "",
     val address: String = "",
     val features: List<String> = emptyList(),
     val images: List<Uri> = emptyList(),
     val userDetails: ReusableFunctions.LoggedInUserData = ReusableFunctions.LoggedInUserData(),
     val uploadingStatus: UploadingStatus = UploadingStatus.INITIAL,
-    val fetchingCategoriesStatus: FetchingCategoriesStatus = FetchingCategoriesStatus.INITIAL
+    val fetchingCategoriesStatus: FetchingCategoriesStatus = FetchingCategoriesStatus.INITIAL,
+    val saveButtonEnabled: Boolean = false
 )
 
 class PropertyUploadScreenViewModel(
@@ -88,7 +89,8 @@ class PropertyUploadScreenViewModel(
     fun updateNumberOfRoomsSelected(numberOfRooms: Int) {
         _uiState.update {
             it.copy(
-                numberOfRooms = numberOfRooms
+                numberOfRooms = numberOfRooms,
+                saveButtonEnabled = requiredFieldsFilled()
             )
         }
     }
@@ -96,7 +98,8 @@ class PropertyUploadScreenViewModel(
     fun updateCategoryType(category: Category) {
         _uiState.update {
             it.copy(
-                category = category
+                category = category,
+                saveButtonEnabled = requiredFieldsFilled()
             )
         }
     }
@@ -104,7 +107,8 @@ class PropertyUploadScreenViewModel(
     fun updateTitle(title: String) {
         _uiState.update {
             it.copy(
-                title = title
+                title = title,
+                saveButtonEnabled = requiredFieldsFilled()
             )
         }
     }
@@ -112,7 +116,8 @@ class PropertyUploadScreenViewModel(
     fun updatePrice(price: String) {
         _uiState.update {
             it.copy(
-                price = price
+                price = price,
+                saveButtonEnabled = requiredFieldsFilled()
             )
         }
     }
@@ -120,7 +125,8 @@ class PropertyUploadScreenViewModel(
     fun updateCounty(county: String) {
         _uiState.update {
             it.copy(
-                county = county
+                county = county,
+                saveButtonEnabled = requiredFieldsFilled()
             )
         }
     }
@@ -128,7 +134,8 @@ class PropertyUploadScreenViewModel(
     fun updateAddress(address: String) {
         _uiState.update {
             it.copy(
-                address = address
+                address = address,
+                saveButtonEnabled = requiredFieldsFilled()
             )
         }
     }
@@ -136,7 +143,8 @@ class PropertyUploadScreenViewModel(
     fun updateDescription(description: String) {
         _uiState.update {
             it.copy(
-                description = description
+                description = description,
+                saveButtonEnabled = requiredFieldsFilled()
             )
         }
     }
@@ -145,7 +153,8 @@ class PropertyUploadScreenViewModel(
         features.add("")
         _uiState.update {
             it.copy(
-                features = features
+                features = features,
+                saveButtonEnabled = requiredFieldsFilled()
             )
         }
     }
@@ -154,7 +163,8 @@ class PropertyUploadScreenViewModel(
         features.removeAt(index)
         _uiState.update {
             it.copy(
-                features = features
+                features = features,
+                saveButtonEnabled = requiredFieldsFilled()
             )
         }
     }
@@ -163,7 +173,8 @@ class PropertyUploadScreenViewModel(
         features[index] = value
         _uiState.update {
             it.copy(
-                features = features
+                features = features,
+                saveButtonEnabled = requiredFieldsFilled()
             )
         }
     }
@@ -172,7 +183,8 @@ class PropertyUploadScreenViewModel(
         images.add(uri)
         _uiState.update {
             it.copy(
-                images = images
+                images = images,
+                saveButtonEnabled = requiredFieldsFilled()
             )
         }
     }
@@ -181,7 +193,8 @@ class PropertyUploadScreenViewModel(
         images.removeAt(index)
         _uiState.update {
             it.copy(
-                images = images
+                images = images,
+                saveButtonEnabled = requiredFieldsFilled()
             )
         }
     }
@@ -291,6 +304,7 @@ class PropertyUploadScreenViewModel(
                             uploadingStatus = UploadingStatus.FAILURE
                         )
                     }
+                    Log.e("FAILED_TO_UPLOAD_PROPERTY", response.message())
                 }
             } catch (e: Exception) {
                 _uiState.update {
@@ -298,7 +312,28 @@ class PropertyUploadScreenViewModel(
                         uploadingStatus = UploadingStatus.FAILURE
                     )
                 }
+                Log.e("FAILED_TO_UPLOAD_PROPERTY_EXCEPTION", e.message.toString())
             }
+        }
+    }
+
+    fun requiredFieldsFilled(): Boolean {
+        return _uiState.value.price.isNotEmpty() &&
+                _uiState.value.price != "0" &&
+                _uiState.value.title.isNotEmpty() &&
+                _uiState.value.county.isNotEmpty() &&
+                _uiState.value.address.isNotEmpty() &&
+                _uiState.value.features.isNotEmpty() &&
+                _uiState.value.images.isNotEmpty() &&
+                _uiState.value.numberOfRooms  != 0 &&
+                _uiState.value.category.id != 0
+    }
+
+    fun resetSavingState() {
+        _uiState.update {
+            it.copy(
+                uploadingStatus = UploadingStatus.INITIAL
+            )
         }
     }
 

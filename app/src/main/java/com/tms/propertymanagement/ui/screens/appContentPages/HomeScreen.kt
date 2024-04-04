@@ -1,3 +1,5 @@
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,6 +44,7 @@ import com.tms.propertymanagement.nav.NavigationDestination
 import com.tms.propertymanagement.ui.screens.appContentPages.HomeScreenViewModel
 import com.tms.propertymanagement.ui.screens.appContentPages.ListingsScreen
 import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.PropertyUploadScreen
+import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.UserLiveProperties
 import kotlinx.coroutines.launch
 
 object HomeScreenDestination: NavigationDestination {
@@ -61,9 +64,11 @@ data class MainMenuItem (
     val icon: Painter,
     val mainNavigationPage: MainNavigationPages
 )
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen(
     navigateToSpecificProperty: (propertyId: String) -> Unit,
+    navigateToHomeScreen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: HomeScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
@@ -192,7 +197,14 @@ fun HomeScreen(
                     navigateToSpecificProperty = navigateToSpecificProperty
                 )
                 MainNavigationPages.MY_UNITS_SCREEN -> {}
-                MainNavigationPages.ADVERTISE_SCREEN -> PropertyUploadScreen()
+//                MainNavigationPages.ADVERTISE_SCREEN -> PropertyUploadScreen(
+//                    navigateToListingsScreen = {
+//                        navigateToHomeScreen()
+//                    }
+//                )
+                MainNavigationPages.ADVERTISE_SCREEN -> UserLiveProperties(
+//                    navigateToUpdateProperty = { /*TODO*/ }
+                )
                 MainNavigationPages.NOTIFICATIONS_SCREEN -> {}
                 MainNavigationPages.PROFILE_SCREEN -> {}
             }
@@ -203,11 +215,13 @@ fun HomeScreen(
 
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
     HomeScreen(
-        navigateToSpecificProperty = {}
+        navigateToSpecificProperty = {},
+        navigateToHomeScreen = {}
     )
 }
 

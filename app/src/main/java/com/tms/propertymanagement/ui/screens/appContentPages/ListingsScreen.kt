@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -304,13 +305,14 @@ fun ListingItems(
     viewModel: ListingsScreenViewModel,
     modifier: Modifier = Modifier
 ) {
+    var properties = uiState.properties.reversed()
     LazyVerticalGrid(
         columns = GridCells.Fixed(2)
     ) {
-        items(uiState.properties.size) {
+        items(properties) {
             ListingItem(
                 navigateToSpecificProperty = navigateToSpecificProperty,
-                property = uiState.properties[it],
+                property = it,
                 modifier = Modifier
                     .padding(8.dp)
             )

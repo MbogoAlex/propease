@@ -14,6 +14,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
@@ -63,11 +64,19 @@ interface ApiService {
     ): Response<SpecificPropertyResponseBody>
 
     // upload property
+    @Multipart
     @POST("api/property/userId={userId}/create")
     suspend fun uploadProperty(
         @Header("Authorization") token: String,
         @Path("userId") userId: Int,
-        @Part property: PropertyUploadRequestBody,
+        @Part("data") property: PropertyUploadRequestBody,
         @Part imageFiles: List<MultipartBody.Part>
     ): Response<PropertyUploadResponseBody>
+
+    // fetch user properties
+    @GET("api/property/userId={userId}")
+    suspend fun fetchUserProperties(
+        @Header("Authorization") token: String,
+        @Path("userId") userId: Int
+    ): Response<PropertyResponseBody>
 }

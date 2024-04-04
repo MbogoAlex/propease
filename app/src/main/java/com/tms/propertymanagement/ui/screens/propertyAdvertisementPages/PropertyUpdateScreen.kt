@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -109,74 +110,126 @@ fun PropertyUpdateDetails(
     modifier: Modifier = Modifier
 ) {
     val features = remember { mutableStateListOf<String>("") }
-    Column {
-        PropertyUpdateInputForm(
-            labelText = "Title",
-            value = "",
-            maxLines = 2,
-            keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Next,
-                keyboardType = KeyboardType.Text
-            ),
-            onValueChanged = {},
-            modifier = Modifier
-                .fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(20.dp))
-        PropertyUpdateInputForm(
-            labelText = "Description",
-            value = "",
-            maxLines = 4,
-            keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Next,
-                keyboardType = KeyboardType.Text
-            ),
-            onValueChanged = {},
-            modifier = Modifier
-                .fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = "Add Features i.e 'Free wifi'",
-            fontWeight = FontWeight.Bold
-        )
-        features.forEachIndexed { index, s ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                PropertyUpdateInputForm(
-                    labelText = "Feature ${index + 1}",
-                    value = features[index],
-                    maxLines = 1,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Done,
-                        keyboardType = KeyboardType.Text
-                    ),
-                    onValueChanged = {
-                        features[index] = it
-                    }
-                )
-                IconButton(onClick = {
-                    features.removeAt(index)
-
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = "Remove this field"
-                    )
-                }
-            }
-
-        }
-        IconButton(onClick = { features.add("") }) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add new field"
-            )
-        }
-    }
+//    Column {
+//        PropertyUpdateInputForm(
+//            labelText = "Title",
+//            value = uiState.title,
+//            maxLines = 2,
+//            keyboardOptions = KeyboardOptions.Default.copy(
+//                imeAction = ImeAction.Next,
+//                keyboardType = KeyboardType.Text
+//            ),
+//            onValueChanged = {
+//                viewModel.updateTitle(it)
+//            },
+//            modifier = Modifier
+//                .fillMaxWidth()
+//        )
+//        Spacer(modifier = Modifier.height(20.dp))
+//        PropertyUpdateInputForm(
+//            labelText = "Description",
+//            value = uiState.description,
+//            maxLines = 4,
+//            keyboardOptions = KeyboardOptions.Default.copy(
+//                imeAction = ImeAction.Next,
+//                keyboardType = KeyboardType.Text
+//            ),
+//            onValueChanged = {
+//                viewModel.updateDescription(it)
+//            },
+//            modifier = Modifier
+//                .fillMaxWidth()
+//        )
+//        Spacer(modifier = Modifier.height(20.dp))
+//        PropertyUpdateInputForm(
+//            labelText = "Price",
+//            value = uiState.price,
+//            maxLines = 1,
+//            keyboardOptions = KeyboardOptions.Default.copy(
+//                imeAction = ImeAction.Done,
+//                keyboardType = KeyboardType.Decimal
+//            ),
+//            onValueChanged = {
+//                viewModel.updatePrice(it)
+//            },
+//            modifier = Modifier
+//                .fillMaxWidth()
+//        )
+//        Spacer(modifier = Modifier.height(20.dp))
+//        Row {
+//            PropertyUpdateInputForm(
+//                labelText = "County",
+//                value = uiState.county,
+//                maxLines = 1,
+//                keyboardOptions = KeyboardOptions.Default.copy(
+//                    imeAction = ImeAction.Done,
+//                    keyboardType = KeyboardType.Text
+//                ),
+//                onValueChanged = {
+//                    viewModel.updateCounty(it)
+//                },
+//                modifier = Modifier
+//                    .weight(1f)
+//            )
+//            Spacer(modifier = Modifier.width(20.dp))
+//            PropertyUpdateInputForm(
+//                labelText = "Address",
+//                value = uiState.address,
+//                maxLines = 1,
+//                keyboardOptions = KeyboardOptions.Default.copy(
+//                    imeAction = ImeAction.Done,
+//                    keyboardType = KeyboardType.Text
+//                ),
+//                onValueChanged = {
+//                    viewModel.updateAddress(it)
+//                },
+//                modifier = Modifier
+//                    .weight(1f)
+//            )
+//        }
+//        Spacer(modifier = Modifier.height(20.dp))
+//        Text(
+//            text = "Add Features i.e 'Free wifi'",
+//            fontWeight = FontWeight.Bold
+//        )
+//        uiState.features.forEachIndexed { index, s ->
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically,
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//            ) {
+//                PropertyUploadInputForm(
+//                    labelText = "Feature ${index + 1}",
+//                    value = uiState.features[index],
+//                    maxLines = 1,
+//                    keyboardOptions = KeyboardOptions.Default.copy(
+//                        imeAction = ImeAction.Done,
+//                        keyboardType = KeyboardType.Text
+//                    ),
+//                    onValueChanged = {
+//                        viewModel.updateFeature(index, it)
+//                    }
+//                )
+//                IconButton(onClick = {
+//                    viewModel.removeFeatureField(index)
+//
+//                }) {
+//                    Icon(
+//                        imageVector = Icons.Default.Clear,
+//                        contentDescription = "Remove this field"
+//                    )
+//                }
+//            }
+//
+//        }
+//        IconButton(onClick = { viewModel.addFeatureField() }) {
+//            Icon(
+//                imageVector = Icons.Default.Add,
+//                contentDescription = "Add new field"
+//            )
+//        }
+//
+//    }
 }
 
 @Composable

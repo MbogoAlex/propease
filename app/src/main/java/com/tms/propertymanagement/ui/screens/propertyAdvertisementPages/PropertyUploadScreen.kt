@@ -2,6 +2,7 @@ package com.tms.propertymanagement.ui.screens.propertyAdvertisementPages
 
 import android.net.Uri
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -27,6 +28,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -72,6 +74,8 @@ import com.tms.propertymanagement.ui.theme.PropEaseTheme
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PropertyUploadScreen(
+    navigateToListingsScreen: () -> Unit,
+    navigateToPreviousPage: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: PropertyUploadScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
@@ -81,11 +85,14 @@ fun PropertyUploadScreen(
         mutableStateOf(false)
     }
 
+    BackHandler(onBack = navigateToPreviousPage)
+
     if(showPreviewScreen) {
         PropertyUploadPreviewScreen(
             viewModel = viewModel,
             uiState = uiState,
-            navigateToPreviousScreen = { showPreviewScreen = !showPreviewScreen }
+            navigateToPreviousScreen = { showPreviewScreen = !showPreviewScreen },
+            navigateToListingsScreen = {navigateToListingsScreen()}
         )
     } else {
         Column(
@@ -93,11 +100,23 @@ fun PropertyUploadScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            Text(
-                text = "Upload Property",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = {
+                    navigateToPreviousPage()
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Navigate to previous page"
+                    )
+                }
+                Text(
+                    text = "Upload Property",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
             Spacer(modifier = Modifier.height(20.dp))
             PropertyFeaturesSelection(
                 viewModel = viewModel,
@@ -544,10 +563,14 @@ fun ImagesSelectionPreview() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun PropertyUploadScreenPreview() {
     PropEaseTheme {
-        PropertyUploadScreen()
+        PropertyUploadScreen(
+            navigateToListingsScreen = {},
+            navigateToPreviousPage = {}
+        )
     }
 }

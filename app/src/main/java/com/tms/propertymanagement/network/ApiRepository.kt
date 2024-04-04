@@ -26,6 +26,8 @@ interface ApiRepository {
         property: PropertyUploadRequestBody,
         images: List<MultipartBody.Part>
     ): Response<PropertyUploadResponseBody>
+
+    suspend fun fetchUserProperties(token: String, userId: Int): Response<PropertyResponseBody>
 }
 
 class NetworkApiRepository(private val apiService: ApiService): ApiRepository {
@@ -63,6 +65,14 @@ class NetworkApiRepository(private val apiService: ApiService): ApiRepository {
         userId = userId,
         property = property,
         imageFiles = images
+    )
+
+    override suspend fun fetchUserProperties(
+        token: String,
+        userId: Int
+    ): Response<PropertyResponseBody> = apiService.fetchUserProperties(
+        token = "Bearer $token",
+        userId = userId
     )
 
 }

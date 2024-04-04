@@ -12,6 +12,7 @@ import com.tms.propertymanagement.ui.screens.appContentPages.HomeScreenViewModel
 import com.tms.propertymanagement.ui.screens.appContentPages.ListingDetailsScreenViewModel
 import com.tms.propertymanagement.ui.screens.appContentPages.ListingsScreenViewModel
 import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.PropertyUploadScreenViewModel
+import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.UserLivePropertiesScreenViewModel
 
 object PropEaseViewModelFactory {
     val Factory = viewModelFactory {
@@ -81,6 +82,16 @@ object PropEaseViewModelFactory {
             val apiRepository = propEaseApplication().container.apiRepository
             val dsRepository = propEaseApplication().dsRepository
             PropertyUploadScreenViewModel(
+                apiRepository = apiRepository,
+                dsRepository = dsRepository
+            )
+        }
+
+        // initialize UserLivePropertiesScreen ViewModel
+        initializer {
+            val apiRepository = propEaseApplication().container.apiRepository
+            val dsRepository = propEaseApplication().dsRepository
+            UserLivePropertiesScreenViewModel(
                 apiRepository = apiRepository,
                 dsRepository = dsRepository
             )

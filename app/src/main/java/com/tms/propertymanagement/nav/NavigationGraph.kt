@@ -2,6 +2,8 @@ package com.tms.propertymanagement.nav
 
 import HomeScreen
 import HomeScreenDestination
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -20,6 +22,7 @@ import com.tms.propertymanagement.ui.screens.accountManagement.RegistrationScree
 import com.tms.propertymanagement.ui.screens.appContentPages.ListingDetailsDestination
 import com.tms.propertymanagement.ui.screens.appContentPages.ListingDetailsScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavigationGraph(
     navController: NavHostController,
@@ -92,6 +95,10 @@ fun NavigationGraph(
             HomeScreen(
                 navigateToSpecificProperty = {
                     navController.navigate("${ListingDetailsDestination.route}/${it}")
+                },
+                navigateToHomeScreen = {
+                    navController.popBackStack(HomeScreenDestination.route, true)
+                    navController.navigate(HomeScreenDestination.route)
                 }
             )
         }

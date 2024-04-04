@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -28,10 +29,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -61,8 +64,10 @@ fun PropertyUploadPreviewScreen(
     viewModel: PropertyUploadScreenViewModel,
     uiState: PropertyUploadScreenUiState,
     navigateToPreviousScreen: () -> Unit,
+    navigateToListingsScreen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var context = LocalContext.current
 
     BackHandler(
         onBack = navigateToPreviousScreen
@@ -72,17 +77,48 @@ fun PropertyUploadPreviewScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        TextButton(onClick = { navigateToPreviousScreen() }) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            TextButton(onClick = { navigateToPreviousScreen() }) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Previous screen"
+                    )
+                    Text(
+                        text = "Continue editing"
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black
+                ),
+                shape = RoundedCornerShape(0.dp),
+                onClick = {
+                    viewModel.uploadProperty(context)
+                },
+                enabled = uiState.saveButtonEnabled,
+                modifier = Modifier
+                    .width(150.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Previous screen"
-                )
-                Text(
-                    text = "Continue editing"
-                )
+                if(uiState.uploadingStatus == UploadingStatus.LOADING) {
+                    CircularProgressIndicator(color = Color.White)
+                } else {
+                    Text(text = "Publish")
+                    Icon(
+                        painter = painterResource(id = R.drawable.advertise),
+                        contentDescription = "Upload property"
+                    )
+                }
+
+
             }
         }
         ImageSlider(
@@ -95,6 +131,12 @@ fun PropertyUploadPreviewScreen(
         ListingTextDetails(
             uiState = uiState
         )
+    }
+
+    if(uiState.uploadingStatus == UploadingStatus.SUCCESS) {
+        Toast.makeText(context, "Your property is live", Toast.LENGTH_SHORT).show()
+        navigateToListingsScreen()
+        viewModel.resetSavingState()
     }
 }
 
