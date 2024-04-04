@@ -61,4 +61,24 @@ data class SpecificPropertyResponseBodyData(
     val property: PropertyData
 )
 
+// property upload
+@Serializable
+data class PropertyUploadRequestBody (
+    val title: String,
+    val description: String,
+    val categoryId: String,
+    val price: Double,
+    val rooms: Int,
+    val availableDate: String,
+    val location: PropertyLocation,
+    val features: List<String>
+)
+
+@Serializable
+data class PropertyUploadResponseBody (
+    val statusCode: Int,
+    val message: String,
+    val data: SpecificPropertyResponseBodyData
+)
+
 

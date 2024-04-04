@@ -78,11 +78,11 @@ fun PropertyUpdateScreen(
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(20.dp))
-        PropertyFeaturesSelection()
+        PropertyFeaturesUpdateSelection()
         Spacer(modifier = Modifier.height(20.dp))
-        PropertyDetails()
+        PropertyUpdateDetails()
         Spacer(modifier = Modifier.height(20.dp))
-        ImagesSelection()
+        ImagesUpdateSelection()
         Spacer(modifier = Modifier.height(40.dp))
         Button(
             colors = ButtonDefaults.buttonColors(
@@ -437,7 +437,7 @@ fun CategoryUpdateSelection(
 @Composable
 fun ImagesSelectionUpdatePreview() {
     PropEaseTheme {
-        ImagesSelection()
+        ImagesUpdateSelection()
     }
 }
 

@@ -2,16 +2,20 @@ package com.tms.propertymanagement.network
 
 import com.tms.propertymanagement.apiModel.CategoryResponseBody
 import com.tms.propertymanagement.apiModel.PropertyResponseBody
+import com.tms.propertymanagement.apiModel.PropertyUploadRequestBody
+import com.tms.propertymanagement.apiModel.PropertyUploadResponseBody
 import com.tms.propertymanagement.apiModel.SpecificPropertyResponseBody
 import com.tms.propertymanagement.apiModel.UserLoginRequestBody
 import com.tms.propertymanagement.apiModel.UserLoginResponseBody
 import com.tms.propertymanagement.apiModel.UserRegistrationRequestBody
 import com.tms.propertymanagement.apiModel.UserRegistrationResponseBody
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -57,4 +61,13 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Path("propertyId") propertyId: String
     ): Response<SpecificPropertyResponseBody>
+
+    // upload property
+    @POST("api/property/userId={userId}/create")
+    suspend fun uploadProperty(
+        @Header("Authorization") token: String,
+        @Path("userId") userId: Int,
+        @Part property: PropertyUploadRequestBody,
+        @Part imageFiles: List<MultipartBody.Part>
+    ): Response<PropertyUploadResponseBody>
 }

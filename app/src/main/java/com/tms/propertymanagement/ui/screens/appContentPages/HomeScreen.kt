@@ -41,6 +41,7 @@ import com.tms.propertymanagement.R
 import com.tms.propertymanagement.nav.NavigationDestination
 import com.tms.propertymanagement.ui.screens.appContentPages.HomeScreenViewModel
 import com.tms.propertymanagement.ui.screens.appContentPages.ListingsScreen
+import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.PropertyUploadScreen
 import kotlinx.coroutines.launch
 
 object HomeScreenDestination: NavigationDestination {
@@ -191,7 +192,7 @@ fun HomeScreen(
                     navigateToSpecificProperty = navigateToSpecificProperty
                 )
                 MainNavigationPages.MY_UNITS_SCREEN -> {}
-                MainNavigationPages.ADVERTISE_SCREEN -> {}
+                MainNavigationPages.ADVERTISE_SCREEN -> PropertyUploadScreen()
                 MainNavigationPages.NOTIFICATIONS_SCREEN -> {}
                 MainNavigationPages.PROFILE_SCREEN -> {}
             }

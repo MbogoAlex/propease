@@ -1,8 +1,10 @@
 package com.tms.propertymanagement.ui.screens.propertyAdvertisementPages
 
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,10 +19,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
@@ -35,21 +39,20 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -60,90 +63,171 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberImagePainter
+import com.tms.propertymanagement.PropEaseViewModelFactory
 import com.tms.propertymanagement.R
 import com.tms.propertymanagement.ui.theme.PropEaseTheme
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PropertyUploadScreen(
     modifier: Modifier = Modifier
 ) {
+    val viewModel: PropertyUploadScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
+    val uiState by viewModel.uiState.collectAsState()
 
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Upload Property",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(20.dp))
-        PropertyFeaturesSelection()
-        Spacer(modifier = Modifier.height(20.dp))
-        PropertyDetails()
-        Spacer(modifier = Modifier.height(20.dp))
-        ImagesSelection()
-        Spacer(modifier = Modifier.height(40.dp))
-        Button(
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Black
-            ),
-            shape = RoundedCornerShape(0.dp),
-            onClick = { /*TODO*/ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-        ) {
-            Text(text = "Preview")
-            Icon(
-                painter = painterResource(id = R.drawable.preview),
-                contentDescription = "Preview Changes"
-            )
-        }
-
+    var showPreviewScreen by rememberSaveable {
+        mutableStateOf(false)
     }
+
+    if(showPreviewScreen) {
+        PropertyUploadPreviewScreen(
+            viewModel = viewModel,
+            uiState = uiState,
+            navigateToPreviousScreen = { showPreviewScreen = !showPreviewScreen }
+        )
+    } else {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            Text(
+                text = "Upload Property",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            PropertyFeaturesSelection(
+                viewModel = viewModel,
+                uiState = uiState
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            PropertyDetails(
+                viewModel = viewModel,
+                uiState = uiState
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            ImagesSelection(
+                viewModel = viewModel,
+                uiState = uiState
+            )
+            Spacer(modifier = Modifier.height(40.dp))
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black
+                ),
+                shape = RoundedCornerShape(0.dp),
+                onClick = {
+                          showPreviewScreen = true
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            ) {
+                Text(text = "Preview")
+                Icon(
+                    painter = painterResource(id = R.drawable.preview),
+                    contentDescription = "Preview Changes"
+                )
+            }
+
+        }
+    }
+
+
 }
 
 @Composable
 fun PropertyDetails(
+    viewModel: PropertyUploadScreenViewModel,
+    uiState: PropertyUploadScreenUiState,
     modifier: Modifier = Modifier
 ) {
-    val features = remember { mutableStateListOf<String>("") }
     Column {
         PropertyUploadInputForm(
             labelText = "Title",
-            value = "",
+            value = uiState.title,
             maxLines = 2,
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Next,
                 keyboardType = KeyboardType.Text
             ),
-            onValueChanged = {},
+            onValueChanged = {
+                             viewModel.updateTitle(it)
+            },
             modifier = Modifier
                 .fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(20.dp))
         PropertyUploadInputForm(
             labelText = "Description",
-            value = "",
+            value = uiState.description,
             maxLines = 4,
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Next,
                 keyboardType = KeyboardType.Text
             ),
-            onValueChanged = {},
+            onValueChanged = {
+                             viewModel.updateDescription(it)
+            },
             modifier = Modifier
                 .fillMaxWidth()
         )
+        Spacer(modifier = Modifier.height(20.dp))
+        PropertyUploadInputForm(
+            labelText = "Price",
+            value = uiState.price,
+            maxLines = 1,
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done,
+                keyboardType = KeyboardType.Decimal
+            ),
+            onValueChanged = {
+                viewModel.updatePrice(it)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        Row {
+            PropertyUploadInputForm(
+                labelText = "County",
+                value = uiState.county,
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Text
+                ),
+                onValueChanged = {
+                    viewModel.updateCounty(it)
+                },
+                modifier = Modifier
+                    .weight(1f)
+            )
+            Spacer(modifier = Modifier.width(20.dp))
+            PropertyUploadInputForm(
+                labelText = "Address",
+                value = uiState.address,
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Text
+                ),
+                onValueChanged = {
+                    viewModel.updateAddress(it)
+                },
+                modifier = Modifier
+                    .weight(1f)
+            )
+        }
         Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = "Add Features i.e 'Free wifi'",
             fontWeight = FontWeight.Bold
         )
-        features.forEachIndexed { index, s ->
+        uiState.features.forEachIndexed { index, s ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -151,18 +235,18 @@ fun PropertyDetails(
             ) {
                 PropertyUploadInputForm(
                     labelText = "Feature ${index + 1}",
-                    value = features[index],
+                    value = uiState.features[index],
                     maxLines = 1,
                     keyboardOptions = KeyboardOptions.Default.copy(
                         imeAction = ImeAction.Done,
                         keyboardType = KeyboardType.Text
                     ),
                     onValueChanged = {
-                        features[index] = it
+                        viewModel.updateFeature(index, it)
                     }
                 )
                 IconButton(onClick = {
-                    features.removeAt(index)
+                    viewModel.removeFeatureField(index)
 
                 }) {
                     Icon(
@@ -173,31 +257,35 @@ fun PropertyDetails(
             }
 
         }
-        IconButton(onClick = { features.add("") }) {
+        IconButton(onClick = { viewModel.addFeatureField() }) {
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = "Add new field"
             )
         }
+
     }
 }
 
 @Composable
 fun ImagesSelection(
+    viewModel: PropertyUploadScreenViewModel,
+    uiState: PropertyUploadScreenUiState,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    var imageUrl by remember {
-        mutableStateOf<Uri?>(null)
-    }
+//    val context = LocalContext.current
+//    var imageUrl by remember {
+//        mutableStateOf<Uri?>(null)
+//    }
 
     val images = remember { mutableStateListOf<Uri>() }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = {uri ->
-            imageUrl = uri
+//            imageUrl = uri
             images.add(uri!!)
+            viewModel.uploadPhoto(uri)
         }
     )
 
@@ -206,7 +294,7 @@ fun ImagesSelection(
             modifier = Modifier
                 .horizontalScroll(rememberScrollState())
         ) {
-            images.forEachIndexed { index, uri ->
+            uiState.images.forEachIndexed { index, uri ->
                 Row {
                     Card(
                         modifier = Modifier
@@ -225,7 +313,7 @@ fun ImagesSelection(
                         )
                     }
                     IconButton(onClick = {
-                        images.removeAt(index)
+                        viewModel.removePhoto(index)
                     }) {
                         Icon(
                             imageVector = Icons.Default.Close,
@@ -276,13 +364,21 @@ fun ImagesSelection(
 
 @Composable
 fun PropertyFeaturesSelection(
+    viewModel: PropertyUploadScreenViewModel,
+    uiState: PropertyUploadScreenUiState,
     modifier: Modifier = Modifier
 ) {
     Column() {
         Row {
-            NumberOfRoomsSelection()
+            NumberOfRoomsSelection(
+                viewModel = viewModel,
+                uiState = uiState
+            )
             Spacer(modifier = Modifier.weight(1f))
-            CategorySelection()
+            CategorySelection(
+                viewModel = viewModel,
+                uiState = uiState
+            )
         }
     }
 }
@@ -312,12 +408,11 @@ fun PropertyUploadInputForm(
 
 @Composable
 fun NumberOfRoomsSelection(
+    viewModel: PropertyUploadScreenViewModel,
+    uiState: PropertyUploadScreenUiState,
     modifier: Modifier = Modifier
 ) {
     val rooms = listOf<Int>(1, 2, 3, 4, 5, 6, 7, 8)
-    var selectedRoom by remember {
-        mutableIntStateOf(0)
-    }
     var expanded by remember {
         mutableStateOf(false)
     }
@@ -341,9 +436,9 @@ fun NumberOfRoomsSelection(
                     }
             ) {
                 Text(
-                    text = "No. Rooms".takeIf { selectedRoom == 0 }
-                        ?: "$selectedRoom room".takeIf { selectedRoom == 1 }
-                        ?: "$selectedRoom rooms",
+                    text = "No. Rooms".takeIf { uiState.numberOfRooms == 0 }
+                        ?: "${uiState.numberOfRooms} room".takeIf { uiState.numberOfRooms == 1 }
+                        ?: "${uiState.numberOfRooms} rooms",
                     modifier = Modifier
                         .padding(10.dp)
                         .widthIn(120.dp)
@@ -366,7 +461,7 @@ fun NumberOfRoomsSelection(
                         )
                     },
                     onClick = {
-                        selectedRoom = i
+                        viewModel.updateNumberOfRoomsSelected(i)
                         expanded = !expanded
                     }
                 )
@@ -377,12 +472,12 @@ fun NumberOfRoomsSelection(
 
 @Composable
 fun CategorySelection(
+    viewModel: PropertyUploadScreenViewModel,
+    uiState: PropertyUploadScreenUiState,
     modifier: Modifier = Modifier
 ) {
-    var categories = listOf<String>("Rental", "Airbnb", "On Sale", "Shop")
-    var selectedCategory by remember {
-        mutableStateOf("Rental")
-    }
+
+
     var expanded by remember {
         mutableStateOf(false)
     }
@@ -404,7 +499,7 @@ fun CategorySelection(
                     }
             ) {
                 Text(
-                    text = selectedCategory,
+                    text = uiState.category.name.takeIf { it.isNotEmpty() } ?: "Category",
                     modifier = Modifier
                         .padding(10.dp)
                         .widthIn(120.dp)
@@ -419,15 +514,15 @@ fun CategorySelection(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            categories.forEachIndexed { index, i ->
+            uiState.categories.forEachIndexed { index, i ->
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = i
+                            text = i.name
                         )
                     },
                     onClick = {
-                        selectedCategory = i
+                        viewModel.updateCategoryType(i)
                         expanded = !expanded
                     }
                 )
@@ -439,8 +534,13 @@ fun CategorySelection(
 @Preview(showBackground = true)
 @Composable
 fun ImagesSelectionPreview() {
+    val viewModel: PropertyUploadScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
+    val uiState by viewModel.uiState.collectAsState()
     PropEaseTheme {
-        ImagesSelection()
+        ImagesSelection(
+            viewModel = viewModel,
+            uiState = uiState
+        )
     }
 }
 

@@ -30,8 +30,8 @@ class MainActivity : ComponentActivity() {
 //                    RegistrationScreen()
 //                    LoginScreen()
 //                    HomeScreen()
-//                    StartScreen()
-                    PropertyUploadScreen()
+                    StartScreen()
+//                    PropertyUploadScreen()
                 }
             }
         }
