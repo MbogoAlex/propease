@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -41,10 +42,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +60,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.tms.propertymanagement.PropEaseViewModelFactory
 import com.tms.propertymanagement.R
 import com.tms.propertymanagement.apiModel.CategorizedProperty
@@ -324,19 +330,34 @@ fun ListingItem(
         modifier = modifier
     ) {
         Column {
-            Image(
-                painter = painterResource(id = R.drawable.sample_property),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .border(
-                        width = 1.dp,
-                        color =
-                        Color.Transparent,
-                        shape = RoundedCornerShape(10.dp)
-                    )
-                    .fillMaxWidth()
-            )
+            if(property.images.isNotEmpty()) {
+                AsyncImage(
+                    model = ImageRequest.Builder(context = LocalContext.current)
+                        .data(property.images.first().name)
+                        .crossfade(true)
+                        .build(),
+                    placeholder = painterResource(id = R.drawable.loading_img),
+                    error = painterResource(id = R.drawable.ic_broken_image),
+                    contentScale = ContentScale.Crop,
+                    contentDescription = property.title,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .height(140.dp)
+                        .fillMaxWidth()
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = R.drawable.no_image_icon_coming_soon),
+                    contentDescription = "No image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .alpha(0.5f)
+                        .height(140.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                )
+            }
+
             Spacer(modifier = Modifier.height(10.dp))
             Column(
                 modifier = Modifier
@@ -361,13 +382,13 @@ fun ListingItem(
                         imageVector = Icons.Default.LocationOn,
                         contentDescription = property.location.county
                     )
-                    Spacer(modifier = Modifier.width(5.dp))
+                    Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = property.location.county.takeIf { property.location.county.length <= 6 } ?: "${property.location.county.substring(0, 4)}...",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Light
                     )
-                    Spacer(modifier = Modifier.width(5.dp))
+                    Spacer(modifier = Modifier.weight(1f))
                     Card(
                         colors = CardDefaults.cardColors(
                             containerColor = Color(0xFFFa2a832)
