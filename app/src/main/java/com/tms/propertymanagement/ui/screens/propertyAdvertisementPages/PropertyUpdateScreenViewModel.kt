@@ -97,7 +97,9 @@ data class PropertyUpdateScreenUiState(
     val uploadingStatus: UploadingStatus = UploadingStatus.INITIAL,
     val fetchingUpdateCategoriesStatus: FetchingUpdateCategoriesStatus = FetchingUpdateCategoriesStatus.INITIAL,
     val property: PropertyData = updatePropertyData,
-    val saveButtonEnabled: Boolean = false
+    val saveButtonEnabled: Boolean = false,
+    val imageUpdateResponse: String = "",
+    val propertyTextUpdateResponse: String = ""
 )
 class PropertyUpdateScreenViewModel(
     private val apiRepository: ApiRepository,
@@ -284,7 +286,7 @@ class PropertyUpdateScreenViewModel(
         viewModelScope.launch {
             try {
                 Log.i("FETCHING_WITH_TOKEN", _uiState.value.userDetails.token)
-                val response = apiRepository.fetchSpecificProperty(_uiState.value.userDetails.token, propertyId = propertyId!!)
+                val response = apiRepository.fetchSpecificProperty(propertyId = propertyId!!)
                 if(response.isSuccessful) {
                     features.addAll(response.body()?.data?.property!!.features)
                     serverImages.addAll(response.body()?.data?.property!!.images)
@@ -342,7 +344,7 @@ class PropertyUpdateScreenViewModel(
             description = _uiState.value.description,
             price = _uiState.value.price.toDouble(),
             rooms = _uiState.value.numberOfRooms,
-            postedDate = LocalDateTime.now().toString(),
+            postedDate = _uiState.value.property.postedDate,
             location = propertyLocation,
             features = _uiState.value.features,
 
@@ -357,19 +359,28 @@ class PropertyUpdateScreenViewModel(
                 )
                 if(response.isSuccessful) {
                     if(_uiState.value.images.isNotEmpty()) {
+                        _uiState.update {
+                            it.copy(
+                                propertyTextUpdateResponse = "Text updated"
+                            )
+                        }
                         updateImages(context)
+                    } else {
+                        _uiState.update {
+                            it.copy(
+                                uploadingStatus = UploadingStatus.SUCCESS,
+                                propertyTextUpdateResponse = "Property updated"
+                            )
+                        }
                     }
 
-                    _uiState.update {
-                        it.copy(
-                            uploadingStatus = UploadingStatus.SUCCESS
-                        )
-                    }
+
                     Log.i("PROPERTY_UPDATE", "SUCCESS")
                 } else {
                     _uiState.update {
                         it.copy(
-                            uploadingStatus = UploadingStatus.FAILURE
+                            uploadingStatus = UploadingStatus.FAILURE,
+                            propertyTextUpdateResponse = "Failed to update property"
                         )
                     }
                     Log.e("FAILED_TO_UPDATE_PROPERTY", "$response, TOKEN: ${_uiState.value.userDetails.token}, Property: $property")
@@ -377,7 +388,8 @@ class PropertyUpdateScreenViewModel(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        uploadingStatus = UploadingStatus.FAILURE
+                        uploadingStatus = UploadingStatus.FAILURE,
+                        propertyTextUpdateResponse = "Failed to update property"
                     )
                 }
                 Log.e("FAILED_TO_UPDATE_PROPERTY_EXCEPTION", e.message.toString())
@@ -386,11 +398,6 @@ class PropertyUpdateScreenViewModel(
     }
 
     fun updateImages(context: Context) {
-        _uiState.update {
-            it.copy(
-                uploadingStatus = UploadingStatus.LOADING
-            )
-        }
         var imageParts = ArrayList<MultipartBody.Part>()
         _uiState.value.images.forEach { uri ->
             val parcelFileDescriptor = context.contentResolver.openFileDescriptor(uri, "r", null)
@@ -423,14 +430,16 @@ class PropertyUpdateScreenViewModel(
                 if(response.isSuccessful) {
                     _uiState.update {
                         it.copy(
-                            uploadingStatus = UploadingStatus.SUCCESS
+                            uploadingStatus = UploadingStatus.SUCCESS,
+                            propertyTextUpdateResponse = "Property updated"
                         )
                     }
                     Log.i("IMAGE_UPDATE_SUCCESS", "SUCCESS")
                 } else {
                     _uiState.update {
                         it.copy(
-                            uploadingStatus = UploadingStatus.FAILURE
+                            uploadingStatus = UploadingStatus.FAILURE,
+                            propertyTextUpdateResponse = "Failed to upload images"
                         )
                     }
                     Log.e("IMAGE_UPDATE_FAILURE", response.toString())
@@ -438,7 +447,8 @@ class PropertyUpdateScreenViewModel(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        uploadingStatus = UploadingStatus.FAILURE
+                        uploadingStatus = UploadingStatus.FAILURE,
+                        propertyTextUpdateResponse = "Failed to upload images"
                     )
                 }
                 Log.e("IMAGE_UPDATE_FAILURE_EXCEPTION", e.message.toString())
@@ -448,11 +458,7 @@ class PropertyUpdateScreenViewModel(
     }
 
     fun deletePropertyImages(imageId: String, index: Int) {
-        _uiState.update {
-            it.copy(
-                uploadingStatus = UploadingStatus.LOADING
-            )
-        }
+
         viewModelScope.launch {
             try {
                 val response = apiRepository.deletePropertyImage(
@@ -464,15 +470,11 @@ class PropertyUpdateScreenViewModel(
                     serverImages.removeAt(index)
                     _uiState.update {
                         it.copy(
-                            uploadingStatus = UploadingStatus.SUCCESS, serverImages = serverImages)
+                           serverImages = serverImages)
                     }
                     Log.i("IMAGE_DELETION", "SUCCESS")
                 } else {
-                    _uiState.update {
-                        it.copy(
-                            uploadingStatus = UploadingStatus.FAILURE
-                        )
-                    }
+
                     Log.e("IMAGE_DELETION_FAILURE", "$response, TOKEN: ${_uiState.value.userDetails.token}")
                 }
             } catch (e: Exception) {

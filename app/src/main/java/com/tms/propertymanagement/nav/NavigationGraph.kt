@@ -3,6 +3,7 @@ package com.tms.propertymanagement.nav
 import HomeScreen
 import HomeScreenDestination
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -55,59 +56,31 @@ fun NavigationGraph(
                 navigateToRegistrationPage = {
                     navController.popBackStack(WelcomeScreenDestination.route, true)
                     navController.navigate(RegistrationScreenDestination.route)
-                }
+                },
+                navigateToHomeScreenWithoutArgs = {
+                    navController.popBackStack(WelcomeScreenDestination.route, true)
+                    navController.navigate(HomeScreenDestination.route)
+                },
             )
         }
         composable(RegistrationScreenDestination.route) {
             RegistrationScreen(
-                navigateToLoginScreen = {phoneNumber, password ->
+                navigateToLoginScreenWithArguments = {phoneNumber, password ->
+
                     navController.popBackStack(RegistrationScreenDestination.route, true)
                     navController.navigate("${LoginScreenDestination.route}/${phoneNumber}/${password}")
                 },
                 navigateToPreviousScreen = {
                     navController.navigate(RegistrationScreenDestination.route)
-                }
-            )
-        }
-        composable(RegistrationScreenDestination.route) {
-            RegistrationScreen(
-                navigateToLoginScreen = { phoneNumber, password ->
+                },
+                navigateToLoginScreenWithoutArguments = {
                     navController.popBackStack(RegistrationScreenDestination.route, true)
-                    navController.navigate(LoginScreenDestination.route) {
-                        popUpTo(LoginScreenDestination.route) { inclusive = true }
-                    }
+                    navController.navigate(LoginScreenDestination.route)
                 },
-                navigateToPreviousScreen = {
-                    navController.navigate(RegistrationScreenDestination.route)
-                }
             )
         }
 
-// Default route without arguments
-        composable(LoginScreenDestination.route) {
-            // Retrieve arguments if available or use default values
-            val phoneNumber = navController.previousBackStackEntry?.arguments?.getString(LoginScreenDestination.phoneNumber) ?: ""
-            val password = navController.previousBackStackEntry?.arguments?.getString(LoginScreenDestination.password) ?: ""
 
-            LoginScreen(
-//                phoneNumber = phoneNumber,
-//                password = password,
-                navigateToPreviousScreen = {
-                    navController.popBackStack(LoginScreenDestination.route, true)
-                    navController.navigate(RegistrationScreenDestination.route)
-                },
-                navigateToRegistrationScreen = {
-                    navController.popBackStack(LoginScreenDestination.route, true)
-                    navController.navigate(RegistrationScreenDestination.route)
-                },
-                navigateToHomeScreen = {
-                    navController.popBackStack(LoginScreenDestination.route, true)
-                    navController.navigate(HomeScreenDestination.route)
-                }
-            )
-        }
-
-// Route with arguments
         composable(
             LoginScreenDestination.routeArgs,
             arguments = listOf(
@@ -118,16 +91,13 @@ fun NavigationGraph(
                     type = NavType.StringType
                 }
             )
-        ) { backStackEntry ->
-            val phoneNumber = backStackEntry.arguments?.getString(LoginScreenDestination.phoneNumber) ?: ""
-            val password = backStackEntry.arguments?.getString(LoginScreenDestination.password) ?: ""
-
+        ) {
+            Log.i("LOGIN_SCREEN_NAVIGATION_WITH_ARGS", "${LoginScreenDestination.phoneNumber} ${LoginScreenDestination.password}")
             LoginScreen(
-//                phoneNumber = phoneNumber,
-//                password = password,
                 navigateToPreviousScreen = {
                     navController.popBackStack(LoginScreenDestination.routeArgs, true)
                     navController.navigate(RegistrationScreenDestination.route)
+
                 },
                 navigateToRegistrationScreen = {
                     navController.popBackStack(LoginScreenDestination.routeArgs, true)
@@ -139,7 +109,24 @@ fun NavigationGraph(
                 }
             )
         }
+        composable(LoginScreenDestination.route) {
+            Log.i("LOGIN_SCREEN_NAVIGATION_WITHOUT_ARGS", "No args")
+            LoginScreen(
+                navigateToPreviousScreen = {
+                    navController.popBackStack(LoginScreenDestination.route, true)
+                    navController.navigate(RegistrationScreenDestination.route)
 
+                },
+                navigateToRegistrationScreen = {
+                    navController.popBackStack(LoginScreenDestination.route, true)
+                    navController.navigate(RegistrationScreenDestination.route)
+                },
+                navigateToHomeScreen = {
+                    navController.popBackStack(LoginScreenDestination.route, true)
+                    navController.navigate(HomeScreenDestination.route)
+                }
+            )
+        }
         composable(HomeScreenDestination.route) {
             HomeScreen(
                 navigateToSpecificProperty = {
@@ -151,6 +138,13 @@ fun NavigationGraph(
                 },
                 navigateToSpecificUserProperty = {
                     navController.navigate("${UserLivePropertyDetailsScreenDestination.route}/${it}")
+                },
+                navigateToHomeScreenWithArguments = {
+                    navController.navigate("${HomeScreenDestination.route}/${it}")
+                },
+                navigateToLoginScreenWithoutArgs = {
+                    navController.popBackStack(HomeScreenDestination.route, true)
+                    navController.navigate(LoginScreenDestination.route)
                 }
             )
         }
@@ -198,6 +192,37 @@ fun NavigationGraph(
                 navigateToPreviousScreen = {
 //                    navController.popBackStack(UserLivePropertyDetailsScreenDestination.routeWithArgs, true)
                     navController.navigateUp()
+                },
+                navigateToHomeScreenWithArgs = {
+                    navController.navigate("${HomeScreenDestination.route}/${it}")
+                }
+            )
+        }
+        composable(
+            HomeScreenDestination.routeWithArgs,
+            arguments = listOf(
+                navArgument(HomeScreenDestination.childScreen) {
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            HomeScreen(
+                navigateToSpecificProperty = {
+                    navController.navigate("${ListingDetailsDestination.route}/${it}")
+                },
+                navigateToHomeScreen = {
+                    navController.popBackStack(HomeScreenDestination.route, true)
+                    navController.navigate(HomeScreenDestination.route)
+                },
+                navigateToSpecificUserProperty = {
+                    navController.navigate("${UserLivePropertyDetailsScreenDestination.route}/${it}")
+                },
+                navigateToHomeScreenWithArguments = {
+                    navController.navigate("${HomeScreenDestination.route}/${it}")
+                },
+                navigateToLoginScreenWithoutArgs = {
+                    navController.popBackStack(HomeScreenDestination.routeWithArgs, true)
+                    navController.navigate(LoginScreenDestination.route)
                 }
             )
         }

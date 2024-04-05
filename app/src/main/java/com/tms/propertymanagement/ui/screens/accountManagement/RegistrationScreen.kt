@@ -56,7 +56,8 @@ object RegistrationScreenDestination: NavigationDestination {
 @Composable
 fun RegistrationScreen(
     navigateToPreviousScreen: () -> Unit,
-    navigateToLoginScreen: (phoneNumber: String, password: String) -> Unit,
+    navigateToLoginScreenWithArguments: (phoneNumber: String, password: String) -> Unit,
+    navigateToLoginScreenWithoutArguments: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -65,7 +66,7 @@ fun RegistrationScreen(
 
     if(uiState.registrationStatus == RegistrationStatus.SUCCESS) {
         viewModel.resetRegistrationStatus()
-        navigateToLoginScreen(
+        navigateToLoginScreenWithArguments(
             uiState.registrationDetails.phoneNumber,
             uiState.registrationDetails.password
         )
@@ -209,7 +210,7 @@ fun RegistrationScreen(
         }
         Spacer(modifier = Modifier.height(20.dp))
         OutlinedButton(
-            onClick = { navigateToLoginScreen("", "") },
+            onClick = { navigateToLoginScreenWithoutArguments() },
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -273,7 +274,8 @@ fun RegistrationScreenPreview() {
     PropEaseTheme {
         RegistrationScreen(
             navigateToPreviousScreen = {},
-            navigateToLoginScreen = {phoneNumber: String, password: String ->  }
+            navigateToLoginScreenWithArguments = {phoneNumber: String, password: String ->  },
+            navigateToLoginScreenWithoutArguments = {}
         )
     }
 }

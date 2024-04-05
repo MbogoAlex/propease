@@ -143,7 +143,7 @@ class RegistrationScreenViewModel(
                         _uiState.update {
                             it.copy(
                                 registrationStatus = RegistrationStatus.FAIL,
-                                registrationResponseMessage = "Failed to register. Try again later"
+                                registrationResponseMessage = "Email or Phone Number already taken"
                             )
                         }
                     }

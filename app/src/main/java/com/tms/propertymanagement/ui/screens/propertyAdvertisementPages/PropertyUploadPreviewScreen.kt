@@ -64,7 +64,7 @@ fun PropertyUploadPreviewScreen(
     viewModel: PropertyUploadScreenViewModel,
     uiState: PropertyUploadScreenUiState,
     navigateToPreviousScreen: () -> Unit,
-    navigateToListingsScreen: () -> Unit,
+    navigateToHomeScreenWithArguments: (childScreen: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var context = LocalContext.current
@@ -135,7 +135,7 @@ fun PropertyUploadPreviewScreen(
 
     if(uiState.uploadingStatus == UploadingStatus.SUCCESS) {
         Toast.makeText(context, "Your property is live", Toast.LENGTH_SHORT).show()
-        navigateToListingsScreen()
+        navigateToHomeScreenWithArguments("advertisement-screen")
         viewModel.resetSavingState()
     }
 }

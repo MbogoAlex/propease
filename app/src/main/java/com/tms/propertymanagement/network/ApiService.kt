@@ -61,7 +61,6 @@ interface ApiService {
     // fetch specific property
     @GET("api/property/propertyId={propertyId}")
     suspend fun fetchSpecificProperty(
-        @Header("Authorization") token: String,
         @Path("propertyId") propertyId: String
     ): Response<SpecificPropertyResponseBody>
 

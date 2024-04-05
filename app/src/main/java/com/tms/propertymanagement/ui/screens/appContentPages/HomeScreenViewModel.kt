@@ -1,5 +1,7 @@
 package com.tms.propertymanagement.ui.screens.appContentPages
 
+import HomeScreenDestination
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tms.propertymanagement.network.ApiRepository
@@ -14,23 +16,36 @@ import kotlinx.coroutines.launch
 
 
 data class HomeScreenUiState(
-    val userDetails: ReusableFunctions.LoggedInUserData = ReusableFunctions.LoggedInUserData()
+    val userDetails: ReusableFunctions.LoggedInUserData = ReusableFunctions.LoggedInUserData(),
+    val childScreen: String = ""
 )
 class HomeScreenViewModel(
     private val apiRepository: ApiRepository,
-    private val dsRepository: DSRepository
+    private val dsRepository: DSRepository,
+    private val savedStateHandle: SavedStateHandle,
 ): ViewModel() {
     private val _uiState = MutableStateFlow(value = HomeScreenUiState())
     val uiState: StateFlow<HomeScreenUiState> = _uiState.asStateFlow()
+
+    private val childScreen: String? = savedStateHandle[HomeScreenDestination.childScreen]
     fun loadStartUpDetails() {
         viewModelScope.launch {
             dsRepository.dsUserModel.collect() { dsUserModel ->
                 _uiState.update {
                     it.copy(
-                        userDetails = dsUserModel.toLoggedInUserData()
+                        userDetails = dsUserModel.toLoggedInUserData(),
+                        childScreen = childScreen.takeIf { childScreen != null } ?: ""
                     )
                 }
             }
+        }
+    }
+
+    fun resetChildScreen() {
+        _uiState.update {
+            it.copy(
+                childScreen = ""
+            )
         }
     }
 

@@ -1,5 +1,6 @@
 package com.tms.propertymanagement.ui.screens.accountManagement
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -122,7 +123,7 @@ class LoginScreenViewModel(
                     _uiState.update {
                         it.copy(
                             loginStatus = LoginStatus.FAILURE,
-                            loginResponseMessage = "Invalid credentials"
+                            loginResponseMessage = "Invalid email or password"
                         )
                     }
                 }
@@ -153,22 +154,22 @@ class LoginScreenViewModel(
         }
     }
 
-//    fun initializeFields() {
-//        loginDetails = loginDetails.copy(
-//            phoneNumber = phoneNumber.takeIf { it != null } ?: "phone number",
-//            password = password.takeIf { it != null } ?: "password"
-//        )
-//        _uiState.update {
-//            it.copy(
-//                loginDetails = loginDetails,
-//                loginButtonEnabled = allFieldsFilled()
-//            )
-//        }
-//
-//    }
+    fun initializeFields() {
+        Log.i("INITIALIZING_FIELDS", "$phoneNumber $password")
+        loginDetails = loginDetails.copy(
+            phoneNumber = phoneNumber.takeIf { phoneNumber != null } ?: "",
+            password = password.takeIf { phoneNumber != null } ?: ""
+        )
+        _uiState.update {
+            it.copy(
+                loginDetails = loginDetails,
+                loginButtonEnabled = allFieldsFilled(),
+            )
+        }
+    }
 
     init {
-//        initializeFields()
+        initializeFields()
     }
 
 }

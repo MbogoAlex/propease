@@ -82,6 +82,7 @@ object PropertyUpdateScreenDestination: NavigationDestination {
 @Composable
 fun PropertyUpdateScreen(
     navigateToPreviousScreen: () -> Unit,
+    navigateToHomeScreenWithArgs: (childScreen: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -90,7 +91,7 @@ fun PropertyUpdateScreen(
 
     if(uiState.uploadingStatus == UploadingStatus.SUCCESS) {
         Toast.makeText(context, "Property updated successfully", Toast.LENGTH_SHORT).show()
-        navigateToPreviousScreen()
+        navigateToHomeScreenWithArgs("advertisement-screen")
         viewModel.resetSavingState()
     }
 
@@ -438,7 +439,10 @@ fun PropertyFeaturesUpdateSelection(
 ) {
     Column() {
         Row {
-            NumberOfRoomsUpdateSelection()
+            NumberOfRoomsUpdateSelection(
+                viewModel = viewModel,
+                uiState = uiState
+            )
             Spacer(modifier = Modifier.weight(1f))
             CategoryUpdateSelection(
                 uiState = uiState,
@@ -473,6 +477,8 @@ fun PropertyUpdateInputForm(
 
 @Composable
 fun NumberOfRoomsUpdateSelection(
+    viewModel: PropertyUpdateScreenViewModel,
+    uiState: PropertyUpdateScreenUiState,
     modifier: Modifier = Modifier
 ) {
     val rooms = listOf<Int>(1, 2, 3, 4, 5, 6, 7, 8)
@@ -502,9 +508,7 @@ fun NumberOfRoomsUpdateSelection(
                     }
             ) {
                 Text(
-                    text = "No. Rooms".takeIf { selectedRoom == 0 }
-                        ?: "$selectedRoom room".takeIf { selectedRoom == 1 }
-                        ?: "$selectedRoom rooms",
+                    text = uiState.numberOfRooms.toString(),
                     modifier = Modifier
                         .padding(10.dp)
                         .widthIn(120.dp)
@@ -527,7 +531,8 @@ fun NumberOfRoomsUpdateSelection(
                         )
                     },
                     onClick = {
-                        selectedRoom = i
+
+                        viewModel.updateNumberOfRoomsSelected(i)
                         expanded = !expanded
                     }
                 )
@@ -613,7 +618,8 @@ fun ImagesSelectionUpdatePreview() {
 fun PropertyUpdateScreenPreview() {
     PropEaseTheme {
         PropertyUpdateScreen(
-            navigateToPreviousScreen = {}
+            navigateToPreviousScreen = {},
+            navigateToHomeScreenWithArgs = {}
         )
     }
 }

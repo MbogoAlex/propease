@@ -76,6 +76,7 @@ import com.tms.propertymanagement.ui.theme.PropEaseTheme
 fun PropertyUploadScreen(
     navigateToListingsScreen: () -> Unit,
     navigateToPreviousPage: () -> Unit,
+    navigateToHomeScreenWithArguments: (childScreen: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: PropertyUploadScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
@@ -92,7 +93,9 @@ fun PropertyUploadScreen(
             viewModel = viewModel,
             uiState = uiState,
             navigateToPreviousScreen = { showPreviewScreen = !showPreviewScreen },
-            navigateToListingsScreen = {navigateToListingsScreen()}
+            navigateToHomeScreenWithArguments = {
+                navigateToHomeScreenWithArguments(it)
+            }
         )
     } else {
         Column(
@@ -570,7 +573,8 @@ fun PropertyUploadScreenPreview() {
     PropEaseTheme {
         PropertyUploadScreen(
             navigateToListingsScreen = {},
-            navigateToPreviousPage = {}
+            navigateToPreviousPage = {},
+            navigateToHomeScreenWithArguments = {}
         )
     }
 }

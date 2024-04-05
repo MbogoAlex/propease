@@ -74,7 +74,7 @@ class ListingsScreenViewModel(
                         token = _uiState.value.userDetails.token,
                         location = null,
                         rooms = null,
-                        categoryId = response.body()?.data?.categories!![0].id.toString()
+                        categoryId = null
                     )
                     Log.i("CATEGORIES_FETCHED", "${response.body()?.data?.categories}, 1st Category: ${response.body()?.data?.categories!![0]}")
                 } else {
@@ -151,7 +151,22 @@ class ListingsScreenViewModel(
 
     }
 
-
+    fun unfilter() {
+        _uiState.update {
+            it.copy(
+                numberOfRoomsSelected = "",
+                categoryNameSelected = "",
+                categoryIdSelected = "",
+                location = "",
+            )
+        }
+        fetchProperties(
+            token = _uiState.value.userDetails.token,
+            categoryId = "",
+            location = "",
+            rooms =  ""
+        )
+    }
 
     fun loadStartupData() {
         loadUserDetails()

@@ -1,8 +1,13 @@
 package com.tms.propertymanagement.ui.screens.appContentPages
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,18 +23,23 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +70,7 @@ import com.tms.propertymanagement.PropEaseViewModelFactory
 import com.tms.propertymanagement.R
 import com.tms.propertymanagement.apiModel.PropertyData
 import com.tms.propertymanagement.ui.theme.PropEaseTheme
+import kotlinx.coroutines.delay
 
 @Composable
 fun ListingsScreen(
@@ -67,6 +78,7 @@ fun ListingsScreen(
     navigateToSpecificProperty: (propertyId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
     val viewModel: ListingsScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
     Column(
@@ -92,6 +104,9 @@ fun ListingsFilterSection(
     viewModel: ListingsScreenViewModel,
     modifier: Modifier = Modifier
 ) {
+    var filteringOn by remember {
+        mutableStateOf(false)
+    }
     Column {
         LocationSearchForm(
             leadingIcon = painterResource(id = R.drawable.locations),
@@ -113,16 +128,54 @@ fun ListingsFilterSection(
                 .fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Row {
+        Row(
+            modifier = Modifier
+                .animateContentSize(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                )
+        ) {
             NumberOfRoomsSelection(
                 uiState = uiState,
-                viewModel = viewModel
+                viewModel = viewModel,
+                onFilterButtonClicked = {
+                    filteringOn = true
+                }
             )
-            Spacer(modifier = Modifier.width(20.dp))
+            Spacer(modifier = Modifier.weight(1f))
             CategorySelection(
+                onFilterButtonClicked = {
+                    filteringOn = true
+                },
                 uiState = uiState,
                 viewModel = viewModel
             )
+            Spacer(modifier = Modifier.weight(1f))
+            Card(
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clickable {
+                            viewModel.unfilter()
+                        }
+                ) {
+                    Text(
+                        text = "Unfilter",
+                        modifier = Modifier
+                            .padding(10.dp)
+//                                .widthIn(120.dp)
+                    )
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = null
+                    )
+                }
+            }
+
         }
 
     }
@@ -163,6 +216,7 @@ fun LocationSearchForm(
 
 @Composable
 fun NumberOfRoomsSelection(
+    onFilterButtonClicked: () -> Unit,
     uiState: ListingsScreenUiState,
     viewModel: ListingsScreenViewModel,
     modifier: Modifier = Modifier
@@ -190,6 +244,7 @@ fun NumberOfRoomsSelection(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .clickable {
+                        onFilterButtonClicked()
                         expanded = !expanded
                     }
             ) {
@@ -199,7 +254,7 @@ fun NumberOfRoomsSelection(
                         ?: "${uiState.numberOfRoomsSelected} rooms",
                     modifier = Modifier
                         .padding(10.dp)
-                        .widthIn(120.dp)
+//                        .widthIn(120.dp)
                 )
                 Icon(
                     imageVector = dropDownIcon,
@@ -235,6 +290,7 @@ fun NumberOfRoomsSelection(
 
 @Composable
 fun CategorySelection(
+    onFilterButtonClicked: () -> Unit,
     uiState: ListingsScreenUiState,
     viewModel: ListingsScreenViewModel,
     modifier: Modifier = Modifier
@@ -258,13 +314,14 @@ fun CategorySelection(
                 modifier = Modifier
                     .clickable {
                         expanded = !expanded
+                        onFilterButtonClicked()
                     }
             ) {
                 Text(
                     text = "Category".takeIf { uiState.categoryNameSelected.isEmpty() } ?: uiState.categoryNameSelected,
                     modifier = Modifier
                         .padding(10.dp)
-                        .widthIn(120.dp)
+//                        .widthIn(120.dp)
                 )
                 Icon(
                     imageVector = dropDownIcon,
@@ -305,19 +362,74 @@ fun ListingItems(
     viewModel: ListingsScreenViewModel,
     modifier: Modifier = Modifier
 ) {
+    var showText by remember { mutableStateOf(false) }
+
     var properties = uiState.properties.reversed()
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2)
-    ) {
-        items(properties) {
-            ListingItem(
-                navigateToSpecificProperty = navigateToSpecificProperty,
-                property = it,
+    if(uiState.fetchingStatus == FetchingStatus.LOADING) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            CircularProgressIndicator()
+        }
+    } else if(uiState.fetchingStatus == FetchingStatus.FAILURE) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Failed to fetch properties. Check your connection",
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                IconButton(onClick = {
+                    viewModel.unfilter()
+                }) {
+                    Icon(imageVector = Icons.Default.Refresh,
+                        contentDescription = "Refresh"
+                    )
+                }
+            }
+        }
+    } else if (uiState.fetchingStatus == FetchingStatus.SUCCESS) {
+        if (properties.isEmpty()) {
+            LaunchedEffect(Unit) {
+                delay(2000L)
+                showText = true
+            }
+            Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .padding(8.dp)
-            )
+                    .fillMaxSize()
+            ) {
+                if(showText) {
+                    Text(text = "Properties not added yet")
+                } else {
+                    CircularProgressIndicator()
+                }
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2)
+            ) {
+                items(properties) {
+                    ListingItem(
+                        navigateToSpecificProperty = navigateToSpecificProperty,
+                        property = it,
+                        modifier = Modifier
+                            .padding(8.dp)
+                    )
+                }
+            }
         }
     }
+
 }
 
 @Composable
@@ -438,7 +550,8 @@ fun NumberOfRoomsSelectionPreview(
     PropEaseTheme {
         NumberOfRoomsSelection(
             uiState = ListingsScreenUiState(),
-            viewModel = viewModel
+            viewModel = viewModel,
+            onFilterButtonClicked = {}
         )
     }
 }
@@ -465,7 +578,7 @@ fun ListingsScreenPreview(
     PropEaseTheme {
         ListingsScreen(
             token = "",
-            navigateToSpecificProperty = {}
+            navigateToSpecificProperty = {},
         )
     }
 }

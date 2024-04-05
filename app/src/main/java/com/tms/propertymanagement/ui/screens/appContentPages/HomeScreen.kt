@@ -1,4 +1,5 @@
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
@@ -20,18 +23,21 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -46,10 +52,13 @@ import com.tms.propertymanagement.ui.screens.appContentPages.ListingsScreen
 import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.PropertyUploadScreen
 import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.UserLiveProperties
 import kotlinx.coroutines.launch
+import kotlin.system.exitProcess
 
 object HomeScreenDestination: NavigationDestination {
     override val title: String = "Home Screen"
     override val route: String = "home-screen"
+    val childScreen: String = "childScreen"
+    val routeWithArgs: String = "$route/{$childScreen}"
 
 }
 enum class MainNavigationPages {
@@ -70,12 +79,17 @@ fun HomeScreen(
     navigateToSpecificProperty: (propertyId: String) -> Unit,
     navigateToSpecificUserProperty: (propertyId: String) -> Unit,
     navigateToHomeScreen: () -> Unit,
+    navigateToHomeScreenWithArguments: (childScreen: String) -> Unit,
+    navigateToLoginScreenWithoutArgs: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: HomeScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
     var currentScreen by rememberSaveable {
         mutableStateOf(MainNavigationPages.LISTINGS_SCREEN)
+    }
+    var screenLabel by rememberSaveable {
+        mutableStateOf("Listings")
     }
     var mainMenuItems = listOf<MainMenuItem>(
         MainMenuItem(
@@ -104,6 +118,11 @@ fun HomeScreen(
             mainNavigationPage = MainNavigationPages.PROFILE_SCREEN
         ),
     )
+
+    if(uiState.childScreen == "advertisement-screen") {
+        currentScreen = MainNavigationPages.ADVERTISE_SCREEN
+        viewModel.resetChildScreen()
+    } 
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -187,28 +206,50 @@ fun HomeScreen(
                     )
 
                 }
+                if(uiState.userDetails.userName.isNotEmpty()) {
+                    Text(
+                        text = "Hey, ${uiState.userDetails.userName}",
+                        fontWeight = FontWeight.Bold
+                    )
+                } else {
+                    TextButton(onClick = { navigateToLoginScreenWithoutArgs() }) {
+                        Text(text = "Login")
+                    }
+                }
+                
+                Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = "Hey, ${uiState.userDetails.userName}",
-                    fontWeight = FontWeight.Bold
+                    text = screenLabel,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Red
                 )
             }
             when(currentScreen) {
-                MainNavigationPages.LISTINGS_SCREEN -> ListingsScreen(
-                    token = uiState.userDetails.token,
-                    navigateToSpecificProperty = navigateToSpecificProperty
-                )
+                MainNavigationPages.LISTINGS_SCREEN -> {
+                    screenLabel = "Listings"
+                    ListingsScreen(
+                        token = uiState.userDetails.token,
+                        navigateToSpecificProperty = navigateToSpecificProperty
+                    )
+                }
                 MainNavigationPages.MY_UNITS_SCREEN -> {}
 //                MainNavigationPages.ADVERTISE_SCREEN -> PropertyUploadScreen(
 //                    navigateToListingsScreen = {
 //                        navigateToHomeScreen()
 //                    }
 //                )
-                MainNavigationPages.ADVERTISE_SCREEN -> UserLiveProperties(
-                    navigateToSpecificUserProperty = {
-                        navigateToSpecificUserProperty(it)
-                    }
+                MainNavigationPages.ADVERTISE_SCREEN -> {
+                    screenLabel = "Live"
+                    UserLiveProperties(
+                        navigateToSpecificUserProperty = {
+                            navigateToSpecificUserProperty(it)
+                        },
+                        navigateToHomeScreen = navigateToHomeScreen,
+                        navigateToHomeScreenWithArguments = navigateToHomeScreenWithArguments,
+                        navigateToLoginScreenWithoutArgs = navigateToLoginScreenWithoutArgs
 //                    navigateToUpdateProperty = { /*TODO*/ }
-                )
+                    )
+                }
                 MainNavigationPages.NOTIFICATIONS_SCREEN -> {}
                 MainNavigationPages.PROFILE_SCREEN -> {}
             }
@@ -226,7 +267,9 @@ fun HomeScreenPreview() {
     HomeScreen(
         navigateToSpecificProperty = {},
         navigateToHomeScreen = {},
-        navigateToSpecificUserProperty = {}
+        navigateToSpecificUserProperty = {},
+        navigateToHomeScreenWithArguments = {},
+        navigateToLoginScreenWithoutArgs = {}
     )
 }
 

@@ -91,7 +91,7 @@ class UserLivePropertyDetailsScreenViewModel(
         viewModelScope.launch {
             try {
                 Log.i("FETCHING_WITH_TOKEN", _uiState.value.userDetails.token)
-                val response = apiRepository.fetchSpecificProperty(_uiState.value.userDetails.token, propertyId = propertyId!!)
+                val response = apiRepository.fetchSpecificProperty(propertyId = propertyId!!)
                 if(response.isSuccessful) {
                     _uiState.update {
                         it.copy(

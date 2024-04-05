@@ -27,7 +27,6 @@ interface ApiRepository {
         categoryId: String
     ): Response<PropertyResponseBody>
     suspend fun fetchSpecificProperty(
-        token: String,
         propertyId: String
     ): Response<SpecificPropertyResponseBody>
     suspend fun uploadProperty(
@@ -69,10 +68,8 @@ class NetworkApiRepository(private val apiService: ApiService): ApiRepository {
     )
 
     override suspend fun fetchSpecificProperty(
-        token: String,
         propertyId: String
     ): Response<SpecificPropertyResponseBody> = apiService.fetchSpecificProperty(
-        token = "Bearer $token",
         propertyId = propertyId
     )
 

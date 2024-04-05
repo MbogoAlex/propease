@@ -3,6 +3,7 @@ package com.tms.propertymanagement.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tms.propertymanagement.propEaseDataStore.DSRepository
+import com.tms.propertymanagement.propEaseDataStore.DSUserModel
 import com.tms.propertymanagement.utils.ReusableFunctions
 import com.tms.propertymanagement.utils.ReusableFunctions.toLoggedInUserData
 import kotlinx.coroutines.flow.MutableStateFlow

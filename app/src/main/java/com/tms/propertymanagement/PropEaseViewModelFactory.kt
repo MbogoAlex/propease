@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.tms.propertymanagement.ui.screens.SplashScreenViewModel
+import com.tms.propertymanagement.ui.screens.WelcomeScreenViewModel
 import com.tms.propertymanagement.ui.screens.accountManagement.LoginScreenViewModel
 import com.tms.propertymanagement.ui.screens.accountManagement.RegistrationScreenViewModel
 import com.tms.propertymanagement.ui.screens.appContentPages.HomeScreenViewModel
@@ -51,9 +52,11 @@ object PropEaseViewModelFactory {
         initializer {
             val apiRepository = propEaseApplication().container.apiRepository
             val dsRepository = propEaseApplication().dsRepository
+            val savedStateHandle = this.createSavedStateHandle()
             HomeScreenViewModel(
                 apiRepository = apiRepository,
-                dsRepository = dsRepository
+                dsRepository = dsRepository,
+                savedStateHandle = savedStateHandle
             )
         }
 
@@ -118,6 +121,18 @@ object PropEaseViewModelFactory {
                 apiRepository = apiRepository,
                 dsRepository = dsRepository,
                 savedStateHandle = this.createSavedStateHandle()
+            )
+        }
+
+        // initialize WelcomeScreen ViewModel
+        initializer {
+            val apiRepository = propEaseApplication().container.apiRepository
+            val dsRepository = propEaseApplication().dsRepository
+            val savedStateHandle = this.createSavedStateHandle()
+            WelcomeScreenViewModel(
+                apiRepository = apiRepository,
+                dsRepository = dsRepository,
+                savedStateHandle = savedStateHandle
             )
         }
     }
