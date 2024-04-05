@@ -11,8 +11,10 @@ import com.tms.propertymanagement.ui.screens.accountManagement.RegistrationScree
 import com.tms.propertymanagement.ui.screens.appContentPages.HomeScreenViewModel
 import com.tms.propertymanagement.ui.screens.appContentPages.ListingDetailsScreenViewModel
 import com.tms.propertymanagement.ui.screens.appContentPages.ListingsScreenViewModel
+import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.PropertyUpdateScreenViewModel
 import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.PropertyUploadScreenViewModel
 import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.UserLivePropertiesScreenViewModel
+import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.UserLivePropertyDetailsScreenViewModel
 
 object PropEaseViewModelFactory {
     val Factory = viewModelFactory {
@@ -94,6 +96,28 @@ object PropEaseViewModelFactory {
             UserLivePropertiesScreenViewModel(
                 apiRepository = apiRepository,
                 dsRepository = dsRepository
+            )
+        }
+
+        // initialize UserLivePropertyDetailsScreen ViewModel
+        initializer {
+            val apiRepository = propEaseApplication().container.apiRepository
+            val dsRepository = propEaseApplication().dsRepository
+            UserLivePropertyDetailsScreenViewModel(
+                apiRepository = apiRepository,
+                dsRepository = dsRepository,
+                savedStateHandle = this.createSavedStateHandle()
+            )
+        }
+
+        // initialize PropertyUpdateScreen ViewModel
+        initializer {
+            val apiRepository = propEaseApplication().container.apiRepository
+            val dsRepository = propEaseApplication().dsRepository
+            PropertyUpdateScreenViewModel(
+                apiRepository = apiRepository,
+                dsRepository = dsRepository,
+                savedStateHandle = this.createSavedStateHandle()
             )
         }
     }

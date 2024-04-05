@@ -1,5 +1,6 @@
 package com.tms.propertymanagement.ui.screens.accountManagement
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -54,12 +56,17 @@ fun LoginScreen(
     navigateToHomeScreen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val viewModel: LoginScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
 
     if(uiState.loginStatus == LoginStatus.SUCCESS) {
         viewModel.resetLoginStatus()
         navigateToHomeScreen()
+    } else if(uiState.loginStatus == LoginStatus.FAILURE) {
+        Toast.makeText(context, uiState.loginResponseMessage, Toast.LENGTH_SHORT).show()
+        viewModel.enableButton()
+        viewModel.resetLoginStatus()
     }
 
     Column(

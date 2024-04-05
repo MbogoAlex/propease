@@ -160,6 +160,14 @@ class RegistrationScreenViewModel(
 
     }
 
+    fun enableButton() {
+        _uiState.update {
+            it.copy(
+                registrationButtonEnabled = true
+            )
+        }
+    }
+
     fun resetRegistrationStatus() {
         _uiState.update {
             it.copy(
@@ -167,6 +175,7 @@ class RegistrationScreenViewModel(
             )
         }
     }
+
 
 
 }

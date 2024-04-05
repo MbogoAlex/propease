@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.ui.screens.appContentPages
+package com.tms.propertymanagement.ui.screens.propertyAdvertisementPages
 
 import android.content.Intent
 import android.net.Uri
@@ -25,11 +25,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -54,41 +58,66 @@ import com.google.accompanist.pager.rememberPagerState
 import com.tms.propertymanagement.PropEaseViewModelFactory
 import com.tms.propertymanagement.R
 import com.tms.propertymanagement.nav.NavigationDestination
+import com.tms.propertymanagement.ui.screens.appContentPages.ListingDetailsScreenUiState
+import com.tms.propertymanagement.ui.screens.appContentPages.ListingDetailsScreenViewModel
 import com.tms.propertymanagement.ui.theme.PropEaseTheme
 import com.tms.propertymanagement.utils.ReusableFunctions
 
-object ListingDetailsDestination: NavigationDestination {
-    override val title: String = "Listing Details Screen"
-    override val route: String = "listing-details-screen"
+object UserLivePropertyDetailsScreenDestination: NavigationDestination {
+    override val title: String = "User Property Details Screen"
+    override val route: String = "user-property-details-screen"
     val propertyId: String = "propertyId"
     val routeWithArgs: String = "$route/{$propertyId}"
 }
 @Composable
-fun ListingDetailsScreen(
+fun UserLivePropertyDetailsScreen(
     navigateToPreviousScreen: () -> Unit,
+    navigateToPropertyUpdateScreen: (propertyId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val viewModel: ListingDetailsScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
+    val viewModel: UserLivePropertyDetailsScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
     Column(
         modifier = Modifier
             .padding(16.dp)
             .fillMaxSize()
     ) {
-        IconButton(onClick = { navigateToPreviousScreen() }) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Previous screen"
-            )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = { navigateToPreviousScreen() }) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Previous screen"
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            TextButton(onClick = { navigateToPropertyUpdateScreen(
+
+                uiState.property.propertyId.toString()
+            ) }) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.edit), 
+                        contentDescription = "Edit property"
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(text = "Edit")
+                }
+            }
+
         }
-        ImageSlider(
+
+        UserPropertyImageSlider(
             uiState = uiState
         )
         Spacer(
             modifier = Modifier
                 .height(20.dp)
         )
-        ListingTextDetails(
+        UserPropertyListingTextDetails(
             uiState = uiState
         )
     }
@@ -96,8 +125,8 @@ fun ListingDetailsScreen(
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun ImageSlider(
-    uiState: ListingDetailsScreenUiState,
+fun UserPropertyImageSlider(
+    uiState: UserLivePropertyDetailsScreenUiState,
     modifier: Modifier = Modifier
 ) {
     Log.i("IMAGES_ARE: ", uiState.property.images.toString())
@@ -152,8 +181,8 @@ fun ImageSlider(
 }
 
 @Composable
-fun ListingTextDetails(
-    uiState: ListingDetailsScreenUiState,
+fun UserPropertyListingTextDetails(
+    uiState: UserLivePropertyDetailsScreenUiState,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -352,20 +381,21 @@ fun ListingTextDetails(
 
 @Preview(showBackground = true)
 @Composable
-fun ImageSliderPreview() {
+fun UserPropertyImageSliderPreview() {
     PropEaseTheme {
-        ImageSlider(
-            uiState = ListingDetailsScreenUiState()
+        UserPropertyImageSlider(
+            uiState = UserLivePropertyDetailsScreenUiState()
         )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun ListingDetailsPreview() {
+fun UserLivePropertyDetailsPreview() {
     PropEaseTheme {
-        ListingDetailsScreen(
-            navigateToPreviousScreen = {}
+        UserLivePropertyDetailsScreen(
+            navigateToPreviousScreen = {},
+            navigateToPropertyUpdateScreen = {}
         )
     }
 }

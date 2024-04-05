@@ -61,7 +61,7 @@ class ListingsScreenViewModel(
         }
         viewModelScope.launch {
             try {
-                val response = apiRepository.fetchCategories(token)
+                val response = apiRepository.fetchCategories()
                 if(response.isSuccessful) {
                     _uiState.update {
                         it.copy(
@@ -83,7 +83,7 @@ class ListingsScreenViewModel(
                             fetchingStatus = FetchingStatus.FAILURE
                         )
                     }
-                    Log.e("CATEGORIES_NOT_FETCHED", response.body().toString())
+                    Log.e("CATEGORIES_NOT_FETCHED", response.toString())
                 }
             } catch (e: Exception) {
                 _uiState.update {
@@ -100,7 +100,7 @@ class ListingsScreenViewModel(
         viewModelScope.launch {
             try {
                 val response = apiRepository.fetchFilteredProperties(
-                    token = token,
+
                     location = location.takeIf { location != null } ?: "",
                     rooms  = rooms.takeIf { rooms != null } ?: "",
                     categoryId = categoryId.takeIf { categoryId != null } ?: ""
@@ -112,14 +112,14 @@ class ListingsScreenViewModel(
                             properties = response.body()?.data?.properties!!
                         )
                     }
-                    Log.i("PROPERTIES_FETCHED_SUCCESSFULLY", response.body()?.data.toString())
+                    Log.i("PROPERTIES_FETCHED_SUCCESSFULLY", response.toString())
                 } else {
                     _uiState.update {
                         it.copy(
                             fetchingStatus = FetchingStatus.FAILURE
                         )
                     }
-                    Log.e("PROPERTIES_FETCHING_FAILED", response.body().toString())
+                    Log.e("PROPERTIES_FETCHING_FAILED", response.toString())
                 }
 
             }catch (e: Exception) {

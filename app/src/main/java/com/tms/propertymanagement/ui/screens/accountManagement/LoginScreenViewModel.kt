@@ -137,6 +137,14 @@ class LoginScreenViewModel(
         }
     }
 
+    fun enableButton() {
+        _uiState.update {
+            it.copy(
+                loginButtonEnabled = true
+            )
+        }
+    }
+
     fun resetLoginStatus() {
         _uiState.update {
             it.copy(
@@ -145,22 +153,22 @@ class LoginScreenViewModel(
         }
     }
 
-    fun initializeFields() {
-        loginDetails = loginDetails.copy(
-            phoneNumber = phoneNumber.takeIf { it != null } ?: "phone number",
-            password = password.takeIf { it != null } ?: "password"
-        )
-        _uiState.update {
-            it.copy(
-                loginDetails = loginDetails,
-                loginButtonEnabled = allFieldsFilled()
-            )
-        }
-
-    }
+//    fun initializeFields() {
+//        loginDetails = loginDetails.copy(
+//            phoneNumber = phoneNumber.takeIf { it != null } ?: "phone number",
+//            password = password.takeIf { it != null } ?: "password"
+//        )
+//        _uiState.update {
+//            it.copy(
+//                loginDetails = loginDetails,
+//                loginButtonEnabled = allFieldsFilled()
+//            )
+//        }
+//
+//    }
 
     init {
-        initializeFields()
+//        initializeFields()
     }
 
 }

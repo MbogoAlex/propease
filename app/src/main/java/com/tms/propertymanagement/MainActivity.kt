@@ -1,9 +1,11 @@
 package com.tms.propertymanagement
 
 import HomeScreen
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -17,6 +19,7 @@ import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.Property
 import com.tms.propertymanagement.ui.theme.PropEaseTheme
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

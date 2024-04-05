@@ -7,14 +7,17 @@ import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateListOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tms.propertymanagement.apiModel.Category
+import com.tms.propertymanagement.apiModel.PropertyData
+import com.tms.propertymanagement.apiModel.PropertyImage
 import com.tms.propertymanagement.apiModel.PropertyLocation
+import com.tms.propertymanagement.apiModel.PropertyOwner
 import com.tms.propertymanagement.apiModel.PropertyUploadRequestBody
 import com.tms.propertymanagement.network.ApiRepository
 import com.tms.propertymanagement.propEaseDataStore.DSRepository
-import com.tms.propertymanagement.ui.screens.appContentPages.FetchingStatus
 import com.tms.propertymanagement.utils.ReusableFunctions
 import com.tms.propertymanagement.utils.ReusableFunctions.toLoggedInUserData
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,27 +32,58 @@ import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.time.LocalDateTime
 
-enum class UploadingStatus {
+enum class UpdatingStatus {
     INITIAL,
     LOADING,
     SUCCESS,
     FAILURE
 }
 
-enum class FetchingCategoriesStatus {
+enum class FetchingUpdateCategoriesStatus {
     INITIAL,
     LOADING,
     SUCCESS,
     FAILURE
 }
 
-val categoryData = Category(
+val propertyCategoryData = Category(
     id = 0,
     name = ""
 )
-data class PropertyUploadScreenUiState(
+
+val updatePropertyOwner: PropertyOwner = PropertyOwner(
+    userId = 0,
+    email = "",
+    phoneNumber = "",
+    profilePic = "",
+    fname = "",
+    lname = "",
+)
+
+val updatePropertyOwnerLocation = PropertyLocation(
+    county = "",
+    address = "",
+    latitude = 0.0,
+    longitude = 0.0
+)
+
+val updatePropertyData = PropertyData(
+    user = propertyOwner,
+    propertyId = 0,
+    title = "",
+    description = "",
+    category = "",
+    rooms = 0,
+    price = 0.0,
+    postedDate = "",
+    features = emptyList(),
+    location = propertyLocation,
+    images = emptyList()
+)
+data class PropertyUpdateScreenUiState(
     val numberOfRooms: Int = 0,
-    val category: Category = categoryData,
+    val category: Category = propertyCategoryData,
+    val categoryName: String = "",
     val categories: List<Category> = emptyList(),
     val title: String = "",
     val description: String = "",
@@ -58,19 +92,24 @@ data class PropertyUploadScreenUiState(
     val address: String = "",
     val features: List<String> = emptyList(),
     val images: List<Uri> = emptyList(),
+    val serverImages: List<PropertyImage> = emptyList(),
     val userDetails: ReusableFunctions.LoggedInUserData = ReusableFunctions.LoggedInUserData(),
     val uploadingStatus: UploadingStatus = UploadingStatus.INITIAL,
-    val fetchingCategoriesStatus: FetchingCategoriesStatus = FetchingCategoriesStatus.INITIAL,
+    val fetchingUpdateCategoriesStatus: FetchingUpdateCategoriesStatus = FetchingUpdateCategoriesStatus.INITIAL,
+    val property: PropertyData = updatePropertyData,
     val saveButtonEnabled: Boolean = false
 )
-
-class PropertyUploadScreenViewModel(
+class PropertyUpdateScreenViewModel(
     private val apiRepository: ApiRepository,
-    private val dsRepository: DSRepository
-) :ViewModel() {
-    private val _uiState = MutableStateFlow(value = PropertyUploadScreenUiState())
-    val uiState: StateFlow<PropertyUploadScreenUiState> = _uiState.asStateFlow()
+    private val dsRepository: DSRepository,
+    private val savedStateHandle: SavedStateHandle,
+): ViewModel() {
+    private val _uiState = MutableStateFlow(value = PropertyUpdateScreenUiState())
+    val uiState: StateFlow<PropertyUpdateScreenUiState> = _uiState.asStateFlow()
 
+    private val propertyId: String? = savedStateHandle[PropertyUpdateScreenDestination.propertyId]
+
+    var serverImages = mutableStateListOf<PropertyImage>()
     fun loadUserDetails() {
         viewModelScope.launch {
             dsRepository.dsUserModel.collect() {dsUserModel ->
@@ -99,6 +138,7 @@ class PropertyUploadScreenViewModel(
         _uiState.update {
             it.copy(
                 category = category,
+                categoryName = category.name,
                 saveButtonEnabled = requiredFieldsFilled()
             )
         }
@@ -202,7 +242,7 @@ class PropertyUploadScreenViewModel(
     fun fetchCategories(token: String) {
         _uiState.update {
             it.copy(
-                fetchingCategoriesStatus = FetchingCategoriesStatus.LOADING
+                fetchingUpdateCategoriesStatus = FetchingUpdateCategoriesStatus.LOADING
             )
         }
         viewModelScope.launch {
@@ -212,14 +252,14 @@ class PropertyUploadScreenViewModel(
                     _uiState.update {
                         it.copy(
                             categories = response.body()?.data?.categories!!,
-                            fetchingCategoriesStatus = FetchingCategoriesStatus.SUCCESS
+                            fetchingUpdateCategoriesStatus = FetchingUpdateCategoriesStatus.SUCCESS
                         )
                     }
                     Log.i("CATEGORIES_FETCHED", "${response.body()?.data?.categories}, 1st Category: ${response.body()?.data?.categories!![0]}")
                 } else {
                     _uiState.update {
                         it.copy(
-                            fetchingCategoriesStatus = FetchingCategoriesStatus.FAILURE
+                            fetchingUpdateCategoriesStatus = FetchingUpdateCategoriesStatus.FAILURE
                         )
                     }
                     Log.e("CATEGORIES_NOT_FETCHED", response.body().toString())
@@ -227,7 +267,7 @@ class PropertyUploadScreenViewModel(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        fetchingCategoriesStatus = FetchingCategoriesStatus.FAILURE
+                        fetchingUpdateCategoriesStatus = FetchingUpdateCategoriesStatus.FAILURE
                     )
                 }
                 Log.e("CATEGORIES_NOT_FETCHED_EXCEPTION", e.message.toString())
@@ -235,8 +275,55 @@ class PropertyUploadScreenViewModel(
         }
     }
 
+    fun fetchProperty() {
+//        _uiState.update {
+//            it.copy(
+//                fetchingStatus = PropertyFetchingStatus.LOADING
+//            )
+//        }
+        viewModelScope.launch {
+            try {
+                Log.i("FETCHING_WITH_TOKEN", _uiState.value.userDetails.token)
+                val response = apiRepository.fetchSpecificProperty(_uiState.value.userDetails.token, propertyId = propertyId!!)
+                if(response.isSuccessful) {
+                    features.addAll(response.body()?.data?.property!!.features)
+                    serverImages.addAll(response.body()?.data?.property!!.images)
+                    _uiState.update {
+                        it.copy(
+                            property = response.body()?.data?.property!!,
+                            categoryName = response.body()?.data?.property?.category!!,
+                            numberOfRooms = response.body()?.data?.property!!.rooms,
+                            title = response.body()?.data?.property!!.title,
+                            description = response.body()?.data?.property!!.description,
+                            price = response.body()?.data?.property!!.price.toString(),
+                            county = response.body()?.data?.property!!.location.county,
+                            address = response.body()?.data?.property!!.location.address,
+                            serverImages = serverImages,
+                            features = features,
+                        )
+                    }
+                    Log.i("PROPERTIES_FETCHED_IMAGES_ARE", _uiState.value.property.images.toString())
+                } else {
+//                    _uiState.update {
+//                        it.copy(
+//                            fetchingStatus = PropertyFetchingStatus.FAIL
+//                        )
+//                    }
+                    Log.e("FAILED_TO_FETCH_PROPERTY", response.toString())
+                }
+            } catch (e: Exception) {
+//                _uiState.update {
+//                    it.copy(
+//                        fetchingStatus = PropertyFetchingStatus.FAIL
+//                    )
+//                }
+                Log.e("FAILED_TO_FETCH_PROPERTY_EXCEPTION", e.message.toString())
+            }
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
-    fun uploadProperty(context: Context) {
+    fun updateProperty(context: Context) {
         _uiState.update {
             it.copy(
                 uploadingStatus = UploadingStatus.LOADING
@@ -251,16 +338,59 @@ class PropertyUploadScreenViewModel(
 
         val property = PropertyUploadRequestBody(
             title = _uiState.value.title,
+            categoryId = _uiState.value.categoryName,
             description = _uiState.value.description,
-            categoryId = _uiState.value.category.name,
             price = _uiState.value.price.toDouble(),
             rooms = _uiState.value.numberOfRooms,
             postedDate = LocalDateTime.now().toString(),
             location = propertyLocation,
             features = _uiState.value.features,
 
-        )
+            )
 
+        viewModelScope.launch {
+            try {
+                val response = apiRepository.updateProperty(
+                    token = _uiState.value.userDetails.token,
+                    propertyId = propertyId!!,
+                    property = property,
+                )
+                if(response.isSuccessful) {
+                    if(_uiState.value.images.isNotEmpty()) {
+                        updateImages(context)
+                    }
+
+                    _uiState.update {
+                        it.copy(
+                            uploadingStatus = UploadingStatus.SUCCESS
+                        )
+                    }
+                    Log.i("PROPERTY_UPDATE", "SUCCESS")
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            uploadingStatus = UploadingStatus.FAILURE
+                        )
+                    }
+                    Log.e("FAILED_TO_UPDATE_PROPERTY", "$response, TOKEN: ${_uiState.value.userDetails.token}, Property: $property")
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        uploadingStatus = UploadingStatus.FAILURE
+                    )
+                }
+                Log.e("FAILED_TO_UPDATE_PROPERTY_EXCEPTION", e.message.toString())
+            }
+        }
+    }
+
+    fun updateImages(context: Context) {
+        _uiState.update {
+            it.copy(
+                uploadingStatus = UploadingStatus.LOADING
+            )
+        }
         var imageParts = ArrayList<MultipartBody.Part>()
         _uiState.value.images.forEach { uri ->
             val parcelFileDescriptor = context.contentResolver.openFileDescriptor(uri, "r", null)
@@ -279,17 +409,15 @@ class PropertyUploadScreenViewModel(
                 val mimeType = context.contentResolver.getType(uri)
                 val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
                 val requestFile = RequestBody.create(mimeType?.toMediaTypeOrNull(), byteArray)
-                val imagePart = MultipartBody.Part.createFormData("imageFiles", "upload.$extension", requestFile)
+                val imagePart = MultipartBody.Part.createFormData("files", "upload.$extension", requestFile)
                 imageParts.add(imagePart)
             }
         }
-
         viewModelScope.launch {
             try {
-                val response = apiRepository.uploadProperty(
+                val response = apiRepository.uploadPropertyImages(
                     token = _uiState.value.userDetails.token,
-                    userId = _uiState.value.userDetails.userId!!,
-                    property = property,
+                    propertyId = propertyId!!,
                     images = imageParts
                 )
                 if(response.isSuccessful) {
@@ -298,14 +426,14 @@ class PropertyUploadScreenViewModel(
                             uploadingStatus = UploadingStatus.SUCCESS
                         )
                     }
-                    Log.i("PROPERTY_UPLOADED", "Property: $property")
+                    Log.i("IMAGE_UPDATE_SUCCESS", "SUCCESS")
                 } else {
                     _uiState.update {
                         it.copy(
                             uploadingStatus = UploadingStatus.FAILURE
                         )
                     }
-                    Log.e("FAILED_TO_UPLOAD_PROPERTY", response.toString())
+                    Log.e("IMAGE_UPDATE_FAILURE", response.toString())
                 }
             } catch (e: Exception) {
                 _uiState.update {
@@ -313,7 +441,47 @@ class PropertyUploadScreenViewModel(
                         uploadingStatus = UploadingStatus.FAILURE
                     )
                 }
-                Log.e("FAILED_TO_UPLOAD_PROPERTY_EXCEPTION", e.message.toString())
+                Log.e("IMAGE_UPDATE_FAILURE_EXCEPTION", e.message.toString())
+            }
+
+        }
+    }
+
+    fun deletePropertyImages(imageId: String, index: Int) {
+        _uiState.update {
+            it.copy(
+                uploadingStatus = UploadingStatus.LOADING
+            )
+        }
+        viewModelScope.launch {
+            try {
+                val response = apiRepository.deletePropertyImage(
+                    token = _uiState.value.userDetails.token,
+                    imageId = imageId,
+                    propertyId = propertyId!!
+                )
+                if(response.isSuccessful) {
+                    serverImages.removeAt(index)
+                    _uiState.update {
+                        it.copy(
+                            uploadingStatus = UploadingStatus.SUCCESS, serverImages = serverImages)
+                    }
+                    Log.i("IMAGE_DELETION", "SUCCESS")
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            uploadingStatus = UploadingStatus.FAILURE
+                        )
+                    }
+                    Log.e("IMAGE_DELETION_FAILURE", "$response, TOKEN: ${_uiState.value.userDetails.token}")
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        uploadingStatus = UploadingStatus.FAILURE
+                    )
+                }
+                Log.e("IMAGE_DELETION_FAILURE_EXCEPTION", e.message.toString())
             }
         }
     }
@@ -330,6 +498,11 @@ class PropertyUploadScreenViewModel(
                 _uiState.value.category.id != 0
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun publishUpdate(context: Context) {
+        updateProperty(context)
+    }
+
     fun resetSavingState() {
         _uiState.update {
             it.copy(
@@ -341,5 +514,6 @@ class PropertyUploadScreenViewModel(
     init {
         loadUserDetails()
         fetchCategories(_uiState.value.userDetails.token)
+        fetchProperty()
     }
 }

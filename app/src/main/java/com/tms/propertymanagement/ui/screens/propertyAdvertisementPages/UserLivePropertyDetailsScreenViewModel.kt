@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.ui.screens.appContentPages
+package com.tms.propertymanagement.ui.screens.propertyAdvertisementPages
 
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
@@ -14,12 +14,9 @@ import com.tms.propertymanagement.utils.ReusableFunctions.toLoggedInUserData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-data class SpecificPropertyData(
-    val property: PropertyData
-)
 
 val propertyOwner: PropertyOwner = PropertyOwner(
     userId = 0,
@@ -58,22 +55,22 @@ enum class PropertyFetchingStatus{
     FAIL,
 }
 
-data class ListingDetailsScreenUiState(
+data class UserLivePropertyDetailsScreenUiState(
     val property: PropertyData = propertyData,
     val fetchingStatus: PropertyFetchingStatus = PropertyFetchingStatus.INITIAL,
     val userDetails: ReusableFunctions.LoggedInUserData = ReusableFunctions.LoggedInUserData()
 )
 
-class ListingDetailsScreenViewModel(
+class UserLivePropertyDetailsScreenViewModel(
     private val apiRepository: ApiRepository,
     private val dsRepository: DSRepository,
     private val savedStateHandle: SavedStateHandle,
-): ViewModel() {
-    private val _uiState = MutableStateFlow(value = ListingDetailsScreenUiState())
-    val uiState: StateFlow<ListingDetailsScreenUiState> = _uiState.asStateFlow()
+) : ViewModel() {
+    private val _uiState = MutableStateFlow(value = UserLivePropertyDetailsScreenUiState())
+    val uiState: StateFlow<UserLivePropertyDetailsScreenUiState> = _uiState.asStateFlow()
 
-    private val propertyId: String? = savedStateHandle[ListingDetailsDestination.propertyId]
-    fun loadUserDetails() {
+    private val propertyId: String? = savedStateHandle[UserLivePropertyDetailsScreenDestination.propertyId]
+    fun fetchUserDetails() {
         viewModelScope.launch {
             dsRepository.dsUserModel.collect() {dsUserModel ->
                 _uiState.update {
@@ -102,7 +99,7 @@ class ListingDetailsScreenViewModel(
                             fetchingStatus = PropertyFetchingStatus.SUCCESS
                         )
                     }
-                    Log.i("PROPERTIES_FETCHED_IMAGES_ARE", _uiState.value.property.images.toString())
+                    Log.i("LIVE_PROPERTIES_FETCHED", _uiState.value.property.toString())
                 } else {
                     _uiState.update {
                         it.copy(
@@ -123,8 +120,7 @@ class ListingDetailsScreenViewModel(
     }
 
     init {
-        loadUserDetails()
+        fetchUserDetails()
         fetchProperty()
     }
-
 }

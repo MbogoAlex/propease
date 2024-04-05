@@ -54,6 +54,7 @@ import com.tms.propertymanagement.ui.theme.PropEaseTheme
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun UserLiveProperties(
+    navigateToSpecificUserProperty: (propertyId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: UserLivePropertiesScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
@@ -90,7 +91,7 @@ fun UserLiveProperties(
                     )
                 } else {
                     ListingItems(
-                        navigateToUpdateProperty = {},
+                        navigateToSpecificUserProperty = navigateToSpecificUserProperty,
                         uiState = uiState,
                         viewModel = viewModel
                     )
@@ -109,7 +110,7 @@ fun UserLiveProperties(
 
 @Composable
 fun ListingItems(
-    navigateToUpdateProperty: (propertyId: String) -> Unit,
+    navigateToSpecificUserProperty: (propertyId: String) -> Unit,
     uiState: UserLivePropertiesScreenUiState,
     viewModel: UserLivePropertiesScreenViewModel,
     modifier: Modifier = Modifier
@@ -129,7 +130,7 @@ fun ListingItems(
         ) {
             items(properties) {
                 ListingItem(
-                    navigateToUpdateProperty = navigateToUpdateProperty,
+                    navigateToSpecificUserProperty = navigateToSpecificUserProperty,
                     property = it,
                     modifier = Modifier
                         .padding(8.dp)
@@ -143,13 +144,14 @@ fun ListingItems(
 @Composable
 fun ListingItem(
     property: PropertyData,
-    navigateToUpdateProperty: (propertyId: String) -> Unit,
+//    navigateToUpdateProperty: (propertyId: String) -> Unit,
+    navigateToSpecificUserProperty: (propertyId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
             .clickable {
-                navigateToUpdateProperty(property.propertyId.toString())
+                navigateToSpecificUserProperty(property.propertyId.toString())
             }
     ) {
         Column {
@@ -241,6 +243,7 @@ fun ListingItem(
 fun UserLivePropertiesPreview() {
     PropEaseTheme {
         UserLiveProperties(
+            navigateToSpecificUserProperty = {}
         )
     }
 }

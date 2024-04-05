@@ -21,6 +21,11 @@ import com.tms.propertymanagement.ui.screens.accountManagement.RegistrationScree
 import com.tms.propertymanagement.ui.screens.accountManagement.RegistrationScreenDestination
 import com.tms.propertymanagement.ui.screens.appContentPages.ListingDetailsDestination
 import com.tms.propertymanagement.ui.screens.appContentPages.ListingDetailsScreen
+import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.PropertyUpdateScreen
+import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.PropertyUpdateScreenDestination
+import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.UserLivePropertyDetailsScreen
+import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.UserLivePropertyDetailsScreenDestination
+import kotlin.reflect.typeOf
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -64,6 +69,45 @@ fun NavigationGraph(
                 }
             )
         }
+        composable(RegistrationScreenDestination.route) {
+            RegistrationScreen(
+                navigateToLoginScreen = { phoneNumber, password ->
+                    navController.popBackStack(RegistrationScreenDestination.route, true)
+                    navController.navigate(LoginScreenDestination.route) {
+                        popUpTo(LoginScreenDestination.route) { inclusive = true }
+                    }
+                },
+                navigateToPreviousScreen = {
+                    navController.navigate(RegistrationScreenDestination.route)
+                }
+            )
+        }
+
+// Default route without arguments
+        composable(LoginScreenDestination.route) {
+            // Retrieve arguments if available or use default values
+            val phoneNumber = navController.previousBackStackEntry?.arguments?.getString(LoginScreenDestination.phoneNumber) ?: ""
+            val password = navController.previousBackStackEntry?.arguments?.getString(LoginScreenDestination.password) ?: ""
+
+            LoginScreen(
+//                phoneNumber = phoneNumber,
+//                password = password,
+                navigateToPreviousScreen = {
+                    navController.popBackStack(LoginScreenDestination.route, true)
+                    navController.navigate(RegistrationScreenDestination.route)
+                },
+                navigateToRegistrationScreen = {
+                    navController.popBackStack(LoginScreenDestination.route, true)
+                    navController.navigate(RegistrationScreenDestination.route)
+                },
+                navigateToHomeScreen = {
+                    navController.popBackStack(LoginScreenDestination.route, true)
+                    navController.navigate(HomeScreenDestination.route)
+                }
+            )
+        }
+
+// Route with arguments
         composable(
             LoginScreenDestination.routeArgs,
             arguments = listOf(
@@ -74,12 +118,16 @@ fun NavigationGraph(
                     type = NavType.StringType
                 }
             )
-        ) {
+        ) { backStackEntry ->
+            val phoneNumber = backStackEntry.arguments?.getString(LoginScreenDestination.phoneNumber) ?: ""
+            val password = backStackEntry.arguments?.getString(LoginScreenDestination.password) ?: ""
+
             LoginScreen(
+//                phoneNumber = phoneNumber,
+//                password = password,
                 navigateToPreviousScreen = {
                     navController.popBackStack(LoginScreenDestination.routeArgs, true)
                     navController.navigate(RegistrationScreenDestination.route)
-
                 },
                 navigateToRegistrationScreen = {
                     navController.popBackStack(LoginScreenDestination.routeArgs, true)
@@ -91,6 +139,7 @@ fun NavigationGraph(
                 }
             )
         }
+
         composable(HomeScreenDestination.route) {
             HomeScreen(
                 navigateToSpecificProperty = {
@@ -99,6 +148,9 @@ fun NavigationGraph(
                 navigateToHomeScreen = {
                     navController.popBackStack(HomeScreenDestination.route, true)
                     navController.navigate(HomeScreenDestination.route)
+                },
+                navigateToSpecificUserProperty = {
+                    navController.navigate("${UserLivePropertyDetailsScreenDestination.route}/${it}")
                 }
             )
         }
@@ -114,6 +166,38 @@ fun NavigationGraph(
                 navigateToPreviousScreen = {
                     navController.popBackStack(ListingDetailsDestination.routeWithArgs, true)
                     navController.enableOnBackPressed(true)
+                }
+            )
+        }
+        composable(
+            UserLivePropertyDetailsScreenDestination.routeWithArgs,
+            arguments = listOf(
+                navArgument(UserLivePropertyDetailsScreenDestination.propertyId) {
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            UserLivePropertyDetailsScreen(
+                navigateToPreviousScreen = {
+                    navController.navigateUp()
+                },
+                navigateToPropertyUpdateScreen = {
+                    navController.navigate("${PropertyUpdateScreenDestination.route}/${it}")
+                }
+            )
+        }
+        composable(
+            PropertyUpdateScreenDestination.routeWithArgs,
+            arguments = listOf(
+                navArgument(PropertyUpdateScreenDestination.propertyId) {
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            PropertyUpdateScreen(
+                navigateToPreviousScreen = {
+//                    navController.popBackStack(UserLivePropertyDetailsScreenDestination.routeWithArgs, true)
+                    navController.navigateUp()
                 }
             )
         }

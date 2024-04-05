@@ -22,7 +22,7 @@ data class PropertyData(
     val category: String,
     val rooms: Int,
     val price: Double,
-    val availableDate: String,
+    val postedDate: String,
     val features: List<String>,
     val location: PropertyLocation,
     val images: List<PropertyImage>
@@ -32,7 +32,7 @@ data class PropertyOwner(
     val userId: Int,
     val email: String,
     val phoneNumber: String,
-    val profilePic: String,
+    val profilePic: String?,
     val fname: String,
     val lname: String,
 )
@@ -69,7 +69,7 @@ data class PropertyUploadRequestBody (
     val categoryId: String,
     val price: Double,
     val rooms: Int,
-    val availableDate: String,
+    val postedDate: String,
     val location: PropertyLocation,
     val features: List<String>
 )

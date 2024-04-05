@@ -68,6 +68,7 @@ data class MainMenuItem (
 @Composable
 fun HomeScreen(
     navigateToSpecificProperty: (propertyId: String) -> Unit,
+    navigateToSpecificUserProperty: (propertyId: String) -> Unit,
     navigateToHomeScreen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -203,6 +204,9 @@ fun HomeScreen(
 //                    }
 //                )
                 MainNavigationPages.ADVERTISE_SCREEN -> UserLiveProperties(
+                    navigateToSpecificUserProperty = {
+                        navigateToSpecificUserProperty(it)
+                    }
 //                    navigateToUpdateProperty = { /*TODO*/ }
                 )
                 MainNavigationPages.NOTIFICATIONS_SCREEN -> {}
@@ -221,7 +225,8 @@ fun HomeScreen(
 fun HomeScreenPreview() {
     HomeScreen(
         navigateToSpecificProperty = {},
-        navigateToHomeScreen = {}
+        navigateToHomeScreen = {},
+        navigateToSpecificUserProperty = {}
     )
 }
 

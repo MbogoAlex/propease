@@ -69,6 +69,10 @@ fun RegistrationScreen(
             uiState.registrationDetails.phoneNumber,
             uiState.registrationDetails.password
         )
+    } else if(uiState.registrationStatus == RegistrationStatus.FAIL) {
+        Toast.makeText(context, uiState.registrationResponseMessage, Toast.LENGTH_SHORT).show()
+        viewModel.enableButton()
+        viewModel.resetRegistrationStatus()
     }
 
     var isEmailValid by rememberSaveable {
