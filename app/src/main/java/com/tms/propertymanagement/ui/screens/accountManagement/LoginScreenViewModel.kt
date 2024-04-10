@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.ui.screens.accountManagement
+package com.propertymanagement.tms.ui.screens.accountManagement
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -7,10 +7,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tms.propertymanagement.apiModel.UserLoginRequestBody
-import com.tms.propertymanagement.network.ApiRepository
-import com.tms.propertymanagement.propEaseDataStore.DSRepository
-import com.tms.propertymanagement.propEaseDataStore.DSUserModel
+import com.propertymanagement.tms.apiModel.UserLoginRequestBody
+import com.propertymanagement.tms.network.ApiRepository
+import com.propertymanagement.tms.propEaseDataStore.DSRepository
+import com.propertymanagement.tms.propEaseDataStore.DSUserModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -111,6 +111,10 @@ class LoginScreenViewModel(
                     )
 
                     dsRepository.saveUserData(dsUserModel)
+                    if(response.body()?.data?.user?.userInfo?.imageUrl != null) {
+                        dsRepository.saveUserProfilePicture(response.body()?.data?.user?.userInfo?.imageUrl)
+                    }
+
 
                     _uiState.update {
                         it.copy(
@@ -153,6 +157,8 @@ class LoginScreenViewModel(
             )
         }
     }
+
+
 
     fun initializeFields() {
         Log.i("INITIALIZING_FIELDS", "$phoneNumber $password")

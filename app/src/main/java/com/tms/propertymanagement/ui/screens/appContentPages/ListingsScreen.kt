@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.ui.screens.appContentPages
+package com.propertymanagement.tms.ui.screens.appContentPages
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
@@ -66,10 +66,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.tms.propertymanagement.PropEaseViewModelFactory
-import com.tms.propertymanagement.R
-import com.tms.propertymanagement.apiModel.PropertyData
-import com.tms.propertymanagement.ui.theme.PropEaseTheme
+import com.propertymanagement.tms.PropEaseViewModelFactory
+import com.propertymanagement.tms.R
+import com.propertymanagement.tms.apiModel.PropertyData
+import com.propertymanagement.tms.ui.theme.PropEaseTheme
 import kotlinx.coroutines.delay
 
 @Composable
@@ -481,8 +481,8 @@ fun ListingItem(
                 Text(
                     text = property.title,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    maxLines = 2,
+                    fontSize = 15.sp,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Start
                 )
@@ -500,7 +500,7 @@ fun ListingItem(
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = property.location.county.takeIf { property.location.county.length <= 6 } ?: "${property.location.county.substring(0, 4)}...",
-                        fontSize = 14.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Light
                     )
                     Spacer(modifier = Modifier.weight(1f))
@@ -511,7 +511,7 @@ fun ListingItem(
                     ) {
                         Text(
                             text = property.category.takeIf { it.length <= 6 } ?: "${property.category.substring(0, 4)}...",
-                            fontSize = 14.sp,
+                            fontSize = 11.sp,
                             modifier = Modifier
                                 .padding(
                                     start = 10.dp,

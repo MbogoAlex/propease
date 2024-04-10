@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.ui.screens.propertyAdvertisementPages
+package com.propertymanagement.tms.ui.screens.propertyAdvertisementPages
 
 import android.content.Intent
 import android.net.Uri
@@ -25,10 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,13 +52,11 @@ import coil.request.ImageRequest
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import com.tms.propertymanagement.PropEaseViewModelFactory
-import com.tms.propertymanagement.R
-import com.tms.propertymanagement.nav.NavigationDestination
-import com.tms.propertymanagement.ui.screens.appContentPages.ListingDetailsScreenUiState
-import com.tms.propertymanagement.ui.screens.appContentPages.ListingDetailsScreenViewModel
-import com.tms.propertymanagement.ui.theme.PropEaseTheme
-import com.tms.propertymanagement.utils.ReusableFunctions
+import com.propertymanagement.tms.PropEaseViewModelFactory
+import com.propertymanagement.tms.R
+import com.propertymanagement.tms.nav.NavigationDestination
+import com.propertymanagement.tms.ui.theme.PropEaseTheme
+import com.propertymanagement.tms.utils.ReusableFunctions
 
 object UserLivePropertyDetailsScreenDestination: NavigationDestination {
     override val title: String = "User Property Details Screen"
@@ -100,7 +95,7 @@ fun UserLivePropertyDetailsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.edit), 
+                        painter = painterResource(id = R.drawable.edit),
                         contentDescription = "Edit property"
                     )
                     Spacer(modifier = Modifier.width(5.dp))
@@ -235,7 +230,7 @@ fun UserPropertyListingTextDetails(
         Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = uiState.property.title,
-            fontSize = 22.sp,
+            fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -266,7 +261,7 @@ fun UserPropertyListingTextDetails(
         ) {
             Text(
                 text = uiState.property.description,
-                fontSize = 16.sp
+                fontSize = 14.sp
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
@@ -278,7 +273,7 @@ fun UserPropertyListingTextDetails(
             Text(
                 text = ReusableFunctions.formatMoneyValue(uiState.property.price),
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                fontSize = 16.sp
             )
             Text(
                 text = "/month"
@@ -297,7 +292,7 @@ fun UserPropertyListingTextDetails(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .clip(CircleShape)
-                        .size(70.dp)
+                        .size(60.dp)
                 )
             } else {
                 AsyncImage(
@@ -311,7 +306,7 @@ fun UserPropertyListingTextDetails(
                     contentDescription = uiState.property.title,
                     modifier = Modifier
                         .clip(CircleShape)
-                        .size(70.dp)
+                        .size(60.dp)
                 )
             }
             Spacer(modifier = Modifier.width(20.dp))

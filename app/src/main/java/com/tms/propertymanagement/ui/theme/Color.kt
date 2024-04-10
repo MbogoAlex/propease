@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.ui.theme
+package com.propertymanagement.tms.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.ui.theme
+package com.propertymanagement.tms.ui.theme
 
 import android.app.Activity
 import android.os.Build

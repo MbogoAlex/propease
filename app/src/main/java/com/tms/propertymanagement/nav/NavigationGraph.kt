@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.nav
+package com.propertymanagement.tms.nav
 
 import HomeScreen
 import HomeScreenDestination
@@ -12,20 +12,22 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.tms.propertymanagement.ui.screens.SplashScreen
-import com.tms.propertymanagement.ui.screens.SplashScreenDestination
-import com.tms.propertymanagement.ui.screens.WelcomeScreen
-import com.tms.propertymanagement.ui.screens.WelcomeScreenDestination
-import com.tms.propertymanagement.ui.screens.accountManagement.LoginScreen
-import com.tms.propertymanagement.ui.screens.accountManagement.LoginScreenDestination
-import com.tms.propertymanagement.ui.screens.accountManagement.RegistrationScreen
-import com.tms.propertymanagement.ui.screens.accountManagement.RegistrationScreenDestination
-import com.tms.propertymanagement.ui.screens.appContentPages.ListingDetailsDestination
-import com.tms.propertymanagement.ui.screens.appContentPages.ListingDetailsScreen
-import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.PropertyUpdateScreen
-import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.PropertyUpdateScreenDestination
-import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.UserLivePropertyDetailsScreen
-import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.UserLivePropertyDetailsScreenDestination
+import com.propertymanagement.tms.ui.screens.SplashScreen
+import com.propertymanagement.tms.ui.screens.SplashScreenDestination
+import com.propertymanagement.tms.ui.screens.WelcomeScreen
+import com.propertymanagement.tms.ui.screens.WelcomeScreenDestination
+import com.propertymanagement.tms.ui.screens.accountManagement.LoginScreen
+import com.propertymanagement.tms.ui.screens.accountManagement.LoginScreenDestination
+import com.propertymanagement.tms.ui.screens.accountManagement.RegistrationScreen
+import com.propertymanagement.tms.ui.screens.accountManagement.RegistrationScreenDestination
+import com.propertymanagement.tms.ui.screens.appContentPages.ListingDetailsDestination
+import com.propertymanagement.tms.ui.screens.appContentPages.ListingDetailsScreen
+import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.PropertyUpdateScreen
+import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.PropertyUpdateScreenDestination
+import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.UserLivePropertyDetailsScreen
+import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.UserLivePropertyDetailsScreenDestination
+import com.tms.propertymanagement.ui.screens.accountManagement.ProfileUpdateScreen
+import com.tms.propertymanagement.ui.screens.accountManagement.ProfileUpdateScreenDestination
 import kotlin.reflect.typeOf
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -71,7 +73,7 @@ fun NavigationGraph(
                     navController.navigate("${LoginScreenDestination.route}/${phoneNumber}/${password}")
                 },
                 navigateToPreviousScreen = {
-                    navController.navigate(RegistrationScreenDestination.route)
+                    navController.navigateUp()
                 },
                 navigateToLoginScreenWithoutArguments = {
                     navController.popBackStack(RegistrationScreenDestination.route, true)
@@ -145,6 +147,13 @@ fun NavigationGraph(
                 navigateToLoginScreenWithoutArgs = {
                     navController.popBackStack(HomeScreenDestination.route, true)
                     navController.navigate(LoginScreenDestination.route)
+                },
+                navigateToRegistrationScreen = {
+                    navController.popBackStack(HomeScreenDestination.route, true)
+                    navController.navigate(RegistrationScreenDestination.route)
+                },
+                navigateToUpdateProfileScreen = {
+                    navController.navigate(ProfileUpdateScreenDestination.route)
                 }
             )
         }
@@ -223,6 +232,23 @@ fun NavigationGraph(
                 navigateToLoginScreenWithoutArgs = {
                     navController.popBackStack(HomeScreenDestination.routeWithArgs, true)
                     navController.navigate(LoginScreenDestination.route)
+                },
+                navigateToRegistrationScreen = {
+                    navController.popBackStack(HomeScreenDestination.route, true)
+                    navController.navigate(RegistrationScreenDestination.route)
+                },
+                navigateToUpdateProfileScreen = {
+                    navController.navigate(ProfileUpdateScreenDestination.route)
+                }
+            )
+        }
+        composable(ProfileUpdateScreenDestination.route) {
+            ProfileUpdateScreen(
+                navigateToHomeScreenWithArgs = {
+                    navController.navigate("${HomeScreenDestination.route}/${it}")
+                },
+                navigateToPreviousScreen = {
+                    navController.navigateUp()
                 }
             )
         }

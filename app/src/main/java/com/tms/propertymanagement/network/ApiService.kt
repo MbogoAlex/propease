@@ -1,14 +1,16 @@
-package com.tms.propertymanagement.network
+package com.propertymanagement.tms.network
 
-import com.tms.propertymanagement.apiModel.CategoryResponseBody
-import com.tms.propertymanagement.apiModel.PropertyResponseBody
-import com.tms.propertymanagement.apiModel.PropertyUploadRequestBody
-import com.tms.propertymanagement.apiModel.PropertyUploadResponseBody
-import com.tms.propertymanagement.apiModel.SpecificPropertyResponseBody
-import com.tms.propertymanagement.apiModel.UserLoginRequestBody
-import com.tms.propertymanagement.apiModel.UserLoginResponseBody
-import com.tms.propertymanagement.apiModel.UserRegistrationRequestBody
-import com.tms.propertymanagement.apiModel.UserRegistrationResponseBody
+import com.propertymanagement.tms.apiModel.CategoryResponseBody
+import com.propertymanagement.tms.apiModel.ProfileUpdateRequestBody
+import com.propertymanagement.tms.apiModel.ProfileUpdateResponseBody
+import com.propertymanagement.tms.apiModel.PropertyResponseBody
+import com.propertymanagement.tms.apiModel.PropertyUploadRequestBody
+import com.propertymanagement.tms.apiModel.PropertyUploadResponseBody
+import com.propertymanagement.tms.apiModel.SpecificPropertyResponseBody
+import com.propertymanagement.tms.apiModel.UserLoginRequestBody
+import com.propertymanagement.tms.apiModel.UserLoginResponseBody
+import com.propertymanagement.tms.apiModel.UserRegistrationRequestBody
+import com.propertymanagement.tms.apiModel.UserRegistrationResponseBody
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -106,4 +108,12 @@ interface ApiService {
         @Body property: PropertyUploadRequestBody,
         @Path("propertyId") propertyId: String
     ): Response<PropertyUploadResponseBody>
+
+    // update user profile
+    @PUT("api/profile/userId={userId}/update")
+    suspend fun updateUserProfile(
+        @Header("Authorization") token: String,
+        @Path("userId") userId: String,
+        @Body profileDetails: ProfileUpdateRequestBody
+    ): Response<ProfileUpdateResponseBody>
 }

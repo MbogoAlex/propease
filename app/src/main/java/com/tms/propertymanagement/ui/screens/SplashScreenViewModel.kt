@@ -1,11 +1,11 @@
-package com.tms.propertymanagement.ui.screens
+package com.propertymanagement.tms.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tms.propertymanagement.propEaseDataStore.DSRepository
-import com.tms.propertymanagement.propEaseDataStore.DSUserModel
-import com.tms.propertymanagement.utils.ReusableFunctions
-import com.tms.propertymanagement.utils.ReusableFunctions.toLoggedInUserData
+import com.propertymanagement.tms.propEaseDataStore.DSRepository
+import com.propertymanagement.tms.propEaseDataStore.DSUserModel
+import com.propertymanagement.tms.utils.ReusableFunctions
+import com.propertymanagement.tms.utils.ReusableFunctions.toLoggedInUserData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

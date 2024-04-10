@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.ui.screens.accountManagement
+package com.propertymanagement.tms.ui.screens.accountManagement
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
@@ -19,11 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,7 +27,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -42,11 +37,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.tms.propertymanagement.PropEaseViewModelFactory
-import com.tms.propertymanagement.R
-import com.tms.propertymanagement.nav.NavigationDestination
-import com.tms.propertymanagement.ui.theme.PropEaseTheme
-import com.tms.propertymanagement.utils.ReusableFunctions
+import com.propertymanagement.tms.PropEaseViewModelFactory
+import com.propertymanagement.tms.R
+import com.propertymanagement.tms.nav.NavigationDestination
+import com.propertymanagement.tms.ui.theme.PropEaseTheme
+import com.propertymanagement.tms.utils.ReusableFunctions
 
 object RegistrationScreenDestination: NavigationDestination {
     override val title: String = "Registration Screen"

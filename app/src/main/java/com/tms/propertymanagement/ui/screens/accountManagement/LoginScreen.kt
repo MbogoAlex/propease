@@ -1,8 +1,8 @@
-package com.tms.propertymanagement.ui.screens.accountManagement
+package com.propertymanagement.tms.ui.screens.accountManagement
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,10 +37,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.tms.propertymanagement.PropEaseViewModelFactory
-import com.tms.propertymanagement.R
-import com.tms.propertymanagement.nav.NavigationDestination
-import com.tms.propertymanagement.ui.theme.PropEaseTheme
+import com.propertymanagement.tms.PropEaseViewModelFactory
+import com.propertymanagement.tms.R
+import com.propertymanagement.tms.nav.NavigationDestination
+import com.propertymanagement.tms.ui.theme.PropEaseTheme
+import kotlin.math.log
+
 
 object LoginScreenDestination: NavigationDestination {
     override val title: String = "Login Screen"
@@ -70,6 +72,45 @@ fun LoginScreen(
         viewModel.resetLoginStatus()
     }
 
+    Box(
+        modifier = modifier
+    ) {
+        LoginScreenBody(
+            navigateToPreviousScreen = { navigateToPreviousScreen() },
+            phoneNumber = uiState.loginDetails.phoneNumber,
+            onUpdatePhoneNumber = {
+                viewModel.updatePhoneNumber(it)
+            },
+            password = uiState.loginDetails.password,
+            onUpdatePassword = {
+                viewModel.updatePassword(it)
+            },
+            loginButtonEnabled = uiState.loginButtonEnabled,
+            loginUser = {
+                viewModel.loginUser()
+            },
+            loginStatus = uiState.loginStatus,
+            navigateToRegistrationScreen = {
+                navigateToRegistrationScreen()
+            }
+        )
+    }
+
+}
+
+@Composable
+fun LoginScreenBody(
+    navigateToPreviousScreen: () -> Unit,
+    phoneNumber: String,
+    onUpdatePhoneNumber: (phoneNumber: String) -> Unit,
+    password: String,
+    onUpdatePassword: (password: String) -> Unit,
+    loginButtonEnabled: Boolean,
+    loginUser: () -> Unit,
+    loginStatus: LoginStatus,
+    navigateToRegistrationScreen: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -99,14 +140,12 @@ fun LoginScreen(
         LoginInputForm(
             leadingIcon = painterResource(id = R.drawable.phone),
             labelText = "Phone number",
-            value = uiState.loginDetails.phoneNumber,
+            value = phoneNumber,
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Next,
                 keyboardType = KeyboardType.Phone
             ),
-            onValueChanged = {
-                             viewModel.updatePhoneNumber(it)
-            },
+            onValueChanged = onUpdatePhoneNumber,
             modifier = Modifier
                 .fillMaxWidth()
         )
@@ -114,27 +153,23 @@ fun LoginScreen(
         LoginInputForm(
             leadingIcon = painterResource(id = R.drawable.password),
             labelText = "Password",
-            value = uiState.loginDetails.password,
+            value = password,
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Done,
                 keyboardType = KeyboardType.Password
             ),
-            onValueChanged = {
-                             viewModel.updatePassword(it)
-            },
+            onValueChanged = onUpdatePassword,
             modifier = Modifier
                 .fillMaxWidth()
         )
         Spacer(modifier = Modifier.weight(1f))
         Button(
-            enabled = uiState.loginButtonEnabled,
-            onClick = {
-                viewModel.loginUser()
-            },
+            enabled = loginButtonEnabled,
+            onClick = loginUser,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            if(uiState.loginStatus == LoginStatus.LOADING) {
+            if(loginStatus == LoginStatus.LOADING) {
                 CircularProgressIndicator()
             }
             else {
@@ -185,10 +220,15 @@ fun LoginInputForm(
 @Composable
 fun LoginScreenPreview() {
     PropEaseTheme {
-        LoginScreen(
-            navigateToPreviousScreen = {},
-            navigateToRegistrationScreen = {},
-            navigateToHomeScreen = {}
-        )
+        LoginScreenBody(
+            navigateToPreviousScreen = { /*TODO*/ },
+            phoneNumber = "",
+            onUpdatePhoneNumber = {},
+            password = "",
+            onUpdatePassword = {},
+            loginButtonEnabled = false,
+            loginUser = { /*TODO*/ },
+            loginStatus = LoginStatus.INITIAL,
+            navigateToRegistrationScreen = { /*TODO*/ })
     }
 }

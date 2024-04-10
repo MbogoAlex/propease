@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.nav
+package com.propertymanagement.tms.nav
 
 interface NavigationDestination {
     val title: String

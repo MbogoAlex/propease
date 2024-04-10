@@ -1,8 +1,7 @@
 import android.os.Build
-import androidx.activity.compose.BackHandler
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,9 +25,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,21 +37,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.tms.propertymanagement.PropEaseViewModelFactory
-import com.tms.propertymanagement.R
-import com.tms.propertymanagement.nav.NavigationDestination
+import com.propertymanagement.tms.PropEaseViewModelFactory
+import com.propertymanagement.tms.R
+import com.propertymanagement.tms.nav.NavigationDestination
+import com.propertymanagement.tms.ui.screens.accountManagement.LoginScreen
+import com.tms.propertymanagement.ui.screens.accountManagement.ProfileScreen
 import com.tms.propertymanagement.ui.screens.appContentPages.HomeScreenViewModel
-import com.tms.propertymanagement.ui.screens.appContentPages.ListingsScreen
-import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.PropertyUploadScreen
-import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.UserLiveProperties
+import com.propertymanagement.tms.ui.screens.appContentPages.ListingsScreen
+import com.propertymanagement.tms.ui.screens.dummy.NotificationsScreen
+import com.propertymanagement.tms.ui.screens.dummy.UnitsScreen
+import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.UserLiveProperties
+import com.tms.propertymanagement.ui.screens.appContentPages.MainMenuItem
+import com.tms.propertymanagement.ui.screens.appContentPages.MainNavigationPages
 import kotlinx.coroutines.launch
-import kotlin.system.exitProcess
 
 object HomeScreenDestination: NavigationDestination {
     override val title: String = "Home Screen"
@@ -61,18 +64,7 @@ object HomeScreenDestination: NavigationDestination {
     val routeWithArgs: String = "$route/{$childScreen}"
 
 }
-enum class MainNavigationPages {
-    LISTINGS_SCREEN,
-    MY_UNITS_SCREEN,
-    ADVERTISE_SCREEN,
-    NOTIFICATIONS_SCREEN,
-    PROFILE_SCREEN
-}
-data class MainMenuItem (
-    val label: String,
-    val icon: Painter,
-    val mainNavigationPage: MainNavigationPages
-)
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen(
@@ -81,8 +73,11 @@ fun HomeScreen(
     navigateToHomeScreen: () -> Unit,
     navigateToHomeScreenWithArguments: (childScreen: String) -> Unit,
     navigateToLoginScreenWithoutArgs: () -> Unit,
+    navigateToRegistrationScreen: () -> Unit,
+    navigateToUpdateProfileScreen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val viewModel: HomeScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
     var currentScreen by rememberSaveable {
@@ -91,7 +86,10 @@ fun HomeScreen(
     var screenLabel by rememberSaveable {
         mutableStateOf("Listings")
     }
-    var mainMenuItems = listOf<MainMenuItem>(
+
+
+
+    var loggedInMenuItems = listOf<MainMenuItem>(
         MainMenuItem(
             label = "Listings",
             icon = painterResource(id = R.drawable.house),
@@ -117,15 +115,93 @@ fun HomeScreen(
             icon = painterResource(id = R.drawable.person),
             mainNavigationPage = MainNavigationPages.PROFILE_SCREEN
         ),
+        MainMenuItem(
+            label = "Log out",
+            icon = painterResource(id = R.drawable.logout),
+            mainNavigationPage = MainNavigationPages.LOG_OUT_SCREEN
+        ),
     )
+
+    var loggedOutMenuItems = listOf<MainMenuItem>(
+        MainMenuItem(
+            label = "Listings",
+            icon = painterResource(id = R.drawable.house),
+            mainNavigationPage = MainNavigationPages.LISTINGS_SCREEN
+        ),
+        MainMenuItem(
+            label = "My Units",
+            icon = painterResource(id = R.drawable.house),
+            mainNavigationPage = MainNavigationPages.MY_UNITS_SCREEN
+        ),
+        MainMenuItem(
+            label = "Advertise",
+            icon = painterResource(id = R.drawable.advertise),
+            mainNavigationPage = MainNavigationPages.ADVERTISE_SCREEN
+        ),
+        MainMenuItem(
+            label = "Notifications",
+            icon = painterResource(id = R.drawable.notifications),
+            mainNavigationPage = MainNavigationPages.NOTIFICATIONS_SCREEN
+        ),
+        MainMenuItem(
+            label = "Sign in",
+            icon = painterResource(id = R.drawable.login),
+            mainNavigationPage = MainNavigationPages.SIGN_UP_SCREEN
+        ),
+    )
+
+    if(uiState.userDetails.userId == 0 || uiState.userDetails.userId == null) {
+        viewModel.initializeMenuList(loggedOutMenuItems)
+    } else {
+        viewModel.initializeMenuList(loggedInMenuItems)
+    }
+
+    var showLogoutDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+
 
     if(uiState.childScreen == "advertisement-screen") {
         currentScreen = MainNavigationPages.ADVERTISE_SCREEN
         viewModel.resetChildScreen()
-    } 
+    } else if(uiState.childScreen == "profile-screen") {
+        currentScreen = MainNavigationPages.PROFILE_SCREEN
+        viewModel.resetChildScreen()
+    } else if(uiState.childScreen == "logged-out") {
+        viewModel.initializeMenuList(loggedOutMenuItems)
+    }
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    if(showLogoutDialog) {
+        AlertDialog(
+            title = {
+                Text(text = "Logout confirmation")
+            },
+            text = {
+                Text(text = "Are you sure you want to log out?")
+            },
+            onDismissRequest = {
+                showLogoutDialog = !showLogoutDialog
+            },
+            confirmButton = {
+                Button(onClick = {
+                    viewModel.logout()
+                    Toast.makeText(context, "You are logged out", Toast.LENGTH_SHORT).show()
+                    navigateToHomeScreenWithArguments("logged-out")
+                }) {
+                    Text(text = "Log out")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = !showLogoutDialog }) {
+                    Text(text = "Dismiss")
+                }
+            }
+        )
+    }
 
 
 
@@ -158,7 +234,7 @@ fun HomeScreen(
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 Divider()
-                for(menuItem in mainMenuItems) {
+                for(menuItem in uiState.mainMenuItems) {
                     NavigationDrawerItem(
                         modifier = Modifier
                             .padding(8.dp),
@@ -232,7 +308,12 @@ fun HomeScreen(
                         navigateToSpecificProperty = navigateToSpecificProperty
                     )
                 }
-                MainNavigationPages.MY_UNITS_SCREEN -> {}
+                MainNavigationPages.MY_UNITS_SCREEN -> {
+                    screenLabel = "My units"
+                    UnitsScreen(
+                        navigateToHomeScreen = navigateToHomeScreen
+                    )
+                }
 //                MainNavigationPages.ADVERTISE_SCREEN -> PropertyUploadScreen(
 //                    navigateToListingsScreen = {
 //                        navigateToHomeScreen()
@@ -250,8 +331,33 @@ fun HomeScreen(
 //                    navigateToUpdateProperty = { /*TODO*/ }
                     )
                 }
-                MainNavigationPages.NOTIFICATIONS_SCREEN -> {}
-                MainNavigationPages.PROFILE_SCREEN -> {}
+                MainNavigationPages.NOTIFICATIONS_SCREEN -> {
+                    screenLabel = "Notifications"
+                    NotificationsScreen(
+                        navigateToHomeScreen = navigateToHomeScreen
+                    )
+                }
+                MainNavigationPages.PROFILE_SCREEN -> {
+                    screenLabel = "User profile"
+                    ProfileScreen(
+                        navigateToHomeScreenWithArgs = navigateToHomeScreenWithArguments,
+                        navigateToLoginScreenWithoutArgs = navigateToLoginScreenWithoutArgs,
+                        navigateToHomeScreen = navigateToHomeScreen,
+                        navigateToUpdateProfileScreen = navigateToUpdateProfileScreen
+                    )
+                }
+                MainNavigationPages.SIGN_UP_SCREEN -> {
+                    LoginScreen(
+                        navigateToPreviousScreen = navigateToHomeScreen,
+                        navigateToRegistrationScreen = navigateToRegistrationScreen,
+                        navigateToHomeScreen = navigateToHomeScreen
+                    )
+                }
+                MainNavigationPages.LOG_OUT_SCREEN -> {
+                    showLogoutDialog = true
+                    currentScreen = MainNavigationPages.LISTINGS_SCREEN
+                    viewModel.initializeMenuList(loggedOutMenuItems)
+                }
             }
         }
     }
@@ -269,7 +375,9 @@ fun HomeScreenPreview() {
         navigateToHomeScreen = {},
         navigateToSpecificUserProperty = {},
         navigateToHomeScreenWithArguments = {},
-        navigateToLoginScreenWithoutArgs = {}
+        navigateToLoginScreenWithoutArgs = {},
+        navigateToRegistrationScreen = {},
+        navigateToUpdateProfileScreen = {}
     )
 }
 

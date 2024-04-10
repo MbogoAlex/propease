@@ -1,4 +1,4 @@
-package com.tms.propertymanagement
+package com.propertymanagement.tms
 
 import org.junit.Test
 

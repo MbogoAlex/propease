@@ -1,7 +1,6 @@
-package com.tms.propertymanagement.ui.screens
+package com.propertymanagement.tms.ui.screens
 
 import android.app.Activity
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -45,10 +44,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.tms.propertymanagement.PropEaseViewModelFactory
-import com.tms.propertymanagement.R
-import com.tms.propertymanagement.nav.NavigationDestination
-import com.tms.propertymanagement.ui.theme.PropEaseTheme
+import com.propertymanagement.tms.PropEaseViewModelFactory
+import com.propertymanagement.tms.R
+import com.propertymanagement.tms.nav.NavigationDestination
+import com.propertymanagement.tms.ui.theme.PropEaseTheme
+
+
 object WelcomeScreenDestination: NavigationDestination {
     override val title: String = "Welcome Screen"
     override val route: String = "welcome-screen"

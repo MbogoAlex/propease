@@ -1,9 +1,9 @@
-package com.tms.propertymanagement.container
+package com.propertymanagement.tms.container
 
 import android.content.Context
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.tms.propertymanagement.network.ApiService
-import com.tms.propertymanagement.network.NetworkApiRepository
+import com.propertymanagement.tms.network.ApiService
+import com.propertymanagement.tms.network.NetworkApiRepository
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit

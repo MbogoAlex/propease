@@ -1,6 +1,6 @@
-package com.tms.propertymanagement.utils
+package com.propertymanagement.tms.utils
 
-import com.tms.propertymanagement.propEaseDataStore.DSUserModel
+import com.propertymanagement.tms.propEaseDataStore.DSUserModel
 import java.text.NumberFormat
 import java.util.Locale
 

@@ -1,21 +1,23 @@
-package com.tms.propertymanagement
+package com.propertymanagement.tms
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.tms.propertymanagement.ui.screens.SplashScreenViewModel
-import com.tms.propertymanagement.ui.screens.WelcomeScreenViewModel
-import com.tms.propertymanagement.ui.screens.accountManagement.LoginScreenViewModel
-import com.tms.propertymanagement.ui.screens.accountManagement.RegistrationScreenViewModel
+import com.propertymanagement.tms.ui.screens.SplashScreenViewModel
+import com.propertymanagement.tms.ui.screens.WelcomeScreenViewModel
+import com.propertymanagement.tms.ui.screens.accountManagement.LoginScreenViewModel
+import com.propertymanagement.tms.ui.screens.accountManagement.ProfileScreenViewModel
+import com.propertymanagement.tms.ui.screens.accountManagement.RegistrationScreenViewModel
 import com.tms.propertymanagement.ui.screens.appContentPages.HomeScreenViewModel
-import com.tms.propertymanagement.ui.screens.appContentPages.ListingDetailsScreenViewModel
-import com.tms.propertymanagement.ui.screens.appContentPages.ListingsScreenViewModel
-import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.PropertyUpdateScreenViewModel
-import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.PropertyUploadScreenViewModel
-import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.UserLivePropertiesScreenViewModel
-import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.UserLivePropertyDetailsScreenViewModel
+import com.propertymanagement.tms.ui.screens.appContentPages.ListingDetailsScreenViewModel
+import com.propertymanagement.tms.ui.screens.appContentPages.ListingsScreenViewModel
+import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.PropertyUpdateScreenViewModel
+import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.PropertyUploadScreenViewModel
+import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.UserLivePropertiesScreenViewModel
+import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.UserLivePropertyDetailsScreenViewModel
+import com.tms.propertymanagement.ui.screens.accountManagement.ProfileUpdateScreenViewModel
 
 object PropEaseViewModelFactory {
     val Factory = viewModelFactory {
@@ -133,6 +135,26 @@ object PropEaseViewModelFactory {
                 apiRepository = apiRepository,
                 dsRepository = dsRepository,
                 savedStateHandle = savedStateHandle
+            )
+        }
+
+        // initialize ProfileScreen ViewModel
+        initializer {
+            val apiRepository = propEaseApplication().container.apiRepository
+            val dsRepository = propEaseApplication().dsRepository
+            ProfileScreenViewModel(
+                apiRepository = apiRepository,
+                dsRepository = dsRepository
+            )
+        }
+
+        // initialize ProfileUpdateScreen viewModel
+        initializer {
+            val apiRepository = propEaseApplication().container.apiRepository
+            val dsRepository = propEaseApplication().dsRepository
+            ProfileUpdateScreenViewModel(
+                apiRepository = apiRepository,
+                dsRepository = dsRepository
             )
         }
     }

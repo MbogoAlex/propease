@@ -1,13 +1,13 @@
-package com.tms.propertymanagement
+package com.propertymanagement.tms
 
 import android.app.Application
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
-import com.tms.propertymanagement.container.AppContainer
-import com.tms.propertymanagement.container.PropEaseMainContainer
-import com.tms.propertymanagement.propEaseDataStore.DSRepository
+import com.propertymanagement.tms.container.AppContainer
+import com.propertymanagement.tms.container.PropEaseMainContainer
+import com.propertymanagement.tms.propEaseDataStore.DSRepository
 
 private const val DS_NAME = "PROP_EASE_DS"
 private val Context.datastore: DataStore<Preferences> by preferencesDataStore(

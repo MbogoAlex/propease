@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.ui.screens.propertyAdvertisementPages
+package com.propertymanagement.tms.ui.screens.propertyAdvertisementPages
 
 import android.net.Uri
 import android.os.Build
@@ -67,10 +67,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberImagePainter
-import com.tms.propertymanagement.PropEaseViewModelFactory
-import com.tms.propertymanagement.R
-import com.tms.propertymanagement.nav.NavigationDestination
-import com.tms.propertymanagement.ui.theme.PropEaseTheme
+import com.propertymanagement.tms.PropEaseViewModelFactory
+import com.propertymanagement.tms.R
+import com.propertymanagement.tms.nav.NavigationDestination
+import com.propertymanagement.tms.ui.theme.PropEaseTheme
 
 object PropertyUpdateScreenDestination: NavigationDestination {
     override val title: String = "Property Update Screen"

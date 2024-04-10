@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.apiModel
+package com.propertymanagement.tms.apiModel
 
 import kotlinx.serialization.Serializable
 

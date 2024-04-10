@@ -1,14 +1,16 @@
-package com.tms.propertymanagement.network
+package com.propertymanagement.tms.network
 
-import com.tms.propertymanagement.apiModel.CategoryResponseBody
-import com.tms.propertymanagement.apiModel.PropertyResponseBody
-import com.tms.propertymanagement.apiModel.PropertyUploadRequestBody
-import com.tms.propertymanagement.apiModel.PropertyUploadResponseBody
-import com.tms.propertymanagement.apiModel.SpecificPropertyResponseBody
-import com.tms.propertymanagement.apiModel.UserLoginRequestBody
-import com.tms.propertymanagement.apiModel.UserLoginResponseBody
-import com.tms.propertymanagement.apiModel.UserRegistrationRequestBody
-import com.tms.propertymanagement.apiModel.UserRegistrationResponseBody
+import com.propertymanagement.tms.apiModel.CategoryResponseBody
+import com.propertymanagement.tms.apiModel.ProfileUpdateRequestBody
+import com.propertymanagement.tms.apiModel.ProfileUpdateResponseBody
+import com.propertymanagement.tms.apiModel.PropertyResponseBody
+import com.propertymanagement.tms.apiModel.PropertyUploadRequestBody
+import com.propertymanagement.tms.apiModel.PropertyUploadResponseBody
+import com.propertymanagement.tms.apiModel.SpecificPropertyResponseBody
+import com.propertymanagement.tms.apiModel.UserLoginRequestBody
+import com.propertymanagement.tms.apiModel.UserLoginResponseBody
+import com.propertymanagement.tms.apiModel.UserRegistrationRequestBody
+import com.propertymanagement.tms.apiModel.UserRegistrationResponseBody
 import okhttp3.MultipartBody
 import retrofit2.Response
 
@@ -45,6 +47,12 @@ interface ApiRepository {
     suspend fun deletePropertyImage(token: String, propertyId: String, imageId: String): Response<PropertyUploadResponseBody>
 
     suspend fun updateProperty(token: String, property: PropertyUploadRequestBody, propertyId: String): Response<PropertyUploadResponseBody>
+
+    suspend fun updateUserProfile(
+        token: String,
+        userId: String,
+        profileDetails: ProfileUpdateRequestBody
+    ): Response<ProfileUpdateResponseBody>
 }
 
 class NetworkApiRepository(private val apiService: ApiService): ApiRepository {
@@ -121,6 +129,16 @@ class NetworkApiRepository(private val apiService: ApiService): ApiRepository {
         token = "Bearer $token",
         property = property,
         propertyId = propertyId
+    )
+
+    override suspend fun updateUserProfile(
+        token: String,
+        userId: String,
+        profileDetails: ProfileUpdateRequestBody
+    ): Response<ProfileUpdateResponseBody> = apiService.updateUserProfile(
+        token = "Bearer $token",
+        userId = userId,
+        profileDetails = profileDetails
     )
 
 }

@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.propEaseDataStore
+package com.propertymanagement.tms.propEaseDataStore
 
 data class DSUserModel(
     val userId: Int?,

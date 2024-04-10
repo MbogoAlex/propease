@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.ui.screens.propertyAdvertisementPages
+package com.propertymanagement.tms.ui.screens.propertyAdvertisementPages
 
 import android.content.Intent
 import android.net.Uri
@@ -54,8 +54,8 @@ import coil.request.ImageRequest
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import com.tms.propertymanagement.R
-import com.tms.propertymanagement.utils.ReusableFunctions
+import com.propertymanagement.tms.R
+import com.propertymanagement.tms.utils.ReusableFunctions
 import java.time.LocalDate
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -254,7 +254,7 @@ fun ListingTextDetails(
         Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = uiState.title,
-            fontSize = 22.sp,
+            fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -285,7 +285,7 @@ fun ListingTextDetails(
         ) {
             Text(
                 text = uiState.description,
-                fontSize = 16.sp
+                fontSize = 14.sp
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
@@ -297,7 +297,7 @@ fun ListingTextDetails(
             Text(
                 text = ReusableFunctions.formatMoneyValue(uiState.price.toDouble()),
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                fontSize = 16.sp
             )
             Text(
                 text = "/month"
@@ -315,7 +315,7 @@ fun ListingTextDetails(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .clip(CircleShape)
-                    .size(70.dp)
+                    .size(60.dp)
             )
             Spacer(modifier = Modifier.width(20.dp))
             Column(

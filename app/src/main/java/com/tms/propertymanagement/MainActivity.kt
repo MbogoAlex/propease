@@ -1,4 +1,4 @@
-package com.tms.propertymanagement
+package com.propertymanagement.tms
 
 import HomeScreen
 import android.os.Build
@@ -13,10 +13,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.tms.propertymanagement.ui.screens.accountManagement.LoginScreen
-import com.tms.propertymanagement.ui.screens.accountManagement.RegistrationScreen
-import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.PropertyUploadScreen
-import com.tms.propertymanagement.ui.theme.PropEaseTheme
+import com.propertymanagement.tms.ui.screens.accountManagement.LoginScreen
+import com.propertymanagement.tms.ui.screens.accountManagement.RegistrationScreen
+import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.PropertyUploadScreen
+import com.propertymanagement.tms.ui.theme.PropEaseTheme
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)

@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.tms.propertymanagement"
+    namespace = "com.propertymanagement.tms"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.tms.propertymanagement"
+        applicationId = "com.propertymanagement.tms"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

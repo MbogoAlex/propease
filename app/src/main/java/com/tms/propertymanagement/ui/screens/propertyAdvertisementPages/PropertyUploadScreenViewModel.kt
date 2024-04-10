@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.ui.screens.propertyAdvertisementPages
+package com.propertymanagement.tms.ui.screens.propertyAdvertisementPages
 
 import android.content.Context
 import android.net.Uri
@@ -9,14 +9,14 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tms.propertymanagement.apiModel.Category
-import com.tms.propertymanagement.apiModel.PropertyLocation
-import com.tms.propertymanagement.apiModel.PropertyUploadRequestBody
-import com.tms.propertymanagement.network.ApiRepository
-import com.tms.propertymanagement.propEaseDataStore.DSRepository
-import com.tms.propertymanagement.ui.screens.appContentPages.FetchingStatus
-import com.tms.propertymanagement.utils.ReusableFunctions
-import com.tms.propertymanagement.utils.ReusableFunctions.toLoggedInUserData
+import com.propertymanagement.tms.apiModel.Category
+import com.propertymanagement.tms.apiModel.PropertyLocation
+import com.propertymanagement.tms.apiModel.PropertyUploadRequestBody
+import com.propertymanagement.tms.network.ApiRepository
+import com.propertymanagement.tms.propEaseDataStore.DSRepository
+import com.propertymanagement.tms.ui.screens.appContentPages.FetchingStatus
+import com.propertymanagement.tms.utils.ReusableFunctions
+import com.propertymanagement.tms.utils.ReusableFunctions.toLoggedInUserData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

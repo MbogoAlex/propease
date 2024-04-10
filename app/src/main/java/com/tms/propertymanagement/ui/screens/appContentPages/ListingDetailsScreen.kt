@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.ui.screens.appContentPages
+package com.propertymanagement.tms.ui.screens.appContentPages
 
 import android.content.Intent
 import android.net.Uri
@@ -51,11 +51,11 @@ import coil.request.ImageRequest
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import com.tms.propertymanagement.PropEaseViewModelFactory
-import com.tms.propertymanagement.R
-import com.tms.propertymanagement.nav.NavigationDestination
-import com.tms.propertymanagement.ui.theme.PropEaseTheme
-import com.tms.propertymanagement.utils.ReusableFunctions
+import com.propertymanagement.tms.PropEaseViewModelFactory
+import com.propertymanagement.tms.R
+import com.propertymanagement.tms.nav.NavigationDestination
+import com.propertymanagement.tms.ui.theme.PropEaseTheme
+import com.propertymanagement.tms.utils.ReusableFunctions
 
 object ListingDetailsDestination: NavigationDestination {
     override val title: String = "Listing Details Screen"
@@ -206,7 +206,7 @@ fun ListingTextDetails(
         Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = uiState.property.title,
-            fontSize = 22.sp,
+            fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -237,7 +237,7 @@ fun ListingTextDetails(
         ) {
             Text(
                 text = uiState.property.description,
-                fontSize = 16.sp
+                fontSize = 14.sp
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
@@ -249,7 +249,7 @@ fun ListingTextDetails(
             Text(
                 text = ReusableFunctions.formatMoneyValue(uiState.property.price),
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                fontSize = 16.sp
             )
             Text(
                 text = "/month"
@@ -268,7 +268,7 @@ fun ListingTextDetails(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .clip(CircleShape)
-                        .size(70.dp)
+                        .size(60.dp)
                 )
             } else {
                 AsyncImage(
@@ -282,7 +282,7 @@ fun ListingTextDetails(
                     contentDescription = uiState.property.title,
                     modifier = Modifier
                         .clip(CircleShape)
-                        .size(70.dp)
+                        .size(60.dp)
                 )
             }
             Spacer(modifier = Modifier.width(20.dp))

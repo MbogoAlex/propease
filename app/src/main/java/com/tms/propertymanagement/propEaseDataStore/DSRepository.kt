@@ -1,4 +1,4 @@
-package com.tms.propertymanagement.propEaseDataStore
+package com.propertymanagement.tms.propEaseDataStore
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -21,6 +21,7 @@ class DSRepository(
         private val EMAIL = stringPreferencesKey("email")
         private val PASSWORD = stringPreferencesKey("password")
         private val TOKEN = stringPreferencesKey("token")
+        private val PROFILE_PICTURE = stringPreferencesKey("profilePic")
     }
 
     suspend fun saveUserData(dsUserModel: DSUserModel) {
@@ -33,6 +34,24 @@ class DSRepository(
             preferences[TOKEN] = dsUserModel.token
         }
     }
+
+    suspend fun saveUserProfilePicture(userProfilePicture: String?) {
+        dataStore.edit { preferences ->
+            preferences[PROFILE_PICTURE] = userProfilePicture!!
+        }
+    }
+
+    val userProfilePicture: Flow<String?> = dataStore.data
+        .catch {
+            if(it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map {
+            it[PROFILE_PICTURE] ?: null
+        }
 
     val dsUserModel: Flow<DSUserModel> = dataStore.data
         .catch {
@@ -52,6 +71,12 @@ class DSRepository(
                 token = it[TOKEN] ?: ""
             )
         }
+
+    suspend fun deletePreferences() {
+        dataStore.edit {
+            it.clear()
+        }
+    }
 
     fun Preferences.toDsUserModel(
         userId: Int?,
