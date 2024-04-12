@@ -142,6 +142,7 @@ fun PropertyUploadScreen(
                 ),
                 shape = RoundedCornerShape(0.dp),
                 onClick = {
+                    viewModel.checkIfAllFieldsAreFilled()
                           showPreviewScreen = true
                 },
                 modifier = Modifier
@@ -295,19 +296,18 @@ fun ImagesSelection(
     uiState: PropertyUploadScreenUiState,
     modifier: Modifier = Modifier
 ) {
-//    val context = LocalContext.current
-//    var imageUrl by remember {
-//        mutableStateOf<Uri?>(null)
-//    }
-
     val images = remember { mutableStateListOf<Uri>() }
 
     val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = {uri ->
-//            imageUrl = uri
-            images.add(uri!!)
-            viewModel.uploadPhoto(uri)
+        contract = ActivityResultContracts.GetMultipleContents(),
+        onResult = {uriList ->
+            if(uriList.isNotEmpty()) {
+                for(uri in uriList) {
+                    images.add(uri)
+                    viewModel.uploadPhoto(uri)
+                }
+            }
+
         }
     )
 
@@ -318,22 +318,18 @@ fun ImagesSelection(
         ) {
             uiState.images.forEachIndexed { index, uri ->
                 Row {
-                    Card(
+                    Image(
+                        rememberImagePainter(data = uri),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
                         modifier = Modifier
-                    ) {
-                        Image(
-                            rememberImagePainter(data = uri),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .padding(
-                                    top = 5.dp,
-                                    end = 3.dp,
-                                    bottom = 5.dp
-                                )
-                                .size(100.dp)
-                        )
-                    }
+                            .padding(
+                                top = 5.dp,
+                                end = 3.dp,
+                                bottom = 5.dp
+                            )
+                            .size(100.dp)
+                    )
                     IconButton(onClick = {
                         viewModel.removePhoto(index)
                     }) {

@@ -66,7 +66,7 @@ class ListingsScreenViewModel(
                     _uiState.update {
                         it.copy(
                             categories = response.body()?.data?.categories!!,
-                            categoryNameSelected = response.body()?.data?.categories!![0].name,
+//                            categoryNameSelected = response.body()?.data?.categories!![0].name,
                             fetchingStatus = FetchingStatus.SUCCESS
                         )
                     }

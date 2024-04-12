@@ -61,6 +61,9 @@ data class PropertyUploadScreenUiState(
     val userDetails: ReusableFunctions.LoggedInUserData = ReusableFunctions.LoggedInUserData(),
     val uploadingStatus: UploadingStatus = UploadingStatus.INITIAL,
     val fetchingCategoriesStatus: FetchingCategoriesStatus = FetchingCategoriesStatus.INITIAL,
+    val uploadingPropertyResponse: String = "",
+    val roomsSelected: Boolean = false,
+    val categorySelected: Boolean = false,
     val saveButtonEnabled: Boolean = false
 )
 
@@ -90,6 +93,7 @@ class PropertyUploadScreenViewModel(
         _uiState.update {
             it.copy(
                 numberOfRooms = numberOfRooms,
+                roomsSelected = true,
                 saveButtonEnabled = requiredFieldsFilled()
             )
         }
@@ -99,6 +103,7 @@ class PropertyUploadScreenViewModel(
         _uiState.update {
             it.copy(
                 category = category,
+                categorySelected = true,
                 saveButtonEnabled = requiredFieldsFilled()
             )
         }
@@ -219,7 +224,7 @@ class PropertyUploadScreenViewModel(
                 } else {
                     _uiState.update {
                         it.copy(
-                            fetchingCategoriesStatus = FetchingCategoriesStatus.FAILURE
+                            fetchingCategoriesStatus = FetchingCategoriesStatus.FAILURE,
                         )
                     }
                     Log.e("CATEGORIES_NOT_FETCHED", response.body().toString())
@@ -295,14 +300,16 @@ class PropertyUploadScreenViewModel(
                 if(response.isSuccessful) {
                     _uiState.update {
                         it.copy(
-                            uploadingStatus = UploadingStatus.SUCCESS
+                            uploadingStatus = UploadingStatus.SUCCESS,
+                            uploadingPropertyResponse = "Property uploaded successfully",
                         )
                     }
                     Log.i("PROPERTY_UPLOADED", "Property: $property")
                 } else {
                     _uiState.update {
                         it.copy(
-                            uploadingStatus = UploadingStatus.FAILURE
+                            uploadingStatus = UploadingStatus.FAILURE,
+                            uploadingPropertyResponse = response.toString(),
                         )
                     }
                     Log.e("FAILED_TO_UPLOAD_PROPERTY", response.toString())
@@ -310,11 +317,20 @@ class PropertyUploadScreenViewModel(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        uploadingStatus = UploadingStatus.FAILURE
+                        uploadingStatus = UploadingStatus.FAILURE,
+                        uploadingPropertyResponse = e.toString(),
                     )
                 }
                 Log.e("FAILED_TO_UPLOAD_PROPERTY_EXCEPTION", e.message.toString())
             }
+        }
+    }
+
+    fun checkIfAllFieldsAreFilled() {
+        _uiState.update {
+            it.copy(
+                saveButtonEnabled = requiredFieldsFilled()
+            )
         }
     }
 
@@ -326,8 +342,8 @@ class PropertyUploadScreenViewModel(
                 _uiState.value.address.isNotEmpty() &&
                 _uiState.value.features.isNotEmpty() &&
                 _uiState.value.images.isNotEmpty() &&
-                _uiState.value.numberOfRooms  != 0 &&
-                _uiState.value.category.id != 0
+                _uiState.value.roomsSelected &&
+                _uiState.value.categorySelected
     }
 
     fun resetSavingState() {

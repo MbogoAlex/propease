@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -89,10 +90,42 @@ fun PropertyUpdateScreen(
     val viewModel: PropertyUpdateScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
 
+    var showDialog by remember {
+        mutableStateOf(false)
+    }
+
     if(uiState.uploadingStatus == UploadingStatus.SUCCESS) {
         Toast.makeText(context, "Property updated successfully", Toast.LENGTH_SHORT).show()
         navigateToHomeScreenWithArgs("advertisement-screen")
         viewModel.resetSavingState()
+    } else if(uiState.uploadingStatus == UploadingStatus.FAILURE) {
+        showDialog = !showDialog
+        viewModel.resetSavingState()
+    }
+
+    if(showDialog) {
+        AlertDialog(
+            title = {
+                Text(text = "Updating error")
+            },
+            text = {
+                Text(text = uiState.propertyUploadResponse)
+            },
+            onDismissRequest = {
+                showDialog = !showDialog
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog = !showDialog
+
+                    }
+                ) {
+                    Text(text = "Exit")
+                }
+            },
+
+            )
     }
 
     Column(
@@ -347,11 +380,15 @@ fun ImagesUpdateSelection(
     val images = remember { mutableStateListOf<Uri>() }
 
     val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = {uri ->
-            imageUrl = uri
-            viewModel.uploadPhoto(uri!!)
-            images.add(uri!!)
+        contract = ActivityResultContracts.GetMultipleContents(),
+        onResult = {uriList ->
+            if(uriList.isNotEmpty()) {
+                for(uri in uriList) {
+                    viewModel.uploadPhoto(uri!!)
+                    images.add(uri!!)
+                }
+            }
+
         }
     )
 

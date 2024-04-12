@@ -29,6 +29,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -38,6 +39,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -69,9 +74,38 @@ fun PropertyUploadPreviewScreen(
 ) {
     var context = LocalContext.current
 
+    var showDialog by remember {
+        mutableStateOf(false)
+    }
+
     BackHandler(
         onBack = navigateToPreviousScreen
     )
+
+    if(showDialog) {
+        AlertDialog(
+            title = {
+                Text(text = "Uploading error")
+            },
+            text = {
+                Text(text = uiState.uploadingPropertyResponse)
+            },
+            onDismissRequest = {
+                showDialog = !showDialog
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog = !showDialog
+
+                    }
+                ) {
+                    Text(text = "Exit")
+                }
+            },
+
+            )
+    }
 
     Column(
         modifier = Modifier
@@ -106,10 +140,14 @@ fun PropertyUploadPreviewScreen(
                 },
                 enabled = uiState.saveButtonEnabled,
                 modifier = Modifier
-                    .width(150.dp)
+                    .width(130.dp)
             ) {
                 if(uiState.uploadingStatus == UploadingStatus.LOADING) {
-                    CircularProgressIndicator(color = Color.White)
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier
+                            .size(20.dp)
+                    )
                 } else {
                     Text(text = "Publish")
                     Icon(
@@ -136,6 +174,9 @@ fun PropertyUploadPreviewScreen(
     if(uiState.uploadingStatus == UploadingStatus.SUCCESS) {
         Toast.makeText(context, "Your property is live", Toast.LENGTH_SHORT).show()
         navigateToHomeScreenWithArguments("advertisement-screen")
+        viewModel.resetSavingState()
+    } else if(uiState.uploadingStatus == UploadingStatus.FAILURE)  {
+        showDialog = !showDialog
         viewModel.resetSavingState()
     }
 }
@@ -219,6 +260,7 @@ fun ListingTextDetails(
                     Text(
                         text = uiState.category.name,
                         color = Color.White,
+                        fontSize = 14.sp,
                         modifier = Modifier
                             .padding(
                                 start = 10.dp,
@@ -240,13 +282,15 @@ fun ListingTextDetails(
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
                     text = "${uiState.numberOfRooms} room".takeIf { uiState.numberOfRooms == 1 }
-                        ?: "${uiState.numberOfRooms} rooms"
+                        ?: "${uiState.numberOfRooms} rooms",
+                    fontSize = 14.sp
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = "Posted on ${LocalDate.now()}",
-                fontWeight = FontWeight.Light
+                fontWeight = FontWeight.Light,
+                fontSize = 12.sp
             )
 
 
@@ -305,6 +349,7 @@ fun ListingTextDetails(
         }
         Spacer(modifier = Modifier.height(10.dp))
         Divider()
+        Spacer(modifier = Modifier.height(30.dp))
         Spacer(modifier = Modifier.weight(1f))
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -315,20 +360,23 @@ fun ListingTextDetails(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .clip(CircleShape)
-                    .size(60.dp)
+                    .size(50.dp)
             )
-            Spacer(modifier = Modifier.width(20.dp))
+            Spacer(modifier = Modifier.width(10.dp))
             Column(
             ) {
                 Text(
                     text = uiState.userDetails.userName,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
                 )
                 Text(
-                    text = "Owner"
+                    text = "Owner",
+                    fontSize = 13.sp
                 )
                 Text(
-                    text = uiState.userDetails.phoneNumber
+                    text = uiState.userDetails.phoneNumber,
+                    fontSize = 13.sp
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -350,7 +398,7 @@ fun ListingTextDetails(
                         painter = painterResource(id = R.drawable.phone),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(30.dp)
+                            .size(25.dp)
                     )
                 }
             }
@@ -373,7 +421,7 @@ fun ListingTextDetails(
                         painter = painterResource(id = R.drawable.message),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(30.dp)
+                            .size(25.dp)
                     )
                 }
             }

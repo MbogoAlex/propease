@@ -171,6 +171,7 @@ fun ListingTextDetails(
                 ) {
                     Text(
                         text = uiState.property.category,
+                        fontSize = 14.sp,
                         color = Color.White,
                         modifier = Modifier
                             .padding(
@@ -192,13 +193,15 @@ fun ListingTextDetails(
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    text = "${uiState.property.rooms} room".takeIf { it.length == 1 } ?: "${uiState.property.rooms} rooms"
+                    text = "${uiState.property.rooms} room".takeIf { it.length == 1 } ?: "${uiState.property.rooms} rooms",
+                    fontSize = 14.sp
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = "Posted on ${uiState.property.postedDate}",
-                fontWeight = FontWeight.Light
+                fontWeight = FontWeight.Light,
+                fontSize = 12.sp
             )
 
 
@@ -257,6 +260,7 @@ fun ListingTextDetails(
         }
         Spacer(modifier = Modifier.height(10.dp))
         Divider()
+        Spacer(modifier = Modifier.height(30.dp))
         Spacer(modifier = Modifier.weight(1f))
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -268,7 +272,7 @@ fun ListingTextDetails(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .clip(CircleShape)
-                        .size(60.dp)
+                        .size(50.dp)
                 )
             } else {
                 AsyncImage(
@@ -282,7 +286,7 @@ fun ListingTextDetails(
                     contentDescription = uiState.property.title,
                     modifier = Modifier
                         .clip(CircleShape)
-                        .size(60.dp)
+                        .size(50.dp)
                 )
             }
             Spacer(modifier = Modifier.width(20.dp))
@@ -290,13 +294,16 @@ fun ListingTextDetails(
             ) {
                 Text(
                     text = "${uiState.property.user.fname} ${uiState.property.user.lname}",
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
                 )
                 Text(
-                    text = "Owner"
+                    text = "Owner",
+                    fontSize = 13.sp
                 )
                 Text(
-                    text = uiState.property.user.phoneNumber
+                    text = uiState.property.user.phoneNumber,
+                    fontSize = 13.sp
                 )
             }
             Spacer(modifier = Modifier.weight(1f))

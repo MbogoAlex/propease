@@ -266,7 +266,7 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(10.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically

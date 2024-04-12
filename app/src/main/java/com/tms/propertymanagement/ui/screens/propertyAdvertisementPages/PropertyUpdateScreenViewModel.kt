@@ -99,7 +99,8 @@ data class PropertyUpdateScreenUiState(
     val property: PropertyData = updatePropertyData,
     val saveButtonEnabled: Boolean = false,
     val imageUpdateResponse: String = "",
-    val propertyTextUpdateResponse: String = ""
+    val propertyTextUpdateResponse: String = "",
+    val propertyUploadResponse: String = ""
 )
 class PropertyUpdateScreenViewModel(
     private val apiRepository: ApiRepository,
@@ -369,7 +370,7 @@ class PropertyUpdateScreenViewModel(
                         _uiState.update {
                             it.copy(
                                 uploadingStatus = UploadingStatus.SUCCESS,
-                                propertyTextUpdateResponse = "Property updated"
+                                propertyTextUpdateResponse = "Property updated",
                             )
                         }
                     }
@@ -380,7 +381,8 @@ class PropertyUpdateScreenViewModel(
                     _uiState.update {
                         it.copy(
                             uploadingStatus = UploadingStatus.FAILURE,
-                            propertyTextUpdateResponse = "Failed to update property"
+                            propertyTextUpdateResponse = "Failed to update property",
+                            propertyUploadResponse = response.toString()
                         )
                     }
                     Log.e("FAILED_TO_UPDATE_PROPERTY", "$response, TOKEN: ${_uiState.value.userDetails.token}, Property: $property")
@@ -389,7 +391,8 @@ class PropertyUpdateScreenViewModel(
                 _uiState.update {
                     it.copy(
                         uploadingStatus = UploadingStatus.FAILURE,
-                        propertyTextUpdateResponse = "Failed to update property"
+                        propertyTextUpdateResponse = "Failed to update property",
+                        propertyUploadResponse = e.toString()
                     )
                 }
                 Log.e("FAILED_TO_UPDATE_PROPERTY_EXCEPTION", e.message.toString())
@@ -439,7 +442,8 @@ class PropertyUpdateScreenViewModel(
                     _uiState.update {
                         it.copy(
                             uploadingStatus = UploadingStatus.FAILURE,
-                            propertyTextUpdateResponse = "Failed to upload images"
+                            propertyTextUpdateResponse = "Failed to upload images",
+                            propertyUploadResponse = response.toString(),
                         )
                     }
                     Log.e("IMAGE_UPDATE_FAILURE", response.toString())
@@ -448,7 +452,8 @@ class PropertyUpdateScreenViewModel(
                 _uiState.update {
                     it.copy(
                         uploadingStatus = UploadingStatus.FAILURE,
-                        propertyTextUpdateResponse = "Failed to upload images"
+                        propertyTextUpdateResponse = "Failed to upload images",
+                        propertyUploadResponse = e.toString()
                     )
                 }
                 Log.e("IMAGE_UPDATE_FAILURE_EXCEPTION", e.message.toString())
@@ -474,13 +479,19 @@ class PropertyUpdateScreenViewModel(
                     }
                     Log.i("IMAGE_DELETION", "SUCCESS")
                 } else {
-
+                    _uiState.update {
+                        it.copy(
+                            uploadingStatus = UploadingStatus.FAILURE,
+                            propertyUploadResponse = response.toString()
+                        )
+                    }
                     Log.e("IMAGE_DELETION_FAILURE", "$response, TOKEN: ${_uiState.value.userDetails.token}")
                 }
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        uploadingStatus = UploadingStatus.FAILURE
+                        uploadingStatus = UploadingStatus.FAILURE,
+                        propertyUploadResponse = e.toString()
                     )
                 }
                 Log.e("IMAGE_DELETION_FAILURE_EXCEPTION", e.message.toString())

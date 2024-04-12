@@ -196,6 +196,7 @@ fun UserPropertyListingTextDetails(
                     Text(
                         text = uiState.property.category,
                         color = Color.White,
+                        fontSize = 14.sp,
                         modifier = Modifier
                             .padding(
                                 start = 10.dp,
@@ -216,12 +217,14 @@ fun UserPropertyListingTextDetails(
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    text = "${uiState.property.rooms} room".takeIf { it.length == 1 } ?: "${uiState.property.rooms} rooms"
+                    text = "${uiState.property.rooms} room".takeIf { it.length == 1 } ?: "${uiState.property.rooms} rooms",
+                    fontSize = 14.sp
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = "Posted on ${uiState.property.postedDate}",
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Light
             )
 
@@ -281,6 +284,7 @@ fun UserPropertyListingTextDetails(
         }
         Spacer(modifier = Modifier.height(10.dp))
         Divider()
+        Spacer(modifier = Modifier.height(30.dp))
         Spacer(modifier = Modifier.weight(1f))
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -292,7 +296,7 @@ fun UserPropertyListingTextDetails(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .clip(CircleShape)
-                        .size(60.dp)
+                        .size(50.dp)
                 )
             } else {
                 AsyncImage(
@@ -306,21 +310,24 @@ fun UserPropertyListingTextDetails(
                     contentDescription = uiState.property.title,
                     modifier = Modifier
                         .clip(CircleShape)
-                        .size(60.dp)
+                        .size(50.dp)
                 )
             }
-            Spacer(modifier = Modifier.width(20.dp))
+            Spacer(modifier = Modifier.width(10.dp))
             Column(
             ) {
                 Text(
                     text = "${uiState.property.user.fname} ${uiState.property.user.lname}",
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
                 )
                 Text(
-                    text = "Owner"
+                    text = "Owner",
+                    fontSize = 13.sp
                 )
                 Text(
-                    text = uiState.property.user.phoneNumber
+                    text = uiState.property.user.phoneNumber,
+                    fontSize = 13.sp
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -342,7 +349,7 @@ fun UserPropertyListingTextDetails(
                         painter = painterResource(id = R.drawable.phone),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(30.dp)
+                            .size(25.dp)
                     )
                 }
             }
@@ -365,7 +372,7 @@ fun UserPropertyListingTextDetails(
                         painter = painterResource(id = R.drawable.message),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(30.dp)
+                            .size(25.dp)
                     )
                 }
             }

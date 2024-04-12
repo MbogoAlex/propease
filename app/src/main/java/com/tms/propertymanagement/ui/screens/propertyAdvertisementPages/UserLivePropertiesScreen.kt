@@ -1,6 +1,7 @@
 package com.propertymanagement.tms.ui.screens.propertyAdvertisementPages
 
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -109,7 +110,7 @@ fun UserLiveProperties(
             if(!uiState.showPropertyUploadScreen) {
                 FloatingActionButton(
                     onClick = {
-                        if(uiState.userDetails.userId != 0) {
+                        if(uiState.userDetails.userId != 0 && uiState.userDetails.userId != null) {
                             viewModel.switchToAndFromPropertyUploadScreen()
                         } else {
                             showLoginDialog = !showLoginDialog
