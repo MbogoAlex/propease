@@ -81,4 +81,10 @@ data class PropertyUploadResponseBody (
     val data: SpecificPropertyResponseBodyData
 )
 
+@Serializable
+data class DeletePropertyResponseBody(
+    val statusCode: Int,
+    val message: String
+)
+
 

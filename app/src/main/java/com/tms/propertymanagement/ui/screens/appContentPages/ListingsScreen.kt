@@ -104,9 +104,7 @@ fun ListingsFilterSection(
     viewModel: ListingsScreenViewModel,
     modifier: Modifier = Modifier
 ) {
-    var filteringOn by remember {
-        mutableStateOf(false)
-    }
+
     Column {
         LocationSearchForm(
             leadingIcon = painterResource(id = R.drawable.locations),
@@ -117,12 +115,13 @@ fun ListingsFilterSection(
                 keyboardType = KeyboardType.Text,
             ),
             onValueChanged = {
-                             viewModel.fetchFilteredProperties(
-                                 location = it,
-                                 rooms = null,
-                                 categoryId = null,
-                                 categoryName = null
-                             )
+                viewModel.fetchFilteredProperties(
+                    location = it,
+                    rooms = null,
+                    categoryId = null,
+                    categoryName = null
+                )
+                viewModel.turnOnFiltering()
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -139,39 +138,43 @@ fun ListingsFilterSection(
         ) {
             NumberOfRoomsSelection(
                 uiState = uiState,
-                viewModel = viewModel,
-                onFilterButtonClicked = {
-                    filteringOn = true
+                onChangeNumberOfRooms = {location, rooms, categoryId, categoryName ->
+                    viewModel.fetchFilteredProperties(
+                        location = location,
+                        rooms = rooms,
+                        categoryId = categoryId,
+                        categoryName = categoryName
+                    )
+                    viewModel.turnOnFiltering()
+                },
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            CategorySelection(
+                uiState = uiState,
+                onChangeCategory = {location, rooms, categoryId, categoryName ->
+                    viewModel.fetchFilteredProperties(
+                        location = location,
+                        rooms = rooms,
+                        categoryId = categoryId,
+                        categoryName = categoryName
+                    )
+                    viewModel.turnOnFiltering()
                 }
             )
             Spacer(modifier = Modifier.weight(1f))
-            CategorySelection(
-                onFilterButtonClicked = {
-                    filteringOn = true
-                },
-                uiState = uiState,
-                viewModel = viewModel
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Card(
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+            if(uiState.filteringOn) {
+                Card(
+                    shape = RoundedCornerShape(10.dp),
                     modifier = Modifier
                         .clickable {
                             viewModel.unfilter()
                         }
                 ) {
-                    Text(
-                        text = "Unfilter",
-                        modifier = Modifier
-                            .padding(10.dp)
-//                                .widthIn(120.dp)
-                    )
                     Icon(
                         imageVector = Icons.Default.Clear,
-                        contentDescription = null
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(8.dp)
                     )
                 }
             }
@@ -216,9 +219,8 @@ fun LocationSearchForm(
 
 @Composable
 fun NumberOfRoomsSelection(
-    onFilterButtonClicked: () -> Unit,
     uiState: ListingsScreenUiState,
-    viewModel: ListingsScreenViewModel,
+    onChangeNumberOfRooms: (location: String?, rooms: Int?, categoryId: Int?, categoryName: String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val rooms = listOf<Int>(1, 2, 3, 4, 5, 6, 7, 8)
@@ -238,15 +240,15 @@ fun NumberOfRoomsSelection(
 
     Column {
         Card(
-            shape = RoundedCornerShape(10.dp)
+            shape = RoundedCornerShape(10.dp),
+            modifier = Modifier
+                .clickable {
+                    expanded = !expanded
+                }
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .clickable {
-                        onFilterButtonClicked()
-                        expanded = !expanded
-                    }
             ) {
                 Text(
                     text = "No. Rooms".takeIf { uiState.numberOfRoomsSelected.isEmpty() }
@@ -274,12 +276,10 @@ fun NumberOfRoomsSelection(
                            )
                     },
                     onClick = {
-                        viewModel.fetchFilteredProperties(
-                            location = null,
-                            rooms = i,
-                            categoryId = null,
-                            categoryName = null
+                        onChangeNumberOfRooms(
+                            null, i, null,null
                         )
+                        
                         expanded = !expanded
                     }
                 )
@@ -290,9 +290,8 @@ fun NumberOfRoomsSelection(
 
 @Composable
 fun CategorySelection(
-    onFilterButtonClicked: () -> Unit,
     uiState: ListingsScreenUiState,
-    viewModel: ListingsScreenViewModel,
+    onChangeCategory: (location: String?, rooms: Int?, categoryId: Int?, categoryName: String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -307,15 +306,16 @@ fun CategorySelection(
     }
     Column {
         Card(
-            shape = RoundedCornerShape(10.dp)
+            shape = RoundedCornerShape(10.dp),
+            modifier = Modifier
+                .clickable {
+                    expanded = !expanded
+                }
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .clickable {
-                        expanded = !expanded
-                        onFilterButtonClicked()
-                    }
+
             ) {
                 Text(
                     text = "Category".takeIf { uiState.categoryNameSelected.isEmpty() } ?: uiState.categoryNameSelected,
@@ -341,11 +341,8 @@ fun CategorySelection(
                         )
                     },
                     onClick = {
-                        viewModel.fetchFilteredProperties(
-                            location = null,
-                            rooms = null,
-                            categoryId = i.id,
-                            categoryName = i.name
+                        onChangeCategory(
+                            null, null, i.id, i.name
                         )
                         expanded = !expanded
                     }
@@ -506,12 +503,13 @@ fun ListingItem(
                     Spacer(modifier = Modifier.weight(1f))
                     Card(
                         colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFFa2a832)
+                            containerColor = Color.Black
                         )
                     ) {
                         Text(
                             text = property.category.takeIf { it.length <= 6 } ?: "${property.category.substring(0, 4)}...",
                             fontSize = 11.sp,
+                            color = Color.White,
                             modifier = Modifier
                                 .padding(
                                     start = 10.dp,
@@ -550,8 +548,7 @@ fun NumberOfRoomsSelectionPreview(
     PropEaseTheme {
         NumberOfRoomsSelection(
             uiState = ListingsScreenUiState(),
-            viewModel = viewModel,
-            onFilterButtonClicked = {}
+            onChangeNumberOfRooms = {location, rooms, categoryId, categoryName ->  }
         )
     }
 }

@@ -154,6 +154,9 @@ fun NavigationGraph(
                 },
                 navigateToUpdateProfileScreen = {
                     navController.navigate(ProfileUpdateScreenDestination.route)
+                },
+                navigateToLoginScreenWithArgs = {phoneNumber, password ->
+                    navController.navigate("${LoginScreenDestination.route}/${phoneNumber}/${password}")
                 }
             )
         }
@@ -186,6 +189,10 @@ fun NavigationGraph(
                 },
                 navigateToPropertyUpdateScreen = {
                     navController.navigate("${PropertyUpdateScreenDestination.route}/${it}")
+                },
+                navigateToHomeScreenWithArgs = {
+                    navController.popBackStack()
+                    navController.navigate("${HomeScreenDestination.route}/${it}")
                 }
             )
         }
@@ -239,6 +246,9 @@ fun NavigationGraph(
                 },
                 navigateToUpdateProfileScreen = {
                     navController.navigate(ProfileUpdateScreenDestination.route)
+                },
+                navigateToLoginScreenWithArgs = {phoneNumber, password ->
+                    navController.navigate("${LoginScreenDestination.route}/${phoneNumber}/${password}")
                 }
             )
         }
@@ -249,6 +259,9 @@ fun NavigationGraph(
                 },
                 navigateToPreviousScreen = {
                     navController.navigateUp()
+                },
+                navigateToLoginScreenWithArgs = {phoneNumber, password ->
+                    navController.navigate("${LoginScreenDestination.route}/${phoneNumber}/${password}")
                 }
             )
         }

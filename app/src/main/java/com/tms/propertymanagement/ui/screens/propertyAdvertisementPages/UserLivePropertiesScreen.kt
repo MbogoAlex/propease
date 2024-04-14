@@ -2,6 +2,7 @@ package com.propertymanagement.tms.ui.screens.propertyAdvertisementPages
 
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -68,14 +69,25 @@ fun UserLiveProperties(
     navigateToHomeScreen: () -> Unit,
     navigateToHomeScreenWithArguments: (childScreen: String) -> Unit,
     navigateToLoginScreenWithoutArgs: () -> Unit,
+    navigateToLoginScreenWithArgs: (phoneNumber: String, password: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     BackHandler(onBack = {navigateToHomeScreen()})
+    val context = LocalContext.current
     val viewModel: UserLivePropertiesScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
 
     var showLoginDialog by remember {
         mutableStateOf(false)
+    }
+
+    if(uiState.forceLogin) {
+        Toast.makeText(context, "Login first to see your adverts", Toast.LENGTH_SHORT).show()
+        navigateToLoginScreenWithArgs(
+            uiState.userDetails.phoneNumber,
+            uiState.userDetails.password
+        )
+        viewModel.resetForcedLogin()
     }
 
     if(showLoginDialog) {
@@ -270,12 +282,13 @@ fun ListingItem(
                     Spacer(modifier = Modifier.weight(1f))
                     Card(
                         colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFFa2a832)
+                            containerColor = Color.Black
                         )
                     ) {
                         Text(
                             text = property.category.takeIf { it.length <= 6 } ?: "${property.category.substring(0, 4)}...",
                             fontSize = 11.sp,
+                            color = Color.White,
                             modifier = Modifier
                                 .padding(
                                     start = 10.dp,
@@ -300,7 +313,8 @@ fun UserLivePropertiesPreview() {
             navigateToSpecificUserProperty = {},
             navigateToHomeScreen = {},
             navigateToHomeScreenWithArguments = {},
-            navigateToLoginScreenWithoutArgs = {}
+            navigateToLoginScreenWithoutArgs = {},
+            navigateToLoginScreenWithArgs = {phoneNumber, password ->  }
         )
     }
 }

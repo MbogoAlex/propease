@@ -3,6 +3,7 @@ package com.propertymanagement.tms.ui.screens.accountManagement
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import android.webkit.MimeTypeMap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -19,6 +20,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import java.io.ByteArrayOutputStream
+import java.io.FileInputStream
 
 enum class UpdatingStatus{
     INITIAL,
@@ -39,7 +45,8 @@ data class ProfileScreenUiState(
     val updatedUserDetails: ProfileDetails = ProfileDetails(),
     val showUpdateProfileScreen: Boolean = false,
     val enableUpdateButton: Boolean = false,
-    val uploadedPicture: Uri = Uri.EMPTY,
+    val uploadedPicture: Uri? = null,
+    val forcedLogin: Boolean = false,
     val updatingStatus: UpdatingStatus = UpdatingStatus.INITIAL
 )
 class ProfileScreenViewModel(
@@ -183,6 +190,38 @@ class ProfileScreenViewModel(
                     )
                 }
             }
+        }
+    }
+
+    fun changeProfilePicture(uri: Uri, context: Context) {
+        _uiState.update {
+            it.copy(
+                uploadedPicture = uri,
+                updatingStatus = UpdatingStatus.LOADING
+            )
+        }
+        val parcelFileDescriptor = context.contentResolver.openFileDescriptor(uri, "r", null)
+        var imagePart: MultipartBody.Part
+        parcelFileDescriptor?.let { pfd ->
+            val inputStream = FileInputStream(pfd.fileDescriptor)
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            val buffer = ByteArray(1024)
+            var length: Int
+            while(inputStream.read(buffer).also { length = it } != -1) {
+                byteArrayOutputStream.write(buffer, 0, length)
+            }
+            val byteArray = byteArrayOutputStream.toByteArray()
+
+            //Get the MIME type of the file
+
+            val mimeType = context.contentResolver.getType(uri)
+            val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
+            val requestFile = RequestBody.create(mimeType?.toMediaTypeOrNull(), byteArray)
+            val imagePartData = MultipartBody.Part.createFormData("file", "upload.$extension", requestFile)
+            imagePart = imagePartData
+        }
+        viewModelScope.launch {
+            val response = apiRepository
         }
     }
 

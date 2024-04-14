@@ -73,6 +73,7 @@ fun HomeScreen(
     navigateToHomeScreen: () -> Unit,
     navigateToHomeScreenWithArguments: (childScreen: String) -> Unit,
     navigateToLoginScreenWithoutArgs: () -> Unit,
+    navigateToLoginScreenWithArgs: (phoneNumber: String, password: String) -> Unit,
     navigateToRegistrationScreen: () -> Unit,
     navigateToUpdateProfileScreen: () -> Unit,
     modifier: Modifier = Modifier
@@ -327,7 +328,8 @@ fun HomeScreen(
                         },
                         navigateToHomeScreen = navigateToHomeScreen,
                         navigateToHomeScreenWithArguments = navigateToHomeScreenWithArguments,
-                        navigateToLoginScreenWithoutArgs = navigateToLoginScreenWithoutArgs
+                        navigateToLoginScreenWithoutArgs = navigateToLoginScreenWithoutArgs,
+                        navigateToLoginScreenWithArgs = navigateToLoginScreenWithArgs
 //                    navigateToUpdateProperty = { /*TODO*/ }
                     )
                 }
@@ -377,7 +379,8 @@ fun HomeScreenPreview() {
         navigateToHomeScreenWithArguments = {},
         navigateToLoginScreenWithoutArgs = {},
         navigateToRegistrationScreen = {},
-        navigateToUpdateProfileScreen = {}
+        navigateToUpdateProfileScreen = {},
+        navigateToLoginScreenWithArgs = {phoneNumber, password ->  }
     )
 }
 

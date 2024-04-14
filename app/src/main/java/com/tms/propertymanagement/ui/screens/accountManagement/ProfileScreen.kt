@@ -3,6 +3,8 @@ package com.tms.propertymanagement.ui.screens.accountManagement
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberImagePainter
 import com.propertymanagement.tms.PropEaseViewModelFactory
 import com.propertymanagement.tms.R
 import com.propertymanagement.tms.ui.screens.accountManagement.ProfileScreenViewModel
@@ -62,40 +65,48 @@ fun ProfileScreen(
         navigateToHomeScreenWithArgs("profile-screen")
         viewModel.resetProfileUpdateState()
     }
-    var imageUrl by remember {
-        mutableStateOf<Uri?>(null)
-    }
-    val images = remember { mutableStateListOf<Uri>() }
 
-//    val galleryLauncher = rememberLauncherForActivityResult(
-//        contract = ActivityResultContracts.GetContent(),
-//        onResult = {uri ->
-//            imageUrl = uri
-//            viewModel.uploadPhoto(uri!!)
-//            images.add(uri!!)
-//        }
-//    )
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = {uri ->
+            if(uri != null) {
+                viewModel.changeProfilePicture(uri!!, context)
+            }
+
+        }
+    )
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .padding(16.dp)
             .fillMaxSize()
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.profile_placeholder),
-            contentDescription = "Profile picture",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .clip(CircleShape)
-                .size(150.dp)
-        )
+        if(uiState.uploadedPicture != null) {
+            Image(
+                painter = rememberImagePainter(data = uiState.uploadedPicture),
+                contentDescription = "Profile picture",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .size(150.dp)
+            )
+        } else {
+            Image(
+                painter = painterResource(id = R.drawable.profile_placeholder),
+                contentDescription = "Profile picture",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .size(150.dp)
+            )
+        }
+
         TextButton(onClick = {
-
-
-
+//            galleryLauncher.launch("image/*")
         }) {
             Text(
-                text = "Change your profile pic"
+                text = "Change pic"
             )
         }
         Spacer(modifier = Modifier.height(10.dp))

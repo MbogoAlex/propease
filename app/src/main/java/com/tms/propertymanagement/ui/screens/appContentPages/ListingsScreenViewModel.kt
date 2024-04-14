@@ -31,6 +31,7 @@ data class ListingsScreenUiState(
     val numberOfRoomsSelected: String = "",
     val categoryIdSelected: String = "",
     val categoryNameSelected: String = "",
+    val filteringOn: Boolean = false,
     val location: String = ""
 )
 class ListingsScreenViewModel(
@@ -158,6 +159,7 @@ class ListingsScreenViewModel(
                 categoryNameSelected = "",
                 categoryIdSelected = "",
                 location = "",
+                filteringOn = false
             )
         }
         fetchProperties(
@@ -166,6 +168,22 @@ class ListingsScreenViewModel(
             location = "",
             rooms =  ""
         )
+    }
+
+    fun turnOnFiltering() {
+        _uiState.update {
+            it.copy(
+                filteringOn = true
+            )
+        }
+    }
+
+    fun switchFilteringStatus() {
+        _uiState.update {
+            it.copy(
+                filteringOn = !(_uiState.value.filteringOn)
+            )
+        }
     }
 
     fun loadStartupData() {

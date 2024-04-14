@@ -25,7 +25,8 @@ data class UserLivePropertiesScreenUiState(
     val properties: List<PropertyData> = emptyList(),
     val fetchingStatus: FetchingStatus = FetchingStatus.INITIAL,
     val userDetails: ReusableFunctions.LoggedInUserData = ReusableFunctions.LoggedInUserData(),
-    val showPropertyUploadScreen: Boolean = false
+    val showPropertyUploadScreen: Boolean = false,
+    val forceLogin: Boolean = false,
 
 )
 class UserLivePropertiesScreenViewModel(
@@ -69,7 +70,14 @@ class UserLivePropertiesScreenViewModel(
                             fetchingStatus = FetchingStatus.FAILURE
                         )
                     }
-                    Log.e("FAILED_TO_FETCH_USER_PROPERTIES", response.toString())
+                    Log.e("FAILED_TO_FETCH_USER_PROPERTIES", response.code().toString())
+                    if(response.code() == 401) {
+                        _uiState.update {
+                            it.copy(
+                                forceLogin = true
+                            )
+                        }
+                    }
                 }
             } catch (e: Exception) {
                 _uiState.update {
@@ -87,6 +95,14 @@ class UserLivePropertiesScreenViewModel(
         _uiState.update {
             it.copy(
                 showPropertyUploadScreen = !(_uiState.value.showPropertyUploadScreen)
+            )
+        }
+    }
+
+    fun resetForcedLogin() {
+        _uiState.update {
+            it.copy(
+                forceLogin = false
             )
         }
     }

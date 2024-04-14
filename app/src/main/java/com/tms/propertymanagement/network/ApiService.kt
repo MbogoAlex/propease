@@ -1,6 +1,7 @@
 package com.propertymanagement.tms.network
 
 import com.propertymanagement.tms.apiModel.CategoryResponseBody
+import com.propertymanagement.tms.apiModel.DeletePropertyResponseBody
 import com.propertymanagement.tms.apiModel.ProfileUpdateRequestBody
 import com.propertymanagement.tms.apiModel.ProfileUpdateResponseBody
 import com.propertymanagement.tms.apiModel.PropertyResponseBody
@@ -116,4 +117,11 @@ interface ApiService {
         @Path("userId") userId: String,
         @Body profileDetails: ProfileUpdateRequestBody
     ): Response<ProfileUpdateResponseBody>
+
+    // delete property
+    @DELETE("api/property/propertyId={propertyId}")
+    suspend fun deleteProperty(
+        @Header("Authorization") token: String,
+        @Path("propertyId") propertyId: Int
+    ) : Response<DeletePropertyResponseBody>
 }

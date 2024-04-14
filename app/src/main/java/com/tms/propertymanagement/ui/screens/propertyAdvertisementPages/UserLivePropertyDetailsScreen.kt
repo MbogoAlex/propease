@@ -3,6 +3,7 @@ package com.propertymanagement.tms.ui.screens.propertyAdvertisementPages
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,15 +26,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -68,10 +77,55 @@ object UserLivePropertyDetailsScreenDestination: NavigationDestination {
 fun UserLivePropertyDetailsScreen(
     navigateToPreviousScreen: () -> Unit,
     navigateToPropertyUpdateScreen: (propertyId: String) -> Unit,
+    navigateToHomeScreenWithArgs: (childScreen: String) -> Unit,
+
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val viewModel: UserLivePropertyDetailsScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
+    var showDeleteDialog by remember {
+        mutableStateOf(false)
+    }
+
+    if(uiState.deletingPropertyStatus == DeletingPropertyStatus.SUCCESS) {
+        Toast.makeText(context, "Property removed", Toast.LENGTH_SHORT).show()
+        navigateToHomeScreenWithArgs("advertisement-screen")
+        viewModel.resetDeletingStatus()
+    } else if(uiState.deletingPropertyStatus == DeletingPropertyStatus.FAIL) {
+        Toast.makeText(context, "Failed to remove property. Try again later", Toast.LENGTH_SHORT).show()
+        viewModel.resetDeletingStatus()
+    }
+
+    if(showDeleteDialog) {
+        AlertDialog(
+            title = {
+                Text(text = "Confirm Removal")
+            },
+            text = {
+                Text(text = "Are you sure you want to remove this property? This action cannot be undone.")
+            },
+            onDismissRequest = {
+                showDeleteDialog = !showDeleteDialog
+            },
+            confirmButton = {
+                Button(onClick = {
+                    viewModel.deleteProperty()
+                    showDeleteDialog = !showDeleteDialog
+                }) {
+                    Text(text = "Remove")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDeleteDialog = !showDeleteDialog
+                }) {
+                    Text(text = "Cancel")
+                }
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .padding(16.dp)
@@ -87,6 +141,7 @@ fun UserLivePropertyDetailsScreen(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
+
             TextButton(onClick = { navigateToPropertyUpdateScreen(
 
                 uiState.property.propertyId.toString()
@@ -96,10 +151,11 @@ fun UserLivePropertyDetailsScreen(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.edit),
-                        contentDescription = "Edit property"
+                        contentDescription = "Edit"
                     )
                     Spacer(modifier = Modifier.width(5.dp))
-                    Text(text = "Edit")
+                    Text(
+                        text = "Edit")
                 }
             }
 
@@ -113,7 +169,10 @@ fun UserLivePropertyDetailsScreen(
                 .height(20.dp)
         )
         UserPropertyListingTextDetails(
-            uiState = uiState
+            uiState = uiState,
+            onDeleteButtonClicked = {
+                showDeleteDialog = !showDeleteDialog
+            }
         )
     }
 }
@@ -178,6 +237,7 @@ fun UserPropertyImageSlider(
 @Composable
 fun UserPropertyListingTextDetails(
     uiState: UserLivePropertyDetailsScreenUiState,
+    onDeleteButtonClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -377,6 +437,23 @@ fun UserPropertyListingTextDetails(
                 }
             }
         }
+        Spacer(modifier = Modifier.height(10.dp))
+        Button(
+            enabled = uiState.deletingPropertyStatus != DeletingPropertyStatus.LOADING,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Black
+            ),
+            modifier = Modifier
+                .fillMaxWidth(),
+            onClick = { onDeleteButtonClicked() }
+        ) {
+            if(uiState.deletingPropertyStatus == DeletingPropertyStatus.LOADING) {
+                CircularProgressIndicator()
+            } else {
+                Text(text = "Remove")
+            }
+
+        }
 
     }
 }
@@ -397,7 +474,8 @@ fun UserLivePropertyDetailsPreview() {
     PropEaseTheme {
         UserLivePropertyDetailsScreen(
             navigateToPreviousScreen = {},
-            navigateToPropertyUpdateScreen = {}
+            navigateToPropertyUpdateScreen = {},
+            navigateToHomeScreenWithArgs = {}
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.propertymanagement.tms.network
 
 import com.propertymanagement.tms.apiModel.CategoryResponseBody
+import com.propertymanagement.tms.apiModel.DeletePropertyResponseBody
 import com.propertymanagement.tms.apiModel.ProfileUpdateRequestBody
 import com.propertymanagement.tms.apiModel.ProfileUpdateResponseBody
 import com.propertymanagement.tms.apiModel.PropertyResponseBody
@@ -53,6 +54,11 @@ interface ApiRepository {
         userId: String,
         profileDetails: ProfileUpdateRequestBody
     ): Response<ProfileUpdateResponseBody>
+
+    suspend fun deleteProperty(
+        token: String,
+        propertyId: Int
+    ): Response<DeletePropertyResponseBody>
 }
 
 class NetworkApiRepository(private val apiService: ApiService): ApiRepository {
@@ -139,6 +145,14 @@ class NetworkApiRepository(private val apiService: ApiService): ApiRepository {
         token = "Bearer $token",
         userId = userId,
         profileDetails = profileDetails
+    )
+
+    override suspend fun deleteProperty(
+        token: String,
+        propertyId: Int
+    ): Response<DeletePropertyResponseBody> = apiService.deleteProperty(
+        token = "Bearer $token",
+        propertyId = propertyId
     )
 
 }

@@ -45,6 +45,7 @@ object ProfileUpdateScreenDestination: NavigationDestination {
 @Composable
 fun ProfileUpdateScreen(
     navigateToHomeScreenWithArgs: (childScreen: String) -> Unit,
+    navigateToLoginScreenWithArgs: (phoneNumber: String, password: String) -> Unit,
     navigateToPreviousScreen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -59,6 +60,14 @@ fun ProfileUpdateScreen(
     } else if(uiState.updatingUserProfileStatus == UpdatingUserProfileStatus.FAIL) {
         viewModel.resetUpdatingStatus()
         Toast.makeText(context, "Failed to update profile. Try gain later", Toast.LENGTH_SHORT).show()
+    }
+    if(uiState.forcedLogin) {
+        Toast.makeText(context, "Login first to continue with this operation", Toast.LENGTH_SHORT).show()
+        navigateToLoginScreenWithArgs(
+            uiState.userDetails.phoneNumber,
+            uiState.userDetails.password
+        )
+        viewModel.resetForcedLogin()
     }
     Column(
         modifier = Modifier

@@ -55,9 +55,17 @@ enum class PropertyFetchingStatus{
     FAIL,
 }
 
+enum class DeletingPropertyStatus{
+    INITIAL,
+    LOADING,
+    SUCCESS,
+    FAIL,
+}
+
 data class UserLivePropertyDetailsScreenUiState(
     val property: PropertyData = propertyData,
     val fetchingStatus: PropertyFetchingStatus = PropertyFetchingStatus.INITIAL,
+    val deletingPropertyStatus: DeletingPropertyStatus = DeletingPropertyStatus.INITIAL,
     val userDetails: ReusableFunctions.LoggedInUserData = ReusableFunctions.LoggedInUserData()
 )
 
@@ -116,6 +124,49 @@ class UserLivePropertyDetailsScreenViewModel(
                 }
                 Log.e("FAILED_TO_FETCH_PROPERTY_EXCEPTION", e.message.toString())
             }
+        }
+    }
+
+    fun deleteProperty() {
+        _uiState.update {
+            it.copy(
+                deletingPropertyStatus = DeletingPropertyStatus.LOADING
+            )
+        }
+        viewModelScope.launch {
+            try {
+                val response = apiRepository.deleteProperty(
+                    token = _uiState.value.userDetails.token,
+                    propertyId = propertyId!!.toInt()
+                )
+                if(response.isSuccessful) {
+                    _uiState.update {
+                        it.copy(
+                            deletingPropertyStatus = DeletingPropertyStatus.SUCCESS
+                        )
+                    }
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            deletingPropertyStatus = DeletingPropertyStatus.FAIL
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        deletingPropertyStatus = DeletingPropertyStatus.FAIL
+                    )
+                }
+            }
+        }
+    }
+
+    fun resetDeletingStatus() {
+        _uiState.update {
+            it.copy(
+                deletingPropertyStatus = DeletingPropertyStatus.INITIAL
+            )
         }
     }
 

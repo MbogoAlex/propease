@@ -30,6 +30,7 @@ data class ProfileUpdateScreenUiState(
     val email: String = "",
     val phoneNumber: String = "",
     val enableUpdateButton: Boolean = false,
+    val forcedLogin: Boolean = false,
     val updatingUserProfileStatus: UpdatingUserProfileStatus = UpdatingUserProfileStatus.INITIAL
 )
 
@@ -134,11 +135,20 @@ class ProfileUpdateScreenViewModel(
                     }
                 } else {
                     Log.i("FAILED_TO_UPDATE_USER_PROFILE", response.toString())
-                    _uiState.update {
-                        it.copy(
-                            updatingUserProfileStatus = UpdatingUserProfileStatus.FAIL
-                        )
+                    if(response.code() == 401){
+                        _uiState.update {
+                            it.copy(
+                                forcedLogin = true
+                            )
+                        }
+                    } else {
+                        _uiState.update {
+                            it.copy(
+                                updatingUserProfileStatus = UpdatingUserProfileStatus.FAIL
+                            )
+                        }
                     }
+
                 }
             } catch (e: Exception) {
                 Log.i("FAILED_TO_UPDATE_USER_PROFILE", e.toString())
@@ -155,6 +165,14 @@ class ProfileUpdateScreenViewModel(
         _uiState.update {
             it.copy(
                 updatingUserProfileStatus = UpdatingUserProfileStatus.INITIAL
+            )
+        }
+    }
+
+    fun resetForcedLogin() {
+        _uiState.update {
+            it.copy(
+                forcedLogin = false
             )
         }
     }

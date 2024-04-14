@@ -131,7 +131,7 @@ fun PropertyUpdateScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+
             .padding(16.dp)
     ) {
         Row(
@@ -150,45 +150,50 @@ fun PropertyUpdateScreen(
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
-        PropertyFeaturesUpdateSelection(
-            viewModel = viewModel,
-            uiState = uiState
-        )
-        Spacer(modifier = Modifier.height(20.dp))
-        PropertyUpdateDetails(
-            uiState = uiState,
-            viewModel = viewModel
-        )
-        Spacer(modifier = Modifier.height(20.dp))
-        PublishedImages(uiState = uiState, viewModel = viewModel)
-        Spacer(modifier = Modifier.height(20.dp))
-        ImagesUpdateSelection(
-            uiState = uiState,
-            viewModel = viewModel
-        )
-        Spacer(modifier = Modifier.height(40.dp))
-        Button(
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Black
-            ),
-            shape = RoundedCornerShape(0.dp),
-            onClick = {
-                      viewModel.updateProperty(context)
-            },
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
+                .verticalScroll(rememberScrollState())
         ) {
-            if(uiState.uploadingStatus == UploadingStatus.LOADING) {
-                CircularProgressIndicator(color = Color.White)
-            } else {
-                Text(text = "Publish update")
-                Icon(
-                    painter = painterResource(id = R.drawable.save),
-                    contentDescription = "Save update"
-                )
-            }
+            PropertyFeaturesUpdateSelection(
+                viewModel = viewModel,
+                uiState = uiState
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            PropertyUpdateDetails(
+                uiState = uiState,
+                viewModel = viewModel
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            PublishedImages(uiState = uiState, viewModel = viewModel)
+            Spacer(modifier = Modifier.height(20.dp))
+            ImagesUpdateSelection(
+                uiState = uiState,
+                viewModel = viewModel
+            )
+            Spacer(modifier = Modifier.height(40.dp))
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black
+                ),
+                shape = RoundedCornerShape(0.dp),
+                onClick = {
+                    viewModel.updateProperty(context)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            ) {
+                if(uiState.uploadingStatus == UploadingStatus.LOADING) {
+                    CircularProgressIndicator(color = Color.White)
+                } else {
+                    Text(text = "Publish update")
+                    Icon(
+                        painter = painterResource(id = R.drawable.save),
+                        contentDescription = "Save update"
+                    )
+                }
 
+            }
         }
 
     }
@@ -237,7 +242,7 @@ fun PropertyUpdateDetails(
             value = uiState.price,
             maxLines = 1,
             keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Done,
+                imeAction = ImeAction.Next,
                 keyboardType = KeyboardType.Decimal
             ),
             onValueChanged = {
@@ -253,7 +258,7 @@ fun PropertyUpdateDetails(
                 value = uiState.county,
                 maxLines = 1,
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Done,
+                    imeAction = ImeAction.Next,
                     keyboardType = KeyboardType.Text
                 ),
                 onValueChanged = {
@@ -264,11 +269,11 @@ fun PropertyUpdateDetails(
             )
             Spacer(modifier = Modifier.width(20.dp))
             PropertyUpdateInputForm(
-                labelText = "Address",
+                labelText = "Address / town",
                 value = uiState.address,
                 maxLines = 1,
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Done,
+                    imeAction = ImeAction.Next,
                     keyboardType = KeyboardType.Text
                 ),
                 onValueChanged = {
@@ -334,7 +339,10 @@ fun PublishedImages(
         fontWeight = FontWeight.Bold
     )
     Spacer(modifier = Modifier.height(10.dp))
-    Row {
+    Row(
+        modifier = Modifier
+            .horizontalScroll(rememberScrollState())
+    ) {
         uiState.serverImages.forEachIndexed { index, propertyImage ->
             Row {
                 Image(

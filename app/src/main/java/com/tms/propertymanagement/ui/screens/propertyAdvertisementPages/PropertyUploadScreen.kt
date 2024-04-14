@@ -204,7 +204,7 @@ fun PropertyDetails(
             value = uiState.price,
             maxLines = 1,
             keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Done,
+                imeAction = ImeAction.Next,
                 keyboardType = KeyboardType.Decimal
             ),
             onValueChanged = {
@@ -220,7 +220,7 @@ fun PropertyDetails(
                 value = uiState.county,
                 maxLines = 1,
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Done,
+                    imeAction = ImeAction.Next,
                     keyboardType = KeyboardType.Text
                 ),
                 onValueChanged = {
@@ -231,11 +231,11 @@ fun PropertyDetails(
             )
             Spacer(modifier = Modifier.width(20.dp))
             PropertyUploadInputForm(
-                labelText = "Address",
+                labelText = "Address / town",
                 value = uiState.address,
                 maxLines = 1,
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Done,
+                    imeAction = ImeAction.Next,
                     keyboardType = KeyboardType.Text
                 ),
                 onValueChanged = {
