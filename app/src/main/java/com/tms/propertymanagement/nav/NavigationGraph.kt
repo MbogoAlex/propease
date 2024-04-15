@@ -98,7 +98,7 @@ fun NavigationGraph(
             LoginScreen(
                 navigateToPreviousScreen = {
                     navController.popBackStack(LoginScreenDestination.routeArgs, true)
-                    navController.navigate(RegistrationScreenDestination.route)
+//                    navController.navigate(RegistrationScreenDestination.route)
 
                 },
                 navigateToRegistrationScreen = {
@@ -115,8 +115,9 @@ fun NavigationGraph(
             Log.i("LOGIN_SCREEN_NAVIGATION_WITHOUT_ARGS", "No args")
             LoginScreen(
                 navigateToPreviousScreen = {
-                    navController.popBackStack(LoginScreenDestination.route, true)
-                    navController.navigate(RegistrationScreenDestination.route)
+                                           navController.navigateUp()
+//                    navController.popBackStack(LoginScreenDestination.route, true)
+//                    navController.navigate(RegistrationScreenDestination.route)
 
                 },
                 navigateToRegistrationScreen = {
@@ -142,6 +143,7 @@ fun NavigationGraph(
                     navController.navigate("${UserLivePropertyDetailsScreenDestination.route}/${it}")
                 },
                 navigateToHomeScreenWithArguments = {
+                    navController.popBackStack(HomeScreenDestination.route, true)
                     navController.navigate("${HomeScreenDestination.route}/${it}")
                 },
                 navigateToLoginScreenWithoutArgs = {
@@ -234,6 +236,7 @@ fun NavigationGraph(
                     navController.navigate("${UserLivePropertyDetailsScreenDestination.route}/${it}")
                 },
                 navigateToHomeScreenWithArguments = {
+                    navController.popBackStack(HomeScreenDestination.routeWithArgs, true)
                     navController.navigate("${HomeScreenDestination.route}/${it}")
                 },
                 navigateToLoginScreenWithoutArgs = {

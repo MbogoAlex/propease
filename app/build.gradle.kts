@@ -12,7 +12,7 @@ android {
         applicationId = "com.propertymanagement.tms"
         minSdk = 24
         targetSdk = 34
-        versionCode = 6
+        versionCode = 9
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

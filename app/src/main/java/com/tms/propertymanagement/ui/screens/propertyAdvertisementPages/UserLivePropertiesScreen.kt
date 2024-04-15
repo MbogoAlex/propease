@@ -83,10 +83,13 @@ fun UserLiveProperties(
 
     if(uiState.forceLogin) {
         Toast.makeText(context, "Login first to see your adverts", Toast.LENGTH_SHORT).show()
-        navigateToLoginScreenWithArgs(
-            uiState.userDetails.phoneNumber,
-            uiState.userDetails.password
-        )
+        if(uiState.userDetails.userId != null && uiState.userDetails.userId != 0) {
+            navigateToLoginScreenWithArgs(
+                uiState.userDetails.phoneNumber,
+                uiState.userDetails.password
+            )
+        }
+
         viewModel.resetForcedLogin()
     }
 
@@ -156,6 +159,12 @@ fun UserLiveProperties(
                         }
                     )
                 } else {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "Your adverts",
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
                     ListingItems(
                         navigateToSpecificUserProperty = navigateToSpecificUserProperty,
                         uiState = uiState,

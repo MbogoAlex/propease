@@ -339,7 +339,7 @@ fun ListingTextDetails(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = ReusableFunctions.formatMoneyValue(uiState.price.toDouble()),
+                text = ReusableFunctions.formatMoneyValue( 0.0.takeIf { uiState.price.isEmpty() } ?: uiState.price.toDouble()),
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )

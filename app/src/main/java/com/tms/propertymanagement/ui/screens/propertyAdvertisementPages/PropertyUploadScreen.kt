@@ -101,7 +101,7 @@ fun PropertyUploadScreen(
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -121,39 +121,44 @@ fun PropertyUploadScreen(
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
-            PropertyFeaturesSelection(
-                viewModel = viewModel,
-                uiState = uiState
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            PropertyDetails(
-                viewModel = viewModel,
-                uiState = uiState
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            ImagesSelection(
-                viewModel = viewModel,
-                uiState = uiState
-            )
-            Spacer(modifier = Modifier.height(40.dp))
-            Button(
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Black
-                ),
-                shape = RoundedCornerShape(0.dp),
-                onClick = {
-                    viewModel.checkIfAllFieldsAreFilled()
-                          showPreviewScreen = true
-                },
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
-                Text(text = "Preview")
-                Icon(
-                    painter = painterResource(id = R.drawable.preview),
-                    contentDescription = "Preview Changes"
+                PropertyFeaturesSelection(
+                    viewModel = viewModel,
+                    uiState = uiState
                 )
+                Spacer(modifier = Modifier.height(20.dp))
+                PropertyDetails(
+                    viewModel = viewModel,
+                    uiState = uiState
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                ImagesSelection(
+                    viewModel = viewModel,
+                    uiState = uiState
+                )
+                Spacer(modifier = Modifier.height(40.dp))
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black
+                    ),
+                    shape = RoundedCornerShape(0.dp),
+                    onClick = {
+                        viewModel.checkIfAllFieldsAreFilled()
+                        showPreviewScreen = true
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                ) {
+                    Text(text = "Preview")
+                    Icon(
+                        painter = painterResource(id = R.drawable.preview),
+                        contentDescription = "Preview Changes"
+                    )
+                }
             }
 
         }

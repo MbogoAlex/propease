@@ -27,9 +27,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -47,12 +45,12 @@ import com.propertymanagement.tms.PropEaseViewModelFactory
 import com.propertymanagement.tms.R
 import com.propertymanagement.tms.nav.NavigationDestination
 import com.propertymanagement.tms.ui.screens.accountManagement.LoginScreen
-import com.tms.propertymanagement.ui.screens.accountManagement.ProfileScreen
-import com.tms.propertymanagement.ui.screens.appContentPages.HomeScreenViewModel
 import com.propertymanagement.tms.ui.screens.appContentPages.ListingsScreen
 import com.propertymanagement.tms.ui.screens.dummy.NotificationsScreen
 import com.propertymanagement.tms.ui.screens.dummy.UnitsScreen
 import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.UserLiveProperties
+import com.tms.propertymanagement.ui.screens.accountManagement.ProfileScreen
+import com.tms.propertymanagement.ui.screens.appContentPages.HomeScreenViewModel
 import com.tms.propertymanagement.ui.screens.appContentPages.MainMenuItem
 import com.tms.propertymanagement.ui.screens.appContentPages.MainNavigationPages
 import kotlinx.coroutines.launch
@@ -85,19 +83,19 @@ fun HomeScreen(
         mutableStateOf(MainNavigationPages.LISTINGS_SCREEN)
     }
     var screenLabel by rememberSaveable {
-        mutableStateOf("Listings")
+        mutableStateOf("Find Properties")
     }
 
 
 
     var loggedInMenuItems = listOf<MainMenuItem>(
         MainMenuItem(
-            label = "Listings",
+            label = "Find Properties",
             icon = painterResource(id = R.drawable.house),
             mainNavigationPage = MainNavigationPages.LISTINGS_SCREEN
         ),
         MainMenuItem(
-            label = "My Units",
+            label = "Bought / Sold Units",
             icon = painterResource(id = R.drawable.house),
             mainNavigationPage = MainNavigationPages.MY_UNITS_SCREEN
         ),
@@ -125,12 +123,12 @@ fun HomeScreen(
 
     var loggedOutMenuItems = listOf<MainMenuItem>(
         MainMenuItem(
-            label = "Listings",
+            label = "Find Properties",
             icon = painterResource(id = R.drawable.house),
             mainNavigationPage = MainNavigationPages.LISTINGS_SCREEN
         ),
         MainMenuItem(
-            label = "My Units",
+            label = "Bought / Sold Units",
             icon = painterResource(id = R.drawable.house),
             mainNavigationPage = MainNavigationPages.MY_UNITS_SCREEN
         ),
@@ -190,6 +188,7 @@ fun HomeScreen(
             confirmButton = {
                 Button(onClick = {
                     viewModel.logout()
+                    showLogoutDialog = !showLogoutDialog
                     Toast.makeText(context, "You are logged out", Toast.LENGTH_SHORT).show()
                     navigateToHomeScreenWithArguments("logged-out")
                 }) {
@@ -298,19 +297,19 @@ fun HomeScreen(
                 Text(
                     text = screenLabel,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Red
+                    color = Color.Black
                 )
             }
             when(currentScreen) {
                 MainNavigationPages.LISTINGS_SCREEN -> {
-                    screenLabel = "Listings"
+                    screenLabel = "Properties"
                     ListingsScreen(
                         token = uiState.userDetails.token,
                         navigateToSpecificProperty = navigateToSpecificProperty
                     )
                 }
                 MainNavigationPages.MY_UNITS_SCREEN -> {
-                    screenLabel = "My units"
+                    screenLabel = "Properties"
                     UnitsScreen(
                         navigateToHomeScreen = navigateToHomeScreen
                     )
@@ -321,7 +320,7 @@ fun HomeScreen(
 //                    }
 //                )
                 MainNavigationPages.ADVERTISE_SCREEN -> {
-                    screenLabel = "Live"
+                    screenLabel = "Properties"
                     UserLiveProperties(
                         navigateToSpecificUserProperty = {
                             navigateToSpecificUserProperty(it)
@@ -340,7 +339,7 @@ fun HomeScreen(
                     )
                 }
                 MainNavigationPages.PROFILE_SCREEN -> {
-                    screenLabel = "User profile"
+                    screenLabel = "Profile"
                     ProfileScreen(
                         navigateToHomeScreenWithArgs = navigateToHomeScreenWithArguments,
                         navigateToLoginScreenWithoutArgs = navigateToLoginScreenWithoutArgs,

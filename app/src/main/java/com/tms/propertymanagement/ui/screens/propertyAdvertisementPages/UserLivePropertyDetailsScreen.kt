@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -296,6 +297,19 @@ fun UserPropertyListingTextDetails(
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.LocationOn,
+                contentDescription = null
+            )
+            Text(
+                text = "${uiState.property.location.county}, ${uiState.property.location.address}",
+                fontWeight = FontWeight.Bold
+            )
+        }
         Spacer(modifier = Modifier.height(20.dp))
         LazyVerticalGrid(columns = GridCells.Fixed(2)) {
             items(uiState.property.features.size) {
