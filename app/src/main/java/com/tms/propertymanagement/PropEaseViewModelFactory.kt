@@ -66,9 +66,11 @@ object PropEaseViewModelFactory {
         initializer {
             val apiRepository = propEaseApplication().container.apiRepository
             val dsRepository = propEaseApplication().dsRepository
+            val dbRepository = propEaseApplication().container.dbRepository
             ListingsScreenViewModel(
                 apiRepository = apiRepository,
-                dsRepository = dsRepository
+                dsRepository = dsRepository,
+                dbRepository = dbRepository
             )
         }
 

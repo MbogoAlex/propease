@@ -14,12 +14,16 @@ interface AppDao {
         property: Property,
         owner: Owner,
         category: Category,
-        location: Location
+        location: Location,
+        features: List<Feature>
     ) {
         insertProperty(property)
         insertOwner(owner)
         insertCategory(category)
         insertLocation(location)
+        for(feature in features) {
+            insertFeature(feature)
+        }
     }
 
     // insert category
@@ -37,6 +41,11 @@ interface AppDao {
     // insert location
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertLocation(location: Location)
+
+    // insert feature
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertFeature(feature: Feature)
+
 
     // query property details
     @Transaction

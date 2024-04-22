@@ -8,6 +8,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.propertymanagement.tms.container.AppContainer
 import com.propertymanagement.tms.container.PropEaseMainContainer
 import com.propertymanagement.tms.propEaseDataStore.DSRepository
+import com.tms.propertymanagement.db.DBRepository
 
 private const val DS_NAME = "PROP_EASE_DS"
 private val Context.datastore: DataStore<Preferences> by preferencesDataStore(

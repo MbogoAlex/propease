@@ -9,9 +9,16 @@ import com.propertymanagement.tms.network.ApiRepository
 import com.propertymanagement.tms.propEaseDataStore.DSRepository
 import com.propertymanagement.tms.utils.ReusableFunctions
 import com.propertymanagement.tms.utils.ReusableFunctions.toLoggedInUserData
+import com.tms.propertymanagement.db.DBRepository
+import com.tms.propertymanagement.db.Feature
+import com.tms.propertymanagement.db.Location
+import com.tms.propertymanagement.db.Owner
+import com.tms.propertymanagement.db.Property
+import com.tms.propertymanagement.db.PropertyDetails
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -21,6 +28,7 @@ enum class FetchingStatus {
     SUCCESS,
     FAILURE
 }
+
 
 data class ListingsScreenUiState(
     val properties: List<PropertyData> = emptyList(),
@@ -32,11 +40,14 @@ data class ListingsScreenUiState(
     val categoryIdSelected: String = "",
     val categoryNameSelected: String = "",
     val filteringOn: Boolean = false,
-    val location: String = ""
+    val location: String = "",
+    val offlineProperties: List<PropertyDetails> = emptyList(),
+    val dataInsertedIntoDB: Boolean = false
 )
 class ListingsScreenViewModel(
     private val apiRepository: ApiRepository,
     private val dsRepository: DSRepository,
+    private val dbRepository: DBRepository,
 ): ViewModel() {
     private val _uiState = MutableStateFlow(value = ListingsScreenUiState())
     val uiState: StateFlow<ListingsScreenUiState> = _uiState.asStateFlow()
@@ -77,6 +88,7 @@ class ListingsScreenViewModel(
                         rooms = null,
                         categoryId = null
                     )
+
                     Log.i("CATEGORIES_FETCHED", "${response.body()?.data?.categories}, 1st Category: ${response.body()?.data?.categories!![0]}")
                 } else {
                     _uiState.update {
@@ -93,6 +105,14 @@ class ListingsScreenViewModel(
                     )
                 }
                 Log.e("CATEGORIES_NOT_FETCHED_EXCEPTION", e.message.toString())
+                dbRepository.getAllProperties().collect() {properties ->
+                    Log.i("OFFLINE_PROPERTIES", properties.toString())
+                    _uiState.update {
+                        it.copy(
+                            offlineProperties = properties
+                        )
+                    }
+                }
             }
         }
     }
@@ -113,6 +133,15 @@ class ListingsScreenViewModel(
                             properties = response.body()?.data?.properties!!
                         )
                     }
+                    if(!_uiState.value.dataInsertedIntoDB) {
+                        insertPropertyIntoDB()
+                        _uiState.update {
+                            it.copy(
+                                dataInsertedIntoDB = true
+                            )
+                        }
+                    }
+
                     Log.i("PROPERTIES_FETCHED_SUCCESSFULLY", response.toString())
                 } else {
                     _uiState.update {
@@ -193,6 +222,105 @@ class ListingsScreenViewModel(
 //            token = _uiState.value.userDetails.token,
 //            categoryId = 0
 //        )
+    }
+
+    // Room database
+    fun insertPropertyIntoDB() {
+        viewModelScope.launch {
+            for(prop in _uiState.value.properties) {
+                var categoryId: Int = 0
+                var categoryName: String = ""
+                for(category in _uiState.value.categories) {
+                    if(category.name.lowercase() == prop.category.lowercase()) {
+                        categoryId = category.id
+                        categoryName = category.name
+                    }
+                }
+
+                val category: com.tms.propertymanagement.db.Category = com.tms.propertymanagement.db.Category(
+                    categoryId = categoryId,
+                    name = categoryName
+                )
+
+                val owner: Owner = Owner(
+                    name = "${prop.user.fname} ${prop.user.lname}",
+                    phoneNumber = prop.user.phoneNumber,
+                    ownerId = prop.user.userId,
+                    propertyId = prop.propertyId
+                )
+
+                val property: Property = Property(
+                    propertyId = prop.propertyId,
+                    title = prop.title,
+                    description = prop.description,
+                    price = prop.price,
+                    ownerId = prop.user.userId,
+                    categoryId = categoryId
+                )
+
+                val location: Location = Location(
+                    propertyId = prop.propertyId,
+                    county = prop.location.county,
+                    address = prop.location.address,
+                    longitude = prop.location.longitude,
+                    latitude = prop.location.latitude
+                )
+
+                val features = mutableListOf<Feature>()
+                for(item in prop.features) {
+                    val feature: Feature = Feature(
+                        name = item,
+                        propertyId = prop.propertyId
+                    )
+                    features.add(feature)
+
+                }
+
+                // insert category
+
+                try {
+                    dbRepository.insertCategory(category)
+                } catch (e: Exception) {
+                    Log.e("INSERT_CATEGORY_ERROR", e.toString())
+                }
+
+                // insert owner
+
+                try {
+                    dbRepository.insertOwner(owner)
+                } catch (e: Exception) {
+                    Log.e("FAILED_TO_INSERT_OWNER", e.toString())
+                }
+
+                // insert property
+
+                try {
+                    dbRepository.insertProperty(property)
+                } catch (e: Exception) {
+                    Log.e("FAILED_TO_INSERT_PROPERTY", e.toString())
+                }
+
+                // insert location
+
+                try {
+                    dbRepository.insertLocation(location)
+                } catch (e: Exception) {
+                    Log.e("FAILED_TO_INSERT_LOCATION", e.toString())
+                }
+
+                // insert features
+
+                for (feature in features) {
+                    try {
+                        dbRepository.insertFeature(feature)
+                    } catch (e: Exception) {
+                        Log.e("FAILED_TO_INSERT_FEATURE", e.toString())
+                    }
+                }
+
+            }
+        }
+
     }
 
     init {
