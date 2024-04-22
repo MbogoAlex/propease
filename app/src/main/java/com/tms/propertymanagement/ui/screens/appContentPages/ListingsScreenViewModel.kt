@@ -15,6 +15,8 @@ import com.tms.propertymanagement.db.Location
 import com.tms.propertymanagement.db.Owner
 import com.tms.propertymanagement.db.Property
 import com.tms.propertymanagement.db.PropertyDetails
+import com.tms.propertymanagement.utils.toCategory
+import com.tms.propertymanagement.utils.toPropertyData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,6 +32,7 @@ enum class FetchingStatus {
 }
 
 
+
 data class ListingsScreenUiState(
     val properties: List<PropertyData> = emptyList(),
     val categories: List<Category> = emptyList(),
@@ -42,7 +45,10 @@ data class ListingsScreenUiState(
     val filteringOn: Boolean = false,
     val location: String = "",
     val offlineProperties: List<PropertyDetails> = emptyList(),
-    val dataInsertedIntoDB: Boolean = false
+    val previousConnection: Boolean = false,
+    val currentConnection: Boolean = false,
+    val isConnected: Boolean = false,
+    val dataInsertedIntoDB: Boolean = false,
 )
 class ListingsScreenViewModel(
     private val apiRepository: ApiRepository,
@@ -65,7 +71,8 @@ class ListingsScreenViewModel(
         }
     }
 
-    fun fetchCategories(token: String) {
+    fun fetchCategories() {
+        Log.i("FETCHING_PROPERTIES", "FETCHING PROPERTIS")
         _uiState.update {
             it.copy(
                 fetchingStatus = FetchingStatus.LOADING
@@ -104,20 +111,19 @@ class ListingsScreenViewModel(
                         fetchingStatus = FetchingStatus.FAILURE
                     )
                 }
+                fetchFilteredDBProperties(
+                    location = null,
+                    rooms = null,
+                    categoryId = null,
+                    categoryName = null
+                )
                 Log.e("CATEGORIES_NOT_FETCHED_EXCEPTION", e.message.toString())
-                dbRepository.getAllProperties().collect() {properties ->
-                    Log.i("OFFLINE_PROPERTIES", properties.toString())
-                    _uiState.update {
-                        it.copy(
-                            offlineProperties = properties
-                        )
-                    }
-                }
             }
         }
     }
 
     fun fetchProperties(token: String, location: String?, rooms: String?, categoryId: String?) {
+
         viewModelScope.launch {
             try {
                 val response = apiRepository.fetchFilteredProperties(
@@ -158,6 +164,12 @@ class ListingsScreenViewModel(
                         fetchingStatus = FetchingStatus.FAILURE
                     )
                 }
+                fetchFilteredDBProperties(
+                    location = null,
+                    rooms = null,
+                    categoryId = null,
+                    categoryName = null
+                )
                 Log.e("PROPERTIES_FETCHING_FAILED_EXCEPTION", e.message.toString())
             }
         }
@@ -217,11 +229,6 @@ class ListingsScreenViewModel(
 
     fun loadStartupData() {
         loadUserDetails()
-        fetchCategories(_uiState.value.userDetails.token)
-//        fetchProperties(
-//            token = _uiState.value.userDetails.token,
-//            categoryId = 0
-//        )
     }
 
     // Room database
@@ -243,8 +250,10 @@ class ListingsScreenViewModel(
                 )
 
                 val owner: Owner = Owner(
-                    name = "${prop.user.fname} ${prop.user.lname}",
+                    firstName = prop.user.fname,
+                    lastName = prop.user.lname,
                     phoneNumber = prop.user.phoneNumber,
+                    email = prop.user.email,
                     ownerId = prop.user.userId,
                     propertyId = prop.propertyId
                 )
@@ -253,9 +262,13 @@ class ListingsScreenViewModel(
                     propertyId = prop.propertyId,
                     title = prop.title,
                     description = prop.description,
+                    postedDate = prop.postedDate,
                     price = prop.price,
+                    rooms = prop.rooms,
                     ownerId = prop.user.userId,
-                    categoryId = categoryId
+                    categoryId = categoryId,
+                    categoryName = prop.category,
+                    fetchData = true
                 )
 
                 val location: Location = Location(
@@ -323,7 +336,92 @@ class ListingsScreenViewModel(
 
     }
 
+    fun fetchPropertiesFromDB() {
+        viewModelScope.launch {
+            dbRepository.getAllProperties().collect() {properties ->
+
+
+                _uiState.update {
+                    it.copy(
+                        offlineProperties = properties,
+                        properties = properties.map {propertyDetails ->
+                            propertyDetails.toPropertyData(propertyDetails)
+                        },
+                        fetchingStatus = FetchingStatus.SUCCESS
+                    )
+                }
+            }
+        }
+    }
+
+    fun setConnectionStatus(isConnected: Boolean) {
+        _uiState.update {
+            it.copy(
+                isConnected = isConnected
+            )
+        }
+
+    }
+
+    private val filteredCategories = mutableListOf<Category>()
+
+    fun fetchFilteredDBProperties(location: String?, rooms: Int?, categoryId: Int?, categoryName: String?) {
+
+        _uiState.update {
+            it.copy(
+                numberOfRoomsSelected = rooms.toString().takeIf { rooms != null } ?: _uiState.value.numberOfRoomsSelected,
+                categoryNameSelected = categoryName.takeIf { categoryName != null } ?: _uiState.value.categoryNameSelected,
+                categoryIdSelected = categoryId.toString().takeIf { categoryId != null } ?: _uiState.value.categoryIdSelected,
+                location = location.takeIf { location != null } ?: _uiState.value.location
+            )
+
+        }
+        Log.i("LOCATION", _uiState.value.location)
+        Log.i("ROOMS", _uiState.value.numberOfRoomsSelected)
+        Log.i("CATEGORYID", categoryId.toString())
+        Log.i("CATEGORYNAME", _uiState.value.categoryNameSelected)
+        viewModelScope.launch {
+            try {
+                dbRepository.filterProperties(
+                    rooms = if(_uiState.value.numberOfRoomsSelected.isEmpty()) null else _uiState.value.numberOfRoomsSelected.toInt(),
+                    category = _uiState.value.categoryNameSelected.takeIf { it.isNotEmpty() },
+//                    location = "kiambu",
+                    location = _uiState.value.location.takeIf { it.isNotEmpty() },
+                    fetchData = true
+                ).collect() {propertyDetails ->
+                    Log.i("PROP_ROOMS_SIZE", propertyDetails.size.toString())
+                    for(property in propertyDetails) {
+                        Log.i("PROP_ROOMS", property.property.toString())
+                    }
+                    val unfilteredCategories = propertyDetails.map {
+                        it.category.toCategory()
+                    }
+
+                    if(_uiState.value.categories.isEmpty()) {
+                        unfilteredCategories.forEachIndexed { index, category ->
+                            if(!filteredCategories.contains(category)) {
+                                filteredCategories.add(category)
+                            }
+                        }
+                    }
+                    _uiState.update {
+                        it.copy(
+                            categories = filteredCategories,
+                            properties = propertyDetails.map { property -> property.toPropertyData(property)},
+                            fetchingStatus = FetchingStatus.SUCCESS
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("FAILED_TO_FETCH_OFFLINE_PROPS", e.toString())
+            }
+
+        }
+    }
+
     init {
         loadStartupData()
+        fetchCategories()
     }
 }
+

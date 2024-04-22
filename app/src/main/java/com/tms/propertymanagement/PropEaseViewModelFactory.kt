@@ -1,5 +1,8 @@
 package com.propertymanagement.tms
 
+import android.content.Context
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
@@ -17,9 +20,11 @@ import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.Property
 import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.PropertyUploadScreenViewModel
 import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.UserLivePropertiesScreenViewModel
 import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.UserLivePropertyDetailsScreenViewModel
+import com.tms.propertymanagement.connectivity.ConnectivityViewModel
 import com.tms.propertymanagement.ui.screens.accountManagement.ProfileUpdateScreenViewModel
 
 object PropEaseViewModelFactory {
+
     val Factory = viewModelFactory {
         // initialize LoginScreen ViewModel
         initializer {
@@ -64,6 +69,7 @@ object PropEaseViewModelFactory {
 
         // initialize ListingsScreen ViewModel
         initializer {
+
             val apiRepository = propEaseApplication().container.apiRepository
             val dsRepository = propEaseApplication().dsRepository
             val dbRepository = propEaseApplication().container.dbRepository
@@ -159,6 +165,7 @@ object PropEaseViewModelFactory {
                 dsRepository = dsRepository
             )
         }
+
     }
 }
 

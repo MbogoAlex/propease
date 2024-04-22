@@ -1,10 +1,12 @@
 package com.propertymanagement.tms.ui.screens.appContentPages
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,6 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -70,6 +73,7 @@ import com.propertymanagement.tms.PropEaseViewModelFactory
 import com.propertymanagement.tms.R
 import com.propertymanagement.tms.apiModel.PropertyData
 import com.propertymanagement.tms.ui.theme.PropEaseTheme
+import com.tms.propertymanagement.connectivity.ConnectivityViewModel
 import kotlinx.coroutines.delay
 
 @Composable
@@ -79,15 +83,38 @@ fun ListingsScreen(
     modifier: Modifier = Modifier
 ) {
 
+    val context = LocalContext.current
+
+    val connectivityViewModel: ConnectivityViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+
+    LaunchedEffect(Unit) {
+        connectivityViewModel.checkConnectivity(context)
+    }
+
     val viewModel: ListingsScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
+
+
+
+    val isConnected by connectivityViewModel.isConnected.observeAsState(false)
+
+    if(uiState.isConnected != isConnected) {
+        Log.i("SETTING_CONNECTIVITY", isConnected.toString())
+        viewModel.setConnectionStatus(isConnected)
+
+        if(isConnected) {
+            viewModel.fetchCategories()
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
     ) {
         ListingsFilterSection(
             uiState = uiState,
-            viewModel = viewModel
+            viewModel = viewModel,
+            isConnected = uiState.isConnected
         )
         Spacer(modifier = Modifier.height(16.dp))
         ListingItems(
@@ -102,6 +129,7 @@ fun ListingsScreen(
 fun ListingsFilterSection(
     uiState: ListingsScreenUiState,
     viewModel: ListingsScreenViewModel,
+    isConnected: Boolean,
     modifier: Modifier = Modifier
 ) {
 
@@ -115,12 +143,22 @@ fun ListingsFilterSection(
                 keyboardType = KeyboardType.Text,
             ),
             onValueChanged = {
-                viewModel.fetchFilteredProperties(
-                    location = it,
-                    rooms = null,
-                    categoryId = null,
-                    categoryName = null
-                )
+                if(isConnected) {
+                    viewModel.fetchFilteredProperties(
+                        location = it,
+                        rooms = null,
+                        categoryId = null,
+                        categoryName = null
+                    )
+                } else {
+                    viewModel.fetchFilteredDBProperties(
+                        location = it,
+                        rooms = null,
+                        categoryId = null,
+                        categoryName = null
+                    )
+                }
+
                 viewModel.turnOnFiltering()
             },
             modifier = Modifier
@@ -139,12 +177,22 @@ fun ListingsFilterSection(
             NumberOfRoomsSelection(
                 uiState = uiState,
                 onChangeNumberOfRooms = {location, rooms, categoryId, categoryName ->
-                    viewModel.fetchFilteredProperties(
-                        location = location,
-                        rooms = rooms,
-                        categoryId = categoryId,
-                        categoryName = categoryName
-                    )
+                    if(isConnected) {
+                        viewModel.fetchFilteredProperties(
+                            location = location,
+                            rooms = rooms,
+                            categoryId = categoryId,
+                            categoryName = categoryName
+                        )
+                    } else {
+                        viewModel.fetchFilteredDBProperties(
+                            location = location,
+                            rooms = rooms,
+                            categoryId = categoryId,
+                            categoryName = categoryName
+                        )
+                    }
+
                     viewModel.turnOnFiltering()
                 },
             )
@@ -152,12 +200,22 @@ fun ListingsFilterSection(
             CategorySelection(
                 uiState = uiState,
                 onChangeCategory = {location, rooms, categoryId, categoryName ->
-                    viewModel.fetchFilteredProperties(
-                        location = location,
-                        rooms = rooms,
-                        categoryId = categoryId,
-                        categoryName = categoryName
-                    )
+                    if(isConnected) {
+                        viewModel.fetchFilteredProperties(
+                            location = location,
+                            rooms = rooms,
+                            categoryId = categoryId,
+                            categoryName = categoryName
+                        )
+                    } else {
+                        viewModel.fetchFilteredDBProperties(
+                            location = location,
+                            rooms = rooms,
+                            categoryId = categoryId,
+                            categoryName = categoryName
+                        )
+                    }
+
                     viewModel.turnOnFiltering()
                 }
             )
@@ -180,7 +238,15 @@ fun ListingsFilterSection(
             }
 
         }
-
+        Spacer(modifier = Modifier.height(5.dp))
+        if(!isConnected) {
+            Text(
+                text = "Check your internet connection",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+            )
+        }
+        Spacer(modifier = Modifier.height(5.dp))
     }
 }
 
@@ -458,16 +524,23 @@ fun ListingItem(
                         .fillMaxWidth()
                 )
             } else {
-                Image(
-                    painter = painterResource(id = R.drawable.no_image_icon_coming_soon),
-                    contentDescription = "No image",
-                    contentScale = ContentScale.Crop,
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .alpha(0.5f)
                         .height(140.dp)
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(10.dp))
-                )
+                        .padding(5.dp)
+                        .border(
+                            width = 1.dp,
+                            color = Color.LightGray,
+                            shape = RoundedCornerShape(5.dp)
+                        )
+                ) {
+                    Text(text = "No image")
+                }
+
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -485,41 +558,42 @@ fun ListingItem(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Default.LocationOn,
                         contentDescription = property.location.county
                     )
-                    Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.width(5.dp))
                     Text(
-                        text = property.location.county.takeIf { property.location.county.length <= 6 } ?: "${property.location.county.substring(0, 4)}...",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Light
+                        text = "${property.location.county}, ${property.location.address}",
+                        fontSize = 13.sp,
+                        maxLines = 1,
+                        fontWeight = FontWeight.Light,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Spacer(modifier = Modifier.weight(1f))
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.Black
-                        )
-                    ) {
-                        Text(
-                            text = property.category.takeIf { it.length <= 6 } ?: "${property.category.substring(0, 4)}...",
-                            fontSize = 11.sp,
-                            color = Color.White,
-                            modifier = Modifier
-                                .padding(
-                                    start = 10.dp,
-                                    top = 5.dp,
-                                    end = 10.dp,
-                                    bottom = 5.dp
-                                )
-                        )
-                    }
                 }
+                Spacer(modifier = Modifier.height(10.dp))
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.Black
+                    )
+                ) {
+                    Text(
+                        text = property.category.takeIf { it.length <= 6 } ?: "${property.category.substring(0, 4)}...",
+                        fontSize = 11.sp,
+                        color = Color.White,
+                        modifier = Modifier
+                            .padding(
+                                start = 10.dp,
+                                top = 5.dp,
+                                end = 10.dp,
+                                bottom = 5.dp
+                            )
+                    )
+                }
+
             }
         }
     }
@@ -562,7 +636,8 @@ fun ListingsFilterSectionPreview(
     PropEaseTheme {
         ListingsFilterSection(
             uiState = ListingsScreenUiState(),
-            viewModel = viewModel
+            viewModel = viewModel,
+            isConnected = true
         )
     }
 }

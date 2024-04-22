@@ -38,10 +38,10 @@ data class PropertyOwner(
 )
 @Serializable
 data class PropertyLocation(
-    val address: String,
-    val county: String,
-    val latitude: Double,
-    val longitude: Double
+    val address: String = "",
+    val county: String = "",
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0
 )
 @Serializable
 data class PropertyImage(

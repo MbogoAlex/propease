@@ -57,5 +57,7 @@ interface AppDao {
     @Query("SELECT * FROM property WHERE propertyId = :propertyId")
     fun getProperty(propertyId: Int): Flow<PropertyDetails>
 
-
+    @Transaction
+    @Query("SELECT DISTINCT property.* FROM property INNER JOIN location ON property.propertyId = location.propertyId WHERE (property.fetchData = :fetchData) AND (:location IS NULL OR location.county LIKE :location) AND (:category IS NULL OR property.categoryName = :category) AND (:rooms IS NULL OR property.rooms = :rooms)")
+    fun filterProperties(fetchData: Boolean, location: String?, rooms: Int?, category: String?): Flow<List<PropertyDetails>>
 }

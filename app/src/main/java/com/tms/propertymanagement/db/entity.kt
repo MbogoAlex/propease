@@ -21,9 +21,13 @@ data class Property(
     val propertyId: Int = 0,
     val title: String = "",
     val description: String = "",
+    val postedDate: String = "",
     val price: Double = 0.0,
+    val rooms: Int = 0,
     val ownerId: Int = 0,
     val categoryId: Int = 0,
+    val categoryName: String = "",
+    val fetchData: Boolean = true,
 )
 @Entity(tableName = "owner", [Index(value = ["propertyId"], unique = true)])
 data class Owner(
@@ -31,7 +35,9 @@ data class Owner(
     val id: Int = 0,
     val ownerId: Int = 0,
     val propertyId: Int = 0,
-    val name: String = "",
+    val firstName: String = "",
+    val lastName: String = "",
+    val email: String = "",
     val phoneNumber: String = ""
 )
 @Entity(tableName = "category",
@@ -83,7 +89,7 @@ data class PropertyDetails(
         parentColumn = "propertyId",
         entityColumn = "propertyId"
     )
-    val location: Location = Location(),
+    val location: Location? = Location(),
 
     @Relation(
         parentColumn = "propertyId",
