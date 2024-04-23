@@ -245,7 +245,10 @@ fun ListingTextDetails(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    Column {
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -302,21 +305,18 @@ fun ListingTextDetails(
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(20.dp))
-        LazyVerticalGrid(columns = GridCells.Fixed(2)) {
-            items(uiState.features.size) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.circle),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(10.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = uiState.features[it])
-                }
-
+        uiState.features.forEachIndexed { index, s ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.circle),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(10.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(text = uiState.features[index])
             }
         }
         Spacer(modifier = Modifier.height(10.dp))

@@ -8,9 +8,12 @@ import com.propertymanagement.tms.network.ApiRepository
 import com.propertymanagement.tms.propEaseDataStore.DSRepository
 import com.propertymanagement.tms.utils.ReusableFunctions
 import com.propertymanagement.tms.utils.ReusableFunctions.toLoggedInUserData
+import com.tms.propertymanagement.db.DBRepository
+import com.tms.propertymanagement.utils.toPropertyData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -27,11 +30,14 @@ data class UserLivePropertiesScreenUiState(
     val userDetails: ReusableFunctions.LoggedInUserData = ReusableFunctions.LoggedInUserData(),
     val showPropertyUploadScreen: Boolean = false,
     val forceLogin: Boolean = false,
+    val isConnected: Boolean = false,
+    val internetPresent: Boolean = true
 
 )
 class UserLivePropertiesScreenViewModel(
     private val apiRepository: ApiRepository,
-    private val dsRepository: DSRepository
+    private val dsRepository: DSRepository,
+    private val dbRepository: DBRepository,
 ): ViewModel() {
     private val _uiState = MutableStateFlow(value = UserLivePropertiesScreenUiState())
     val uiState: StateFlow<UserLivePropertiesScreenUiState> = _uiState.asStateFlow()
@@ -50,7 +56,8 @@ class UserLivePropertiesScreenViewModel(
     fun fetchUserProperties() {
         _uiState.update {
             it.copy(
-                fetchingStatus = FetchingStatus.LOADING
+                isConnected = true,
+                internetPresent = true
             )
         }
         viewModelScope.launch {
@@ -82,9 +89,11 @@ class UserLivePropertiesScreenViewModel(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        fetchingStatus = FetchingStatus.FAILURE
+                        fetchingStatus = FetchingStatus.FAILURE,
+                        internetPresent = false
                     )
                 }
+                fetchPropertiesFromDB()
                 Log.e("FAILED_TO_FETCH_USER_PROPERTIES_EXCEPTION", e.message.toString())
             }
 
@@ -107,8 +116,37 @@ class UserLivePropertiesScreenViewModel(
         }
     }
 
+    fun fetchPropertiesFromDB() {
+        viewModelScope.launch {
+            dbRepository.getUserProperties(_uiState.value.userDetails.userId!!).collect() {properties ->
+                if(!_uiState.value.isConnected || !_uiState.value.internetPresent) {
+                    _uiState.update {
+                        it.copy(
+                            properties = properties.map { property ->
+                                property.toPropertyData(property)
+                            }
+                        )
+                    }
+                }
+
+            }
+        }
+    }
+
+    fun setConnectionStatus(isConnected: Boolean) {
+        _uiState.update {
+            it.copy(
+                isConnected = isConnected
+            )
+        }
+        if(isConnected) {
+            fetchUserProperties()
+        } else if(!isConnected) {
+            fetchPropertiesFromDB()
+        }
+    }
+
     init {
         fetchUserDetails()
-        fetchUserProperties()
     }
 }

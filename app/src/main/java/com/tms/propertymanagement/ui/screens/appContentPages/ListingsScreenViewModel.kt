@@ -49,6 +49,7 @@ data class ListingsScreenUiState(
     val currentConnection: Boolean = false,
     val isConnected: Boolean = false,
     val dataInsertedIntoDB: Boolean = false,
+    val internetPresent: Boolean = true
 )
 class ListingsScreenViewModel(
     private val apiRepository: ApiRepository,
@@ -72,6 +73,17 @@ class ListingsScreenViewModel(
     }
 
     fun fetchCategories() {
+        if(!_uiState.value.internetPresent) {
+            _uiState.update {
+                it.copy(
+                    location = "",
+                    categoryNameSelected = "",
+                    categoryIdSelected = "",
+                    numberOfRoomsSelected = "",
+                    filteringOn = false
+                )
+            }
+        }
         Log.i("FETCHING_PROPERTIES", "FETCHING PROPERTIS")
         _uiState.update {
             it.copy(
@@ -86,7 +98,8 @@ class ListingsScreenViewModel(
                         it.copy(
                             categories = response.body()?.data?.categories!!,
 //                            categoryNameSelected = response.body()?.data?.categories!![0].name,
-                            fetchingStatus = FetchingStatus.SUCCESS
+                            fetchingStatus = FetchingStatus.SUCCESS,
+                            internetPresent = true
                         )
                     }
                     fetchProperties(
@@ -108,16 +121,26 @@ class ListingsScreenViewModel(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        fetchingStatus = FetchingStatus.FAILURE
+                        fetchingStatus = FetchingStatus.FAILURE,
+                        internetPresent = false
                     )
                 }
-                fetchFilteredDBProperties(
-                    location = null,
-                    rooms = null,
-                    categoryId = null,
-                    categoryName = null
-                )
-                Log.e("CATEGORIES_NOT_FETCHED_EXCEPTION", e.message.toString())
+
+                if(_uiState.value.isConnected) {
+                    fetchFilteredDBProperties(
+                        location = null,
+                        categoryName = null,
+                        categoryId = null,
+                        rooms = null
+                    )
+                }
+//                fetchFilteredDBProperties(
+//                    location = null,
+//                    rooms = null,
+//                    categoryId = null,
+//                    categoryName = null
+//                )
+                Log.e("CATEGORIES_NOT_FETCHED_EXCEPTION", e.toString())
             }
         }
     }
@@ -136,7 +159,8 @@ class ListingsScreenViewModel(
                     _uiState.update {
                         it.copy(
                             fetchingStatus = FetchingStatus.SUCCESS,
-                            properties = response.body()?.data?.properties!!
+                            properties = response.body()?.data?.properties!!,
+                            internetPresent = true
                         )
                     }
                     if(!_uiState.value.dataInsertedIntoDB) {
@@ -161,15 +185,20 @@ class ListingsScreenViewModel(
             }catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        fetchingStatus = FetchingStatus.FAILURE
+                        fetchingStatus = FetchingStatus.FAILURE,
+                        internetPresent = false
                     )
                 }
-                fetchFilteredDBProperties(
-                    location = null,
-                    rooms = null,
-                    categoryId = null,
-                    categoryName = null
-                )
+                if(_uiState.value.isConnected) {
+                    fetchFilteredDBProperties(
+                        location = null,
+                        rooms = null,
+                        categoryId = null,
+                        categoryName = null
+                    )
+
+                }
+
                 Log.e("PROPERTIES_FETCHING_FAILED_EXCEPTION", e.message.toString())
             }
         }
@@ -203,12 +232,22 @@ class ListingsScreenViewModel(
                 filteringOn = false
             )
         }
-        fetchProperties(
-            token = _uiState.value.userDetails.token,
-            categoryId = "",
-            location = "",
-            rooms =  ""
-        )
+
+        if(_uiState.value.isConnected) {
+            fetchProperties(
+                token = _uiState.value.userDetails.token,
+                categoryId = "",
+                location = "",
+                rooms =  ""
+            )
+        } else if(!_uiState.value.isConnected) {
+            fetchFilteredDBProperties(
+                location = null,
+                categoryName = null,
+                categoryId = null,
+                rooms = null
+            )
+        }
     }
 
     fun turnOnFiltering() {
@@ -263,6 +302,7 @@ class ListingsScreenViewModel(
                     title = prop.title,
                     description = prop.description,
                     postedDate = prop.postedDate,
+                    propertyLocation = "${prop.location.county}, ${prop.location.address}",
                     price = prop.price,
                     rooms = prop.rooms,
                     ownerId = prop.user.userId,
@@ -360,13 +400,41 @@ class ListingsScreenViewModel(
                 isConnected = isConnected
             )
         }
+        if(isConnected) {
+            _uiState.update {
+                it.copy(
+                    numberOfRoomsSelected = "",
+                    categoryNameSelected = "",
+                    categoryIdSelected = "",
+                    location = "",
+                    filteringOn = false
+                )
+            }
+            fetchCategories()
+        } else if(!isConnected) {
+            _uiState.update {
+                it.copy(
+                    numberOfRoomsSelected = "",
+                    categoryNameSelected = "",
+                    categoryIdSelected = "",
+                    location = "",
+                    filteringOn = false
+                )
+            }
+            fetchFilteredDBProperties(
+                location = null,
+                categoryName = null,
+                categoryId = null,
+                rooms = null
+            )
+        }
 
     }
 
     private val filteredCategories = mutableListOf<Category>()
 
     fun fetchFilteredDBProperties(location: String?, rooms: Int?, categoryId: Int?, categoryName: String?) {
-
+        Log.i("CONNECTION_STATUS", "${_uiState.value.isConnected}")
         _uiState.update {
             it.copy(
                 numberOfRoomsSelected = rooms.toString().takeIf { rooms != null } ?: _uiState.value.numberOfRoomsSelected,
@@ -381,18 +449,17 @@ class ListingsScreenViewModel(
         Log.i("CATEGORYID", categoryId.toString())
         Log.i("CATEGORYNAME", _uiState.value.categoryNameSelected)
         viewModelScope.launch {
-            try {
-                dbRepository.filterProperties(
-                    rooms = if(_uiState.value.numberOfRoomsSelected.isEmpty()) null else _uiState.value.numberOfRoomsSelected.toInt(),
-                    category = _uiState.value.categoryNameSelected.takeIf { it.isNotEmpty() },
+            Log.i("FETCHING_FROM_DB", "Fetching from db")
+            dbRepository.filterProperties(
+                rooms = if(_uiState.value.numberOfRoomsSelected.isEmpty()) null else _uiState.value.numberOfRoomsSelected.toInt(),
+                category = _uiState.value.categoryNameSelected.takeIf { it.isNotEmpty() },
 //                    location = "kiambu",
-                    location = _uiState.value.location.takeIf { it.isNotEmpty() },
-                    fetchData = true
-                ).collect() {propertyDetails ->
+                location = _uiState.value.location.takeIf { it.isNotEmpty() },
+                fetchData = true
+            ).collect() {propertyDetails ->
+                if(!_uiState.value.isConnected || !_uiState.value.internetPresent) {
                     Log.i("PROP_ROOMS_SIZE", propertyDetails.size.toString())
-                    for(property in propertyDetails) {
-                        Log.i("PROP_ROOMS", property.property.toString())
-                    }
+
                     val unfilteredCategories = propertyDetails.map {
                         it.category.toCategory()
                     }
@@ -404,6 +471,9 @@ class ListingsScreenViewModel(
                             }
                         }
                     }
+                    for (property in propertyDetails) {
+                        Log.i("OFFLINE_PROPERTY", property.toString())
+                    }
                     _uiState.update {
                         it.copy(
                             categories = filteredCategories,
@@ -412,16 +482,15 @@ class ListingsScreenViewModel(
                         )
                     }
                 }
-            } catch (e: Exception) {
-                Log.e("FAILED_TO_FETCH_OFFLINE_PROPS", e.toString())
+
             }
 
         }
+
     }
 
     init {
         loadStartupData()
-        fetchCategories()
     }
 }
 

@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,20 +28,25 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -67,6 +73,7 @@ import com.propertymanagement.tms.R
 import com.propertymanagement.tms.nav.NavigationDestination
 import com.propertymanagement.tms.ui.theme.PropEaseTheme
 import com.propertymanagement.tms.utils.ReusableFunctions
+import com.tms.propertymanagement.connectivity.ConnectivityViewModel
 
 object UserLivePropertyDetailsScreenDestination: NavigationDestination {
     override val title: String = "User Property Details Screen"
@@ -83,10 +90,38 @@ fun UserLivePropertyDetailsScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val connectivityViewModel: ConnectivityViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
+
+    LaunchedEffect(Unit) {
+        connectivityViewModel.checkConnectivity(context)
+    }
+
     val viewModel: UserLivePropertyDetailsScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
     var showDeleteDialog by remember {
         mutableStateOf(false)
+    }
+
+    val isConnected by connectivityViewModel.isConnected.observeAsState(false)
+
+    var active by remember {
+        mutableStateOf(false)
+    }
+
+    var inactive by remember {
+        mutableStateOf(false)
+    }
+
+    if(isConnected && !active) {
+        Log.i("SETTING_CONNECTIVITY", isConnected.toString())
+        viewModel.setConnectionStatus(true)
+
+        active = true
+    } else if(!isConnected && active || !isConnected && !inactive) {
+        Log.i("FETCH_FROM_LITE", true.toString())
+        viewModel.setConnectionStatus(false)
+        active = false
+        inactive = true
     }
 
     if(uiState.deletingPropertyStatus == DeletingPropertyStatus.SUCCESS) {
@@ -127,54 +162,82 @@ fun UserLivePropertyDetailsScreen(
         )
     }
 
-    Column(
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxSize()
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { navigateToPreviousScreen() }) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Previous screen"
-                )
+    Scaffold(
+        floatingActionButton = {
+            if(!uiState.internetPresent) {
+                FloatingActionButton(onClick = { viewModel.fetchProperty() }) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Refresh page"
+                    )
+                }
             }
-            Spacer(modifier = Modifier.weight(1f))
+        }
+    ) {
+        Box(modifier = Modifier.padding(it)) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxSize()
 
-            TextButton(onClick = { navigateToPropertyUpdateScreen(
-
-                uiState.property.propertyId.toString()
-            ) }) {
+            ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.edit),
-                        contentDescription = "Edit"
-                    )
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text(
-                        text = "Edit")
+                    IconButton(onClick = { navigateToPreviousScreen() }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Previous screen"
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    TextButton(
+                        enabled = isConnected && uiState.internetPresent,
+                        onClick = { navigateToPropertyUpdateScreen(
+
+                            uiState.property.propertyId.toString()
+                        ) }) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.edit),
+                                contentDescription = "Edit"
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(
+                                text = "Edit")
+                        }
+                    }
+
                 }
+                if(!isConnected || !uiState.internetPresent) {
+                    Text(
+                        text = "Check your connection",
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                    )
+                    Spacer(
+                        modifier = Modifier
+                            .height(10.dp)
+                    )
+                }
+                UserPropertyImageSlider(
+                    uiState = uiState
+                )
+                Spacer(
+                    modifier = Modifier
+                        .height(20.dp)
+                )
+                UserPropertyListingTextDetails(
+                    uiState = uiState,
+                    onDeleteButtonClicked = {
+                        showDeleteDialog = !showDeleteDialog
+                    }
+                )
             }
-
         }
-
-        UserPropertyImageSlider(
-            uiState = uiState
-        )
-        Spacer(
-            modifier = Modifier
-                .height(20.dp)
-        )
-        UserPropertyListingTextDetails(
-            uiState = uiState,
-            onDeleteButtonClicked = {
-                showDeleteDialog = !showDeleteDialog
-            }
-        )
     }
 }
 
@@ -194,6 +257,24 @@ fun UserPropertyImageSlider(
                     .fillMaxWidth()
 
             ) {
+                if(uiState.property.images.isEmpty()) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .alpha(0.5f)
+                            .height(250.dp)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .padding(5.dp)
+                            .border(
+                                width = 1.dp,
+                                color = Color.LightGray,
+                                shape = RoundedCornerShape(5.dp)
+                            )
+                    ) {
+                        Text(text = "No image")
+                    }
+                }
                 HorizontalPager(count = uiState.property.images.size, state = pagerState) { page ->
                     AsyncImage(
                         model = ImageRequest.Builder(context = LocalContext.current)
@@ -211,24 +292,26 @@ fun UserPropertyImageSlider(
                     )
 
                 }
-                Box(
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxWidth()
-                        .align(Alignment.BottomEnd)
-                ) {
-                    Text(
-                        text = "${pagerState.currentPage + 1}/${pagerState.pageCount}",
-                        color = Color.White,
+                if(uiState.isConnected && uiState.property.images.isNotEmpty()) {
+                    Box(
                         modifier = Modifier
-                            .alpha(0.5f)
-                            .background(Color.Black)
-                            .padding(
-                                start = 10.dp,
-                                end = 10.dp,
-                            )
+                            .padding(20.dp)
+                            .fillMaxWidth()
                             .align(Alignment.BottomEnd)
-                    )
+                    ) {
+                        Text(
+                            text = "${pagerState.currentPage + 1}/${pagerState.pageCount}",
+                            color = Color.White,
+                            modifier = Modifier
+                                .alpha(0.5f)
+                                .background(Color.Black)
+                                .padding(
+                                    start = 10.dp,
+                                    end = 10.dp,
+                                )
+                                .align(Alignment.BottomEnd)
+                        )
+                    }
                 }
             }
         }
@@ -242,7 +325,10 @@ fun UserPropertyListingTextDetails(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    Column {
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -311,21 +397,18 @@ fun UserPropertyListingTextDetails(
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
-        LazyVerticalGrid(columns = GridCells.Fixed(2)) {
-            items(uiState.property.features.size) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.circle),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(10.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = uiState.property.features[it])
-                }
-
+        uiState.property.features.distinct().forEachIndexed { index, s ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.circle),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(10.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(text = uiState.property.features[index])
             }
         }
         Spacer(modifier = Modifier.height(10.dp))
@@ -453,13 +536,15 @@ fun UserPropertyListingTextDetails(
         }
         Spacer(modifier = Modifier.height(10.dp))
         Button(
-            enabled = uiState.deletingPropertyStatus != DeletingPropertyStatus.LOADING,
+            enabled =uiState.isConnected && uiState.internetPresent &&  uiState.deletingPropertyStatus != DeletingPropertyStatus.LOADING,
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Black
             ),
             modifier = Modifier
                 .fillMaxWidth(),
-            onClick = { onDeleteButtonClicked() }
+            onClick = {
+                onDeleteButtonClicked()
+            }
         ) {
             if(uiState.deletingPropertyStatus == DeletingPropertyStatus.LOADING) {
                 CircularProgressIndicator()

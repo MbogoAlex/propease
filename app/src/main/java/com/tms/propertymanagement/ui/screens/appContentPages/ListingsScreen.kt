@@ -1,14 +1,11 @@
 package com.propertymanagement.tms.ui.screens.appContentPages
 
 import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -35,9 +31,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -85,7 +83,7 @@ fun ListingsScreen(
 
     val context = LocalContext.current
 
-    val connectivityViewModel: ConnectivityViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val connectivityViewModel: ConnectivityViewModel = androidx.lifecycle.viewmodel.compose.viewModel(factory = PropEaseViewModelFactory.Factory)
 
     LaunchedEffect(Unit) {
         connectivityViewModel.checkConnectivity(context)
@@ -94,35 +92,68 @@ fun ListingsScreen(
     val viewModel: ListingsScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
 
-
-
     val isConnected by connectivityViewModel.isConnected.observeAsState(false)
 
-    if(uiState.isConnected != isConnected) {
-        Log.i("SETTING_CONNECTIVITY", isConnected.toString())
-        viewModel.setConnectionStatus(isConnected)
+    var fetchedFromDB by remember {
+        mutableStateOf(false)
+    }
 
-        if(isConnected) {
-            viewModel.fetchCategories()
+    var active by remember {
+        mutableStateOf(false)
+    }
+
+    var inactive by remember {
+        mutableStateOf(false)
+    }
+
+    if(isConnected && !active) {
+        Log.i("SETTING_CONNECTIVITY", isConnected.toString())
+        viewModel.setConnectionStatus(true)
+
+        active = true
+    } else if(!isConnected && active || !isConnected && !inactive) {
+        Log.i("FETCH_FROM_LITE", true.toString())
+        viewModel.setConnectionStatus(false)
+        active = false
+        inactive = true
+    }
+
+
+
+    Scaffold(
+        floatingActionButton = {
+            if(!uiState.internetPresent) {
+                FloatingActionButton(onClick = { viewModel.fetchCategories() }) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Refresh page"
+                    )
+                }
+            }
+        }
+    ) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(it)
+        ) {
+            ListingsFilterSection(
+                uiState = uiState,
+                viewModel = viewModel,
+                isConnected = uiState.isConnected,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            ListingItems(
+                navigateToSpecificProperty = navigateToSpecificProperty,
+                uiState = uiState,
+                viewModel = viewModel,
+                modifier = Modifier.weight(1f)
+            )
+
         }
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-    ) {
-        ListingsFilterSection(
-            uiState = uiState,
-            viewModel = viewModel,
-            isConnected = uiState.isConnected
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        ListingItems(
-            navigateToSpecificProperty = navigateToSpecificProperty,
-            uiState = uiState,
-            viewModel = viewModel
-        )
-    }
 }
 
 @Composable
@@ -436,31 +467,15 @@ fun ListingItems(
         ) {
             CircularProgressIndicator()
         }
-    } else if(uiState.fetchingStatus == FetchingStatus.FAILURE) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
+    } else if (uiState.fetchingStatus == FetchingStatus.SUCCESS) {
+        if(!uiState.internetPresent) {
             Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = "Failed to fetch properties. Check your connection",
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(20.dp))
-                IconButton(onClick = {
-                    viewModel.unfilter()
-                }) {
-                    Icon(imageVector = Icons.Default.Refresh,
-                        contentDescription = "Refresh"
-                    )
-                }
+                Text(text = "Internet not present")
             }
         }
-    } else if (uiState.fetchingStatus == FetchingStatus.SUCCESS) {
         if (properties.isEmpty()) {
             LaunchedEffect(Unit) {
                 delay(2000L)
@@ -478,6 +493,7 @@ fun ListingItems(
                 }
             }
         } else {
+
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2)
             ) {

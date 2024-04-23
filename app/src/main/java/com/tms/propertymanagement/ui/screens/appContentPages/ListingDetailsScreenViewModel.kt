@@ -11,9 +11,12 @@ import com.propertymanagement.tms.network.ApiRepository
 import com.propertymanagement.tms.propEaseDataStore.DSRepository
 import com.propertymanagement.tms.utils.ReusableFunctions
 import com.propertymanagement.tms.utils.ReusableFunctions.toLoggedInUserData
+import com.tms.propertymanagement.db.DBRepository
+import com.tms.propertymanagement.utils.toPropertyData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -61,13 +64,16 @@ enum class PropertyFetchingStatus{
 data class ListingDetailsScreenUiState(
     val property: PropertyData = propertyData,
     val fetchingStatus: PropertyFetchingStatus = PropertyFetchingStatus.INITIAL,
-    val userDetails: ReusableFunctions.LoggedInUserData = ReusableFunctions.LoggedInUserData()
+    val userDetails: ReusableFunctions.LoggedInUserData = ReusableFunctions.LoggedInUserData(),
+    val isConnected: Boolean = false,
+    val internetPresent: Boolean = true
 )
 
 class ListingDetailsScreenViewModel(
     private val apiRepository: ApiRepository,
     private val dsRepository: DSRepository,
     private val savedStateHandle: SavedStateHandle,
+    private val dbRepository: DBRepository,
 ): ViewModel() {
     private val _uiState = MutableStateFlow(value = ListingDetailsScreenUiState())
     val uiState: StateFlow<ListingDetailsScreenUiState> = _uiState.asStateFlow()
@@ -86,6 +92,12 @@ class ListingDetailsScreenViewModel(
     }
 
     fun fetchProperty() {
+        _uiState.update {
+            it.copy(
+                isConnected = true,
+                internetPresent = true
+            )
+        }
         _uiState.update {
             it.copy(
                 fetchingStatus = PropertyFetchingStatus.LOADING
@@ -114,17 +126,47 @@ class ListingDetailsScreenViewModel(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        fetchingStatus = PropertyFetchingStatus.FAIL
+                        fetchingStatus = PropertyFetchingStatus.FAIL,
+                        internetPresent = false
                     )
                 }
+                fetchPropertyFromDB()
                 Log.e("FAILED_TO_FETCH_PROPERTY_EXCEPTION", e.message.toString())
             }
         }
     }
 
+    fun fetchPropertyFromDB() {
+        viewModelScope.launch {
+            dbRepository.getSpecificProperty(propertyId!!.toInt()).collect() {propertyDetails ->
+                if(!_uiState.value.isConnected || !_uiState.value.internetPresent) {
+                    _uiState.update {
+                        it.copy(
+                            property = propertyDetails.toPropertyData(propertyDetails)
+                        )
+                    }
+                }
+
+            }
+        }
+    }
+
+    fun setConnectionStatus(isConnected: Boolean) {
+        _uiState.update {
+            it.copy(
+                isConnected = isConnected
+            )
+        }
+        if(isConnected) {
+            fetchProperty()
+        } else if(!isConnected) {
+            fetchPropertyFromDB()
+        }
+    }
+
     init {
         loadUserDetails()
-        fetchProperty()
+
     }
 
 }

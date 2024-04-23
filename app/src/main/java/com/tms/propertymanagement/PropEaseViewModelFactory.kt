@@ -83,12 +83,14 @@ object PropEaseViewModelFactory {
         // initialize ListingDetailsScreen ViewModel
         initializer {
             val apiRepository = propEaseApplication().container.apiRepository
+            val dbRepository = propEaseApplication().container.dbRepository
             val dsRepository = propEaseApplication().dsRepository
             val savedStateHandle = this.createSavedStateHandle()
             ListingDetailsScreenViewModel(
                 apiRepository = apiRepository,
                 dsRepository = dsRepository,
-                savedStateHandle = savedStateHandle
+                savedStateHandle = savedStateHandle,
+                dbRepository = dbRepository
             )
         }
 
@@ -105,21 +107,25 @@ object PropEaseViewModelFactory {
         // initialize UserLivePropertiesScreen ViewModel
         initializer {
             val apiRepository = propEaseApplication().container.apiRepository
+            val dbRepository = propEaseApplication().container.dbRepository
             val dsRepository = propEaseApplication().dsRepository
             UserLivePropertiesScreenViewModel(
                 apiRepository = apiRepository,
-                dsRepository = dsRepository
+                dsRepository = dsRepository,
+                dbRepository = dbRepository
             )
         }
 
         // initialize UserLivePropertyDetailsScreen ViewModel
         initializer {
             val apiRepository = propEaseApplication().container.apiRepository
+            val dbRepository = propEaseApplication().container.dbRepository
             val dsRepository = propEaseApplication().dsRepository
             UserLivePropertyDetailsScreenViewModel(
                 apiRepository = apiRepository,
                 dsRepository = dsRepository,
-                savedStateHandle = this.createSavedStateHandle()
+                savedStateHandle = this.createSavedStateHandle(),
+                dbRepository = dbRepository
             )
         }
 
@@ -163,6 +169,14 @@ object PropEaseViewModelFactory {
             ProfileUpdateScreenViewModel(
                 apiRepository = apiRepository,
                 dsRepository = dsRepository
+            )
+        }
+
+        // initialize ConnectivityViewModel
+        initializer {
+            val apiRepository = propEaseApplication().container.apiRepository
+            ConnectivityViewModel(
+                apiRepository = apiRepository
             )
         }
 

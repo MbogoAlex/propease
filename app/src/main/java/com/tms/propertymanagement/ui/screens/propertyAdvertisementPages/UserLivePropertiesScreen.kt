@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,12 +17,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -33,8 +36,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -60,6 +65,7 @@ import com.propertymanagement.tms.PropEaseViewModelFactory
 import com.propertymanagement.tms.R
 import com.propertymanagement.tms.apiModel.PropertyData
 import com.propertymanagement.tms.ui.theme.PropEaseTheme
+import com.tms.propertymanagement.connectivity.ConnectivityViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
@@ -72,10 +78,38 @@ fun UserLiveProperties(
     navigateToLoginScreenWithArgs: (phoneNumber: String, password: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    BackHandler(onBack = {navigateToHomeScreen()})
     val context = LocalContext.current
+    val connectivityViewModel: ConnectivityViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
+
+    LaunchedEffect(Unit) {
+        connectivityViewModel.checkConnectivity(context)
+    }
+
+    BackHandler(onBack = {navigateToHomeScreen()})
+
     val viewModel: UserLivePropertiesScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
+
+    val isConnected by connectivityViewModel.isConnected.observeAsState(false)
+    var active by remember {
+        mutableStateOf(false)
+    }
+
+    var inactive by remember {
+        mutableStateOf(false)
+    }
+
+    if(isConnected && !active) {
+        Log.i("SETTING_CONNECTIVITY", isConnected.toString())
+        viewModel.setConnectionStatus(true)
+
+        active = true
+    } else if(!isConnected && active || !isConnected && !inactive) {
+        Log.i("FETCH_FROM_LITE", true.toString())
+        viewModel.setConnectionStatus(false)
+        active = false
+        inactive = true
+    }
 
     var showLoginDialog by remember {
         mutableStateOf(false)
@@ -122,18 +156,29 @@ fun UserLiveProperties(
 
     Scaffold(
         floatingActionButton = {
-            if(!uiState.showPropertyUploadScreen) {
+            if(!uiState.showPropertyUploadScreen && isConnected && uiState.internetPresent) {
                 FloatingActionButton(
                     onClick = {
-                        if(uiState.userDetails.userId != 0 && uiState.userDetails.userId != null) {
-                            viewModel.switchToAndFromPropertyUploadScreen()
+                        if(!uiState.internetPresent) {
+                            Toast.makeText(context, "Connect to the internet", Toast.LENGTH_SHORT).show()
                         } else {
-                            showLoginDialog = !showLoginDialog
+                            if(uiState.userDetails.userId != 0 && uiState.userDetails.userId != null) {
+                                viewModel.switchToAndFromPropertyUploadScreen()
+                            } else {
+                                showLoginDialog = !showLoginDialog
+                            }
                         }
                     }) {
                     Icon(
                         painter = painterResource(id = R.drawable.advertise),
                         contentDescription = "Publish a new property"
+                    )
+                }
+            } else if (!uiState.internetPresent) {
+                FloatingActionButton(onClick = { viewModel.fetchUserProperties() }) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Refresh page"
                     )
                 }
             }
@@ -165,6 +210,15 @@ fun UserLiveProperties(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(10.dp))
+                    if (!uiState.internetPresent || !uiState.isConnected) {
+                        Text(
+                            text = "Check your internet connection",
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+
                     ListingItems(
                         navigateToSpecificUserProperty = navigateToSpecificUserProperty,
                         uiState = uiState,
@@ -246,16 +300,23 @@ fun ListingItem(
                         .fillMaxWidth()
                 )
             } else {
-                Image(
-                    painter = painterResource(id = R.drawable.no_image_icon_coming_soon),
-                    contentDescription = "No image",
-                    contentScale = ContentScale.Crop,
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .alpha(0.5f)
                         .height(140.dp)
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(10.dp))
-                )
+                        .padding(5.dp)
+                        .border(
+                            width = 1.dp,
+                            color = Color.LightGray,
+                            shape = RoundedCornerShape(5.dp)
+                        )
+                ) {
+                    Text(text = "No image")
+                }
+
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -273,41 +334,42 @@ fun ListingItem(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Default.LocationOn,
                         contentDescription = property.location.county
                     )
-                    Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.width(5.dp))
                     Text(
-                        text = property.location.county.takeIf { property.location.county.length <= 6 } ?: "${property.location.county.substring(0, 4)}...",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Light
+                        text = "${property.location.county}, ${property.location.address}",
+                        fontSize = 13.sp,
+                        maxLines = 1,
+                        fontWeight = FontWeight.Light,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Spacer(modifier = Modifier.weight(1f))
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.Black
-                        )
-                    ) {
-                        Text(
-                            text = property.category.takeIf { it.length <= 6 } ?: "${property.category.substring(0, 4)}...",
-                            fontSize = 11.sp,
-                            color = Color.White,
-                            modifier = Modifier
-                                .padding(
-                                    start = 10.dp,
-                                    top = 5.dp,
-                                    end = 10.dp,
-                                    bottom = 5.dp
-                                )
-                        )
-                    }
                 }
+                Spacer(modifier = Modifier.height(10.dp))
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.Black
+                    )
+                ) {
+                    Text(
+                        text = property.category.takeIf { it.length <= 6 } ?: "${property.category.substring(0, 4)}...",
+                        fontSize = 11.sp,
+                        color = Color.White,
+                        modifier = Modifier
+                            .padding(
+                                start = 10.dp,
+                                top = 5.dp,
+                                end = 10.dp,
+                                bottom = 5.dp
+                            )
+                    )
+                }
+
             }
         }
     }

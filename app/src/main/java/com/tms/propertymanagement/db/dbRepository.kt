@@ -36,6 +36,10 @@ interface DBRepository {
 
     // filter properties
     fun filterProperties(fetchData: Boolean, location: String?, rooms: Int?, category: String?): Flow<List<PropertyDetails>>
+
+    // get user properties
+
+    fun getUserProperties(ownerId: Int): Flow<List<PropertyDetails>>
 }
 
 class OfflineRepository(private val appDao: AppDao): DBRepository {
@@ -74,6 +78,10 @@ class OfflineRepository(private val appDao: AppDao): DBRepository {
         location = location?.let { "%$it%" } ?: "%%",
         rooms = rooms,
         category = category
+    )
+
+    override fun getUserProperties(ownerId: Int): Flow<List<PropertyDetails>> = appDao.getUserProperties(
+        ownerId = ownerId
     )
 
 }

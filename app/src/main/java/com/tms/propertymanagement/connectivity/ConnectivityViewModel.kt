@@ -9,10 +9,16 @@ import android.net.NetworkRequest
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.propertymanagement.tms.network.ApiRepository
+import kotlinx.coroutines.launch
 
-class ConnectivityViewModel() : ViewModel() {
+class ConnectivityViewModel(
+    private val apiRepository: ApiRepository
+) : ViewModel() {
     private val _isConnected = MutableLiveData<Boolean>()
     val isConnected: LiveData<Boolean> = _isConnected
+
 
     var conManager: ConnectivityManager? = null
     var netCallback: NetworkCallback? = null
@@ -37,6 +43,7 @@ class ConnectivityViewModel() : ViewModel() {
             .build()
         connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
     }
+
 
     override fun onCleared() {
         super.onCleared()
