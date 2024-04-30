@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -120,6 +121,10 @@ fun PropertyUploadScreen(
                     fontWeight = FontWeight.Bold
                 )
             }
+            Text(
+                text = "* Required fields",
+                color = Color.Red
+            )
             Spacer(modifier = Modifier.height(20.dp))
             Column(
                 modifier = Modifier
@@ -175,6 +180,7 @@ fun PropertyDetails(
 ) {
     Column {
         PropertyUploadInputForm(
+            index = null,
             labelText = "Title",
             value = uiState.title,
             maxLines = 2,
@@ -190,6 +196,7 @@ fun PropertyDetails(
         )
         Spacer(modifier = Modifier.height(20.dp))
         PropertyUploadInputForm(
+            index = null,
             labelText = "Description",
             value = uiState.description,
             maxLines = 4,
@@ -205,6 +212,7 @@ fun PropertyDetails(
         )
         Spacer(modifier = Modifier.height(20.dp))
         PropertyUploadInputForm(
+            index = null,
             labelText = "Price",
             value = uiState.price,
             maxLines = 1,
@@ -221,6 +229,7 @@ fun PropertyDetails(
         Spacer(modifier = Modifier.height(20.dp))
         Row {
             PropertyUploadInputForm(
+                index = null,
                 labelText = "County",
                 value = uiState.county,
                 maxLines = 1,
@@ -236,11 +245,12 @@ fun PropertyDetails(
             )
             Spacer(modifier = Modifier.width(20.dp))
             PropertyUploadInputForm(
+                index = null,
                 labelText = "Address / town",
                 value = uiState.address,
                 maxLines = 1,
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Next,
+                    imeAction = ImeAction.Done,
                     keyboardType = KeyboardType.Text
                 ),
                 onValueChanged = {
@@ -251,10 +261,19 @@ fun PropertyDetails(
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = "Add Features i.e 'Free wifi'",
-            fontWeight = FontWeight.Bold
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Add Features i.e 'Free wifi'",
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.width(3.dp))
+            Text(
+                text = "*",
+                color = Color.Red
+            )
+        }
         uiState.features.forEachIndexed { index, s ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -262,6 +281,7 @@ fun PropertyDetails(
                     .fillMaxWidth()
             ) {
                 PropertyUploadInputForm(
+                    index = index,
                     labelText = "Feature ${index + 1}",
                     value = uiState.features[index],
                     maxLines = 1,
@@ -376,9 +396,25 @@ fun ImagesSelection(
                         painter = painterResource(id = R.drawable.upload),
                         contentDescription = null
                     )
-                    Text(
-                        text = "Click to upload images"
-                    )
+                    if(uiState.images.isEmpty()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Click to upload images"
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text(
+                                text = "*",
+                                color = Color.Red
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = "Click to upload images"
+                        )
+                    }
+
                 }
             }
         }
@@ -408,6 +444,7 @@ fun PropertyFeaturesSelection(
 
 @Composable
 fun PropertyUploadInputForm(
+    index: Int?,
     labelText: String,
     value: String,
     maxLines: Int,
@@ -419,7 +456,21 @@ fun PropertyUploadInputForm(
         shape = RoundedCornerShape(10.dp),
 
         label = {
-            Text(text = labelText)
+            if(index == 0 || index == null) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = labelText)
+                    Spacer(modifier = Modifier.width(3.dp))
+                    Text(
+                        text = "*",
+                        color = Color.Red
+                    )
+                }
+            } else {
+                Text(text = labelText)
+            }
+
         },
         maxLines = maxLines,
         value = value,
@@ -458,14 +509,36 @@ fun NumberOfRoomsSelection(
                         expanded = !expanded
                     }
             ) {
-                Text(
-                    text = "No. Rooms".takeIf { uiState.numberOfRooms == 0 }
-                        ?: "${uiState.numberOfRooms} room".takeIf { uiState.numberOfRooms == 1 }
-                        ?: "${uiState.numberOfRooms} rooms",
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .widthIn(120.dp)
-                )
+                if(uiState.numberOfRooms == 0) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .widthIn(120.dp)
+                    ) {
+                        Text(text = "No. Rooms")
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text(
+                            text = "*",
+                            color = Color.Red
+                        )
+                    }
+                } else if(uiState.numberOfRooms == 1) {
+                    Text(
+                        text = "${uiState.numberOfRooms} room",
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .widthIn(120.dp)
+                    )
+
+                } else {
+                    Text(
+                        text = "${uiState.numberOfRooms} rooms",
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .widthIn(120.dp)
+                    )
+                }
                 Icon(
                     imageVector = dropDownIcon,
                     contentDescription = null
@@ -521,12 +594,33 @@ fun CategorySelection(
                         expanded = !expanded
                     }
             ) {
-                Text(
-                    text = uiState.category.name.takeIf { it.isNotEmpty() } ?: "Category",
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .widthIn(120.dp)
-                )
+                if(uiState.category.name.isEmpty()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .widthIn(120.dp)
+                    ) {
+                        Text(
+                            text = "Category",
+
+                        )
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text(
+                            text = "*",
+                            color = Color.Red
+                        )
+                    }
+
+                } else {
+                    Text(
+                        text = uiState.category.name,
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .widthIn(120.dp)
+                    )
+
+                }
                 Icon(
                     imageVector = dropDownIcon,
                     contentDescription = null

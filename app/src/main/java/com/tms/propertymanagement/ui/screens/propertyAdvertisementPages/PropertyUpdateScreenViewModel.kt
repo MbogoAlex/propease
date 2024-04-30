@@ -305,6 +305,7 @@ class PropertyUpdateScreenViewModel(
                             features = features,
                         )
                     }
+                    checkIfAllFieldsAreFilled()
                     Log.i("PROPERTIES_FETCHED_IMAGES_ARE", _uiState.value.property.images.toString())
                 } else {
 //                    _uiState.update {
@@ -335,8 +336,8 @@ class PropertyUpdateScreenViewModel(
         val propertyLocation = PropertyLocation(
             county = _uiState.value.county,
             address = _uiState.value.address,
-            latitude = 0.0,
-            longitude = 0.0
+            latitude = 2.0,
+            longitude = 2.0
         )
 
         val property = PropertyUploadRequestBody(
@@ -505,10 +506,7 @@ class PropertyUpdateScreenViewModel(
                 _uiState.value.title.isNotEmpty() &&
                 _uiState.value.county.isNotEmpty() &&
                 _uiState.value.address.isNotEmpty() &&
-                _uiState.value.features.isNotEmpty() &&
-                _uiState.value.images.isNotEmpty() &&
-                _uiState.value.numberOfRooms  != 0 &&
-                _uiState.value.category.id != 0
+                _uiState.value.features.isNotEmpty()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -524,9 +522,19 @@ class PropertyUpdateScreenViewModel(
         }
     }
 
+    fun checkIfAllFieldsAreFilled() {
+        val filled = requiredFieldsFilled()
+        _uiState.update {
+            it.copy(
+                saveButtonEnabled = filled
+            )
+        }
+    }
+
     init {
         loadUserDetails()
         fetchCategories(_uiState.value.userDetails.token)
         fetchProperty()
+
     }
 }

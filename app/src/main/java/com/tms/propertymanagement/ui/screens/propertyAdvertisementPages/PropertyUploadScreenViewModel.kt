@@ -250,8 +250,8 @@ class PropertyUploadScreenViewModel(
         val propertyLocation = PropertyLocation(
             county = _uiState.value.county,
             address = _uiState.value.address,
-            latitude = 0.0,
-            longitude = 0.0
+            latitude = 2.0,
+            longitude = 2.0
         )
 
         val property = PropertyUploadRequestBody(
@@ -290,6 +290,7 @@ class PropertyUploadScreenViewModel(
         }
 
         viewModelScope.launch {
+            Log.e("TOKENN", _uiState.value.userDetails.token)
             try {
                 val response = apiRepository.uploadProperty(
                     token = _uiState.value.userDetails.token,
@@ -322,6 +323,7 @@ class PropertyUploadScreenViewModel(
                     )
                 }
                 Log.e("FAILED_TO_UPLOAD_PROPERTY_EXCEPTION", e.message.toString())
+
             }
         }
     }

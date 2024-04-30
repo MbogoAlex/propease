@@ -138,16 +138,21 @@ class ListingDetailsScreenViewModel(
 
     fun fetchPropertyFromDB() {
         viewModelScope.launch {
-            dbRepository.getSpecificProperty(propertyId!!.toInt()).collect() {propertyDetails ->
-                if(!_uiState.value.isConnected || !_uiState.value.internetPresent) {
-                    _uiState.update {
-                        it.copy(
-                            property = propertyDetails.toPropertyData(propertyDetails)
-                        )
+            try {
+                dbRepository.getSpecificProperty(propertyId!!.toInt()).collect() {propertyDetails ->
+                    if(!_uiState.value.isConnected || !_uiState.value.internetPresent) {
+                        _uiState.update {
+                            it.copy(
+                                property = propertyDetails.toPropertyData(propertyDetails)
+                            )
+                        }
                     }
-                }
 
+                }
+            } catch (e: Exception) {
+                Log.e("PROPERTY_NOT_IN_DB_EXCEPTION", e.toString())
             }
+
         }
     }
 

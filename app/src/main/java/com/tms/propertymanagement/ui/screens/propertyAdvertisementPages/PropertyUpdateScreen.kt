@@ -46,6 +46,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -89,6 +90,7 @@ fun PropertyUpdateScreen(
     val context = LocalContext.current
     val viewModel: PropertyUpdateScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
+
 
     var showDialog by remember {
         mutableStateOf(false)
@@ -149,6 +151,10 @@ fun PropertyUpdateScreen(
                 fontWeight = FontWeight.Bold
             )
         }
+        Text(
+            text = "* Required fields",
+            color = Color.Red
+        )
         Spacer(modifier = Modifier.height(20.dp))
         Column(
             modifier = Modifier
@@ -171,7 +177,17 @@ fun PropertyUpdateScreen(
                 viewModel = viewModel
             )
             Spacer(modifier = Modifier.height(40.dp))
+            if(!uiState.saveButtonEnabled || (uiState.images.isEmpty() && uiState.serverImages.isEmpty())) {
+                Text(
+                    text = "* Fill all required fields",
+                    color = Color.Red,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+            }
             Button(
+                enabled = uiState.saveButtonEnabled && (uiState.images.isNotEmpty() || uiState.serverImages.isNotEmpty()),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Black
                 ),
@@ -208,6 +224,7 @@ fun PropertyUpdateDetails(
     val features = remember { mutableStateListOf<String>("") }
     Column {
         PropertyUpdateInputForm(
+            index = null,
             labelText = "Title",
             value = uiState.title,
             maxLines = 2,
@@ -223,6 +240,7 @@ fun PropertyUpdateDetails(
         )
         Spacer(modifier = Modifier.height(20.dp))
         PropertyUpdateInputForm(
+            index = null,
             labelText = "Description",
             value = uiState.description,
             maxLines = 4,
@@ -238,6 +256,7 @@ fun PropertyUpdateDetails(
         )
         Spacer(modifier = Modifier.height(20.dp))
         PropertyUpdateInputForm(
+            index = null,
             labelText = "Price",
             value = uiState.price,
             maxLines = 1,
@@ -254,6 +273,7 @@ fun PropertyUpdateDetails(
         Spacer(modifier = Modifier.height(20.dp))
         Row {
             PropertyUpdateInputForm(
+                index = null,
                 labelText = "County",
                 value = uiState.county,
                 maxLines = 1,
@@ -269,11 +289,12 @@ fun PropertyUpdateDetails(
             )
             Spacer(modifier = Modifier.width(20.dp))
             PropertyUpdateInputForm(
+                index = null,
                 labelText = "Address / town",
                 value = uiState.address,
                 maxLines = 1,
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Next,
+                    imeAction = ImeAction.Done,
                     keyboardType = KeyboardType.Text
                 ),
                 onValueChanged = {
@@ -284,17 +305,27 @@ fun PropertyUpdateDetails(
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = "Add Features i.e 'Free wifi'",
-            fontWeight = FontWeight.Bold
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Add Features i.e 'Free wifi'",
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.width(3.dp))
+            Text(
+                text = "*",
+                color = Color.Red
+            )
+        }
         uiState.features.forEachIndexed { index, s ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                PropertyUploadInputForm(
+                PropertyUpdateInputForm(
+                    index = index,
                     labelText = "Feature ${index + 1}",
                     value = uiState.features[index],
                     maxLines = 1,
@@ -467,9 +498,24 @@ fun ImagesUpdateSelection(
                         painter = painterResource(id = R.drawable.upload),
                         contentDescription = null
                     )
-                    Text(
-                        text = "Click to upload images"
-                    )
+                    if(uiState.images.isEmpty() && uiState.serverImages.isEmpty()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Click to upload images"
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text(
+                                text = "*",
+                                color = Color.Red
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = "Click to upload images"
+                        )
+                    }
                 }
             }
         }
@@ -499,6 +545,7 @@ fun PropertyFeaturesUpdateSelection(
 
 @Composable
 fun PropertyUpdateInputForm(
+    index: Int?,
     labelText: String,
     value: String,
     maxLines: Int,
@@ -510,7 +557,20 @@ fun PropertyUpdateInputForm(
         shape = RoundedCornerShape(10.dp),
 
         label = {
-            Text(text = labelText)
+            if(index == 0 || index == null) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = labelText)
+                    Spacer(modifier = Modifier.width(3.dp))
+                    Text(
+                        text = "*",
+                        color = Color.Red
+                    )
+                }
+            } else {
+                Text(text = labelText)
+            }
         },
         maxLines = maxLines,
         value = value,

@@ -378,19 +378,21 @@ class ListingsScreenViewModel(
 
     fun fetchPropertiesFromDB() {
         viewModelScope.launch {
-            dbRepository.getAllProperties().collect() {properties ->
+            try {
+                dbRepository.getAllProperties().collect() {properties ->
 
 
-                _uiState.update {
-                    it.copy(
-                        offlineProperties = properties,
-                        properties = properties.map {propertyDetails ->
-                            propertyDetails.toPropertyData(propertyDetails)
-                        },
-                        fetchingStatus = FetchingStatus.SUCCESS
-                    )
+                    _uiState.update {
+                        it.copy(
+                            offlineProperties = properties,
+                            properties = properties.map {propertyDetails ->
+                                propertyDetails.toPropertyData(propertyDetails)
+                            },
+                            fetchingStatus = FetchingStatus.SUCCESS
+                        )
+                    }
                 }
-            }
+            } catch (e: Exception) {}
         }
     }
 
@@ -449,41 +451,43 @@ class ListingsScreenViewModel(
         Log.i("CATEGORYID", categoryId.toString())
         Log.i("CATEGORYNAME", _uiState.value.categoryNameSelected)
         viewModelScope.launch {
-            Log.i("FETCHING_FROM_DB", "Fetching from db")
-            dbRepository.filterProperties(
-                rooms = if(_uiState.value.numberOfRoomsSelected.isEmpty()) null else _uiState.value.numberOfRoomsSelected.toInt(),
-                category = _uiState.value.categoryNameSelected.takeIf { it.isNotEmpty() },
+            try {
+                Log.i("FETCHING_FROM_DB", "Fetching from db")
+                dbRepository.filterProperties(
+                    rooms = if(_uiState.value.numberOfRoomsSelected.isEmpty()) null else _uiState.value.numberOfRoomsSelected.toInt(),
+                    category = _uiState.value.categoryNameSelected.takeIf { it.isNotEmpty() },
 //                    location = "kiambu",
-                location = _uiState.value.location.takeIf { it.isNotEmpty() },
-                fetchData = true
-            ).collect() {propertyDetails ->
-                if(!_uiState.value.isConnected || !_uiState.value.internetPresent) {
-                    Log.i("PROP_ROOMS_SIZE", propertyDetails.size.toString())
+                    location = _uiState.value.location.takeIf { it.isNotEmpty() },
+                    fetchData = true
+                ).collect() {propertyDetails ->
+                    if(!_uiState.value.isConnected || !_uiState.value.internetPresent) {
+                        Log.i("PROP_ROOMS_SIZE", propertyDetails.size.toString())
 
-                    val unfilteredCategories = propertyDetails.map {
-                        it.category.toCategory()
-                    }
+                        val unfilteredCategories = propertyDetails.map {
+                            it.category.toCategory()
+                        }
 
-                    if(_uiState.value.categories.isEmpty()) {
-                        unfilteredCategories.forEachIndexed { index, category ->
-                            if(!filteredCategories.contains(category)) {
-                                filteredCategories.add(category)
+                        if(_uiState.value.categories.isEmpty()) {
+                            unfilteredCategories.forEachIndexed { index, category ->
+                                if(!filteredCategories.contains(category)) {
+                                    filteredCategories.add(category)
+                                }
                             }
                         }
+                        for (property in propertyDetails) {
+                            Log.i("OFFLINE_PROPERTY", property.toString())
+                        }
+                        _uiState.update {
+                            it.copy(
+                                categories = filteredCategories,
+                                properties = propertyDetails.map { property -> property.toPropertyData(property)},
+                                fetchingStatus = FetchingStatus.SUCCESS
+                            )
+                        }
                     }
-                    for (property in propertyDetails) {
-                        Log.i("OFFLINE_PROPERTY", property.toString())
-                    }
-                    _uiState.update {
-                        it.copy(
-                            categories = filteredCategories,
-                            properties = propertyDetails.map { property -> property.toPropertyData(property)},
-                            fetchingStatus = FetchingStatus.SUCCESS
-                        )
-                    }
-                }
 
-            }
+                }
+            } catch (e: Exception) {}
 
         }
 

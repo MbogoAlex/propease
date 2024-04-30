@@ -22,7 +22,7 @@ class PropEaseMainContainer(private val context: Context): AppContainer{
         coerceInputValues = true
     }
     private val baseUrl = "http://172.105.90.112:8080/pManager/"
-//    private val baseUrl = "http://192.168.47.6:8080/pManager/"
+//    private val baseUrl = "http://192.168.166.6:8080/pManager/"
 
     private val retrofit = Retrofit.Builder()
         .baseUrl(baseUrl)

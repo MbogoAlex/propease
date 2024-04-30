@@ -159,6 +159,15 @@ fun PropertyUploadPreviewScreen(
 
             }
         }
+        if(!uiState.saveButtonEnabled) {
+            Text(
+                text = "* Fill all required fields",
+                color = Color.Red,
+                modifier = Modifier
+                    .align(Alignment.End)
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+        }
         ImageSlider(
             uiState = uiState
         )

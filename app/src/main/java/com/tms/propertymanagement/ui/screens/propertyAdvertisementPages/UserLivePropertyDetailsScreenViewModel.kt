@@ -173,15 +173,17 @@ class UserLivePropertyDetailsScreenViewModel(
 
     fun fetchPropertyFromDB() {
         viewModelScope.launch {
-            dbRepository.getSpecificProperty(propertyId!!.toInt()).collect(){property->
-                if(!_uiState.value.isConnected || !_uiState.value.internetPresent) {
-                    _uiState.update {
-                        it.copy(
-                            property = property.toPropertyData(property)
-                        )
+            try {
+                dbRepository.getSpecificProperty(propertyId!!.toInt()).collect(){property->
+                    if(!_uiState.value.isConnected || !_uiState.value.internetPresent) {
+                        _uiState.update {
+                            it.copy(
+                                property = property.toPropertyData(property)
+                            )
+                        }
                     }
                 }
-            }
+            } catch (e: Exception) {}
         }
     }
 

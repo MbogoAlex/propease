@@ -118,18 +118,21 @@ class UserLivePropertiesScreenViewModel(
 
     fun fetchPropertiesFromDB() {
         viewModelScope.launch {
-            dbRepository.getUserProperties(_uiState.value.userDetails.userId!!).collect() {properties ->
-                if(!_uiState.value.isConnected || !_uiState.value.internetPresent) {
-                    _uiState.update {
-                        it.copy(
-                            properties = properties.map { property ->
-                                property.toPropertyData(property)
-                            }
-                        )
-                    }
-                }
 
-            }
+            try {
+                dbRepository.getUserProperties(_uiState.value.userDetails.userId!!).collect() {properties ->
+                    if(!_uiState.value.isConnected || !_uiState.value.internetPresent) {
+                        _uiState.update {
+                            it.copy(
+                                properties = properties.map { property ->
+                                    property.toPropertyData(property)
+                                }
+                            )
+                        }
+                    }
+
+                }
+            } catch (e: Exception) {}
         }
     }
 

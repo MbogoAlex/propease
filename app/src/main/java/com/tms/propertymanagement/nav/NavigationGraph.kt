@@ -172,8 +172,7 @@ fun NavigationGraph(
         ) {
             ListingDetailsScreen(
                 navigateToPreviousScreen = {
-                    navController.popBackStack(ListingDetailsDestination.routeWithArgs, true)
-                    navController.enableOnBackPressed(true)
+                    navController.popBackStack()
                 }
             )
         }
