@@ -31,7 +31,8 @@ data class UserLivePropertiesScreenUiState(
     val showPropertyUploadScreen: Boolean = false,
     val forceLogin: Boolean = false,
     val isConnected: Boolean = false,
-    val internetPresent: Boolean = true
+    val internetPresent: Boolean = true,
+    val approvalStatus: String = "",
 
 )
 class UserLivePropertiesScreenViewModel(
@@ -46,7 +47,8 @@ class UserLivePropertiesScreenViewModel(
             dsRepository.dsUserModel.collect() { dsUserModel ->
                 _uiState.update {
                     it.copy(
-                        userDetails = dsUserModel.toLoggedInUserData()
+                        userDetails = dsUserModel.toLoggedInUserData(),
+                        approvalStatus = dsUserModel.approvalStatus
                     )
                 }
             }

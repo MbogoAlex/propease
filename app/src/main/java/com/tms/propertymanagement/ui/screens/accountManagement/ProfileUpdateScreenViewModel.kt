@@ -125,7 +125,8 @@ class ProfileUpdateScreenViewModel(
                         phoneNumber = _uiState.value.phoneNumber,
                         email = _uiState.value.email,
                         password = _uiState.value.userDetails.password,
-                        token = _uiState.value.userDetails.token
+                        token = _uiState.value.userDetails.token,
+                        approvalStatus = _uiState.value.userDetails.approvalStatus
                     )
                     dsRepository.saveUserData(dsUserModel)
                     _uiState.update {

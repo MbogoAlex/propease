@@ -6,5 +6,6 @@ data class DSUserModel(
     val phoneNumber: String,
     val email: String,
     val password: String,
-    val token: String
+    val token: String,
+    val approvalStatus: String
 )

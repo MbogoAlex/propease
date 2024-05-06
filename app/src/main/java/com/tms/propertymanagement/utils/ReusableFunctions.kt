@@ -12,7 +12,8 @@ object ReusableFunctions {
         val phoneNumber: String = "",
         val email: String = "",
         val password: String = "",
-        val token: String = ""
+        val token: String = "",
+        val approvalStatus: String = ""
     )
     fun checkIfEmailIsValid(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
@@ -28,6 +29,7 @@ object ReusableFunctions {
         phoneNumber = phoneNumber,
         email = email,
         password = password,
-        token = token
+        token = token,
+        approvalStatus = approvalStatus
     )
 }

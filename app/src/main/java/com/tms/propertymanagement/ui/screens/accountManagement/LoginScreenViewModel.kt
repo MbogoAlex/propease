@@ -107,7 +107,8 @@ class LoginScreenViewModel(
                         phoneNumber = response.body()?.data?.user?.userInfo?.phoneNumber!!,
                         email = response.body()?.data?.user?.userInfo?.email!!,
                         password = loginDetails.password,
-                        token = response.body()?.data?.user?.token!!
+                        token = response.body()?.data?.user?.token!!,
+                        approvalStatus = response.body()?.data?.user?.userInfo?.approvalStatus!!
                     )
 
                     dsRepository.saveUserData(dsUserModel)
@@ -122,6 +123,7 @@ class LoginScreenViewModel(
                             loginResponseMessage = "Login success"
                         )
                     }
+                    Log.i("TOKEN", response.body()?.data?.user?.token!!)
 
                 } else {
                     _uiState.update {
@@ -130,6 +132,7 @@ class LoginScreenViewModel(
                             loginResponseMessage = "Invalid email or password"
                         )
                     }
+                    Log.e("LOGIN_FAIL_RESPONSE", response.toString())
                 }
             } catch (e: Exception) {
                 _uiState.update {
@@ -138,6 +141,7 @@ class LoginScreenViewModel(
                         loginResponseMessage = "Failed to login. Try again later"
                     )
                 }
+                Log.e("LOGIN_FAIL_EXCEPTION", e.toString())
             }
         }
     }

@@ -28,6 +28,14 @@ data class UserLoginResponseBodyDataUserInfo(
     val email: String,
     val phoneNumber: String,
     val imageUrl: String?,
+    val approvalStatus: String?,
+    val approved: Boolean?,
+    val roles: List<Role>,
     val fname: String,
     val lname: String
+)
+@Serializable
+data class Role(
+    val id: Int,
+    val name: String
 )

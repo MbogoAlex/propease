@@ -22,6 +22,7 @@ class DSRepository(
         private val PASSWORD = stringPreferencesKey("password")
         private val TOKEN = stringPreferencesKey("token")
         private val PROFILE_PICTURE = stringPreferencesKey("profilePic")
+        private val APPROVAL_STATUS = stringPreferencesKey("approvalStatus")
     }
 
     suspend fun saveUserData(dsUserModel: DSUserModel) {
@@ -32,6 +33,7 @@ class DSRepository(
             preferences[EMAIL] = dsUserModel.email
             preferences[PASSWORD] = dsUserModel.password
             preferences[TOKEN] = dsUserModel.token
+            preferences[APPROVAL_STATUS] = dsUserModel.approvalStatus
         }
     }
 
@@ -68,7 +70,8 @@ class DSRepository(
                 phoneNumber = it[PHONE_NUMBER] ?: "",
                 email = it[EMAIL] ?: "",
                 password = it[PASSWORD] ?: "",
-                token = it[TOKEN] ?: ""
+                token = it[TOKEN] ?: "",
+                approvalStatus = it[APPROVAL_STATUS] ?: ""
             )
         }
 
@@ -84,13 +87,15 @@ class DSRepository(
         phoneNumber: String,
         email: String,
         password: String,
-        token: String
+        token: String,
+        approvalStatus: String,
     ): DSUserModel = DSUserModel(
         userId = userId,
         userName = userName,
         phoneNumber = phoneNumber,
         email = email,
         password = password,
-        token = token
+        token = token,
+        approvalStatus = approvalStatus
     )
 }

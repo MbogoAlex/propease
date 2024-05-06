@@ -28,6 +28,7 @@ import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.UserLive
 import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.UserLivePropertyDetailsScreenDestination
 import com.tms.propertymanagement.ui.screens.accountManagement.ProfileUpdateScreen
 import com.tms.propertymanagement.ui.screens.accountManagement.ProfileUpdateScreenDestination
+import com.tms.propertymanagement.ui.screens.accountManagement.profileVerification.ProfileVerificationComposable
 import kotlin.reflect.typeOf
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -159,6 +160,9 @@ fun NavigationGraph(
                 },
                 navigateToLoginScreenWithArgs = {phoneNumber, password ->
                     navController.navigate("${LoginScreenDestination.route}/${phoneNumber}/${password}")
+                },
+                navigateToProfileVerificationScreen = {
+                    navController.navigate(ProfileUpdateScreenDestination.route)
                 }
             )
         }
@@ -251,6 +255,9 @@ fun NavigationGraph(
                 },
                 navigateToLoginScreenWithArgs = {phoneNumber, password ->
                     navController.navigate("${LoginScreenDestination.route}/${phoneNumber}/${password}")
+                },
+                navigateToProfileVerificationScreen = {
+                    navController.navigate(ProfileUpdateScreenDestination.route)
                 }
             )
         }
@@ -264,6 +271,16 @@ fun NavigationGraph(
                 },
                 navigateToLoginScreenWithArgs = {phoneNumber, password ->
                     navController.navigate("${LoginScreenDestination.route}/${phoneNumber}/${password}")
+                }
+            )
+        }
+        composable(ProfileUpdateScreenDestination.route) {
+            ProfileVerificationComposable(
+                navigateToHomeScreenWithArgs = {
+                    navController.navigate("${HomeScreenDestination.route}/${it}")
+                },
+                navigateToPreviousScreen = {
+                    navController.popBackStack()
                 }
             )
         }

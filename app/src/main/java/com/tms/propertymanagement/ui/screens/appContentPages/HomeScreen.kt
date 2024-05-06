@@ -74,6 +74,7 @@ fun HomeScreen(
     navigateToLoginScreenWithArgs: (phoneNumber: String, password: String) -> Unit,
     navigateToRegistrationScreen: () -> Unit,
     navigateToUpdateProfileScreen: () -> Unit,
+    navigateToProfileVerificationScreen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -328,7 +329,8 @@ fun HomeScreen(
                         navigateToHomeScreen = navigateToHomeScreen,
                         navigateToHomeScreenWithArguments = navigateToHomeScreenWithArguments,
                         navigateToLoginScreenWithoutArgs = navigateToLoginScreenWithoutArgs,
-                        navigateToLoginScreenWithArgs = navigateToLoginScreenWithArgs
+                        navigateToLoginScreenWithArgs = navigateToLoginScreenWithArgs,
+                        navigateToProfileVerificationScreen = navigateToProfileVerificationScreen
 //                    navigateToUpdateProperty = { /*TODO*/ }
                     )
                 }
@@ -379,7 +381,8 @@ fun HomeScreenPreview() {
         navigateToLoginScreenWithoutArgs = {},
         navigateToRegistrationScreen = {},
         navigateToUpdateProfileScreen = {},
-        navigateToLoginScreenWithArgs = {phoneNumber, password ->  }
+        navigateToLoginScreenWithArgs = {phoneNumber, password ->  },
+        navigateToProfileVerificationScreen = {}
     )
 }
 

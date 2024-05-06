@@ -90,6 +90,21 @@ dependencies {
     //LiveData
     implementation ("androidx.compose.runtime:runtime-livedata")
 
+    //Scarlet
+
+    // https://mvnrepository.com/artifact/com.tinder.scarlet/scarlet
+    implementation("com.tinder.scarlet:scarlet:0.1.12")
+
+    // https://mvnrepository.com/artifact/com.tinder.scarlet/websocket-okhttp
+    implementation("com.tinder.scarlet:websocket-okhttp:0.1.12")
+
+    // https://mvnrepository.com/artifact/com.squareup.moshi/moshi-kotlin
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
+
+    // https://mvnrepository.com/artifact/com.tinder.scarlet/stream-adapter-coroutines
+    implementation("com.tinder.scarlet:stream-adapter-coroutines:0.1.12")
+
+
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")

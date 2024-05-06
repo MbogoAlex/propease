@@ -49,7 +49,8 @@ class WelcomeScreenViewModel(
                     phoneNumber = "",
                     email = "",
                     password = "",
-                    token = ""
+                    token = "",
+                    approvalStatus = ""
                 )
             )
         }

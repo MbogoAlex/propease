@@ -64,7 +64,8 @@ data class PropertyUploadScreenUiState(
     val uploadingPropertyResponse: String = "",
     val roomsSelected: Boolean = false,
     val categorySelected: Boolean = false,
-    val saveButtonEnabled: Boolean = false
+    val saveButtonEnabled: Boolean = false,
+    val approvalStatus: String = "",
 )
 
 class PropertyUploadScreenViewModel(
@@ -79,7 +80,8 @@ class PropertyUploadScreenViewModel(
             dsRepository.dsUserModel.collect() {dsUserModel ->
                 _uiState.update {
                     it.copy(
-                        userDetails = dsUserModel.toLoggedInUserData()
+                        userDetails = dsUserModel.toLoggedInUserData(),
+                        approvalStatus = dsUserModel.approvalStatus
                     )
                 }
             }

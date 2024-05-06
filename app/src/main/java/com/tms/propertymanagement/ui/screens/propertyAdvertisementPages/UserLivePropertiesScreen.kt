@@ -1,5 +1,6 @@
 package com.propertymanagement.tms.ui.screens.propertyAdvertisementPages
 
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -24,11 +26,13 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -76,6 +80,7 @@ fun UserLiveProperties(
     navigateToHomeScreenWithArguments: (childScreen: String) -> Unit,
     navigateToLoginScreenWithoutArgs: () -> Unit,
     navigateToLoginScreenWithArgs: (phoneNumber: String, password: String) -> Unit,
+    navigateToProfileVerificationScreen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -154,28 +159,69 @@ fun UserLiveProperties(
         )
     }
 
+    if(uiState.approvalStatus.lowercase() == "pending") {
+        ProfileVerificationCard(
+            navigateToProfileVerificationScreen = navigateToProfileVerificationScreen,
+            enabled = uiState.approvalStatus.lowercase() != "processing"
+        )
+
+
+    } else if(uiState.approvalStatus.lowercase() == "approved") {
+        UserLivePropertiesScreen(
+            properties = uiState.properties,
+            showPropertyUploadScreen = uiState.showPropertyUploadScreen,
+            internetPresent = uiState.internetPresent,
+            context = context,
+            isConnected = isConnected,
+            onFloatingActionButtonClicked = {
+                if(!uiState.internetPresent) {
+                    Toast.makeText(context, "Connect to the internet", Toast.LENGTH_SHORT).show()
+                } else {
+                    if(uiState.userDetails.userId != 0 && uiState.userDetails.userId != null) {
+                        viewModel.switchToAndFromPropertyUploadScreen()
+                    } else {
+                        showLoginDialog = !showLoginDialog
+                    }
+                }
+            },
+            onRefreshPage = {
+                viewModel.fetchUserProperties()
+            },
+            navigateToHomeScreenWithArguments = navigateToHomeScreenWithArguments,
+            navigateToPreviousPage = {
+                viewModel.switchToAndFromPropertyUploadScreen()
+            },
+            navigateToSpecificUserProperty = navigateToSpecificUserProperty
+        )
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun UserLivePropertiesScreen(
+    properties: List<PropertyData>,
+    showPropertyUploadScreen: Boolean,
+    internetPresent: Boolean,
+    context: Context,
+    isConnected: Boolean,
+    onFloatingActionButtonClicked: () -> Unit,
+    onRefreshPage: () -> Unit,
+    navigateToHomeScreenWithArguments: (childScreen: String) -> Unit,
+    navigateToPreviousPage: () -> Unit,
+    navigateToSpecificUserProperty: (propertyId: String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         floatingActionButton = {
-            if(!uiState.showPropertyUploadScreen && isConnected && uiState.internetPresent) {
-                FloatingActionButton(
-                    onClick = {
-                        if(!uiState.internetPresent) {
-                            Toast.makeText(context, "Connect to the internet", Toast.LENGTH_SHORT).show()
-                        } else {
-                            if(uiState.userDetails.userId != 0 && uiState.userDetails.userId != null) {
-                                viewModel.switchToAndFromPropertyUploadScreen()
-                            } else {
-                                showLoginDialog = !showLoginDialog
-                            }
-                        }
-                    }) {
+            if(!showPropertyUploadScreen && isConnected && internetPresent) {
+                FloatingActionButton(onClick = onFloatingActionButtonClicked) {
                     Icon(
                         painter = painterResource(id = R.drawable.advertise),
                         contentDescription = "Publish a new property"
                     )
                 }
-            } else if (!uiState.internetPresent) {
-                FloatingActionButton(onClick = { viewModel.fetchUserProperties() }) {
+            } else if (!internetPresent) {
+                FloatingActionButton(onClick = onRefreshPage) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
                         contentDescription = "Refresh page"
@@ -193,12 +239,10 @@ fun UserLiveProperties(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                if(uiState.showPropertyUploadScreen) {
+                if(showPropertyUploadScreen) {
                     PropertyUploadScreen(
                         navigateToListingsScreen = { /*TODO*/ },
-                        navigateToPreviousPage = {
-                            viewModel.switchToAndFromPropertyUploadScreen()
-                        },
+                        navigateToPreviousPage = navigateToPreviousPage,
                         navigateToHomeScreenWithArguments = {childScreen ->
                             navigateToHomeScreenWithArguments(childScreen)
                         }
@@ -210,7 +254,7 @@ fun UserLiveProperties(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(10.dp))
-                    if (!uiState.internetPresent || !uiState.isConnected) {
+                    if (!internetPresent || !isConnected) {
                         Text(
                             text = "Check your internet connection",
                             modifier = Modifier
@@ -221,30 +265,22 @@ fun UserLiveProperties(
 
                     ListingItems(
                         navigateToSpecificUserProperty = navigateToSpecificUserProperty,
-                        uiState = uiState,
-                        viewModel = viewModel
+                        properties = properties,
                     )
                 }
 
             }
         }
     }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-
-    }
 }
 
 @Composable
 fun ListingItems(
     navigateToSpecificUserProperty: (propertyId: String) -> Unit,
-    uiState: UserLivePropertiesScreenUiState,
-    viewModel: UserLivePropertiesScreenViewModel,
+    properties: List<PropertyData>,
     modifier: Modifier = Modifier
 ) {
-    var properties = uiState.properties.reversed()
+    var properties = properties.reversed()
     if(properties.isEmpty()) {
         Box(
             contentAlignment = Alignment.Center,
@@ -375,6 +411,101 @@ fun ListingItem(
     }
 }
 
+@Composable
+fun ProfileVerificationCard(
+    navigateToProfileVerificationScreen: () -> Unit,
+    enabled: Boolean,
+    modifier: Modifier = Modifier
+) {
+   Column(
+       modifier = Modifier
+           .padding(10.dp)
+           .fillMaxSize()
+   ) {
+       Card(
+           shape = RoundedCornerShape(0.dp)
+       ) {
+           Text(
+               text = "unverified".uppercase(),
+               fontWeight = FontWeight.Bold,
+               color = Color.Red,
+               modifier = Modifier
+                   .padding(5.dp)
+           )
+       }
+
+       Spacer(modifier = Modifier.height(20.dp))
+       Box(
+           modifier = Modifier
+               .border(
+                   width = 1.dp,
+                   color = Color.Gray,
+                   shape = RoundedCornerShape(20.dp)
+               )
+       ) {
+           Row(
+               verticalAlignment = Alignment.CenterVertically,
+               modifier = Modifier
+                   .padding(10.dp)
+           ) {
+               Icon(
+                   tint = Color.LightGray,
+                   imageVector = Icons.Default.Person,
+                   contentDescription = null,
+                   modifier = Modifier
+                       .size(200.dp)
+               )
+               Spacer(modifier = Modifier.weight(1f))
+               Column {
+                   Divider(
+                       thickness = 5.dp,
+                       modifier = Modifier
+                   )
+                   Spacer(
+                       modifier = Modifier
+                           .height(40.dp)
+                   )
+                   Divider(
+                       thickness = 5.dp
+                   )
+                   Spacer(modifier = Modifier.height(40.dp))
+                   Divider(
+                       thickness = 5.dp
+                   )
+               }
+           }
+       }
+       Spacer(modifier = Modifier.height(30.dp))
+       Text(
+           text = "Verify your identity to start advertising",
+           fontSize = 25.sp,
+           textAlign = TextAlign.Center,
+           modifier = Modifier
+               .align(Alignment.CenterHorizontally)
+       )
+       Spacer(modifier = Modifier.weight(1f))
+       Button(
+           enabled = enabled,
+           modifier = Modifier
+               .fillMaxWidth(),
+           onClick = navigateToProfileVerificationScreen
+       ) {
+           Text(text = "Start verification")
+       }
+   }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProfileVerificationCardScreenPreview() {
+    PropEaseTheme {
+        ProfileVerificationCard(
+            enabled = false,
+            navigateToProfileVerificationScreen = {}
+        )
+    }
+}
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
@@ -385,7 +516,8 @@ fun UserLivePropertiesPreview() {
             navigateToHomeScreen = {},
             navigateToHomeScreenWithArguments = {},
             navigateToLoginScreenWithoutArgs = {},
-            navigateToLoginScreenWithArgs = {phoneNumber, password ->  }
+            navigateToLoginScreenWithArgs = {phoneNumber, password ->  },
+            navigateToProfileVerificationScreen = {}
         )
     }
 }
