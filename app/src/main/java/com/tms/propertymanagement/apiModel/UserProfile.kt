@@ -30,6 +30,31 @@ data class UserData(
     val lname: String
 )
 
+@Serializable
+data class UserDetailsResponseBody(
+    val statusCode: Int,
+    val message: String,
+    val data: UserProfileData
+)
+
+@Serializable
+data class UserProfileData(
+    val profiles: ProfileData
+)
+
+@Serializable
+data class ProfileData(
+    val id: Int,
+    val email: String,
+    val phoneNumber: String,
+    val imageUrl: String?,
+    val approvalStatus: String,
+    val approved: Boolean,
+    val roles: List<Role>,
+    val fname: String,
+    val lname: String
+)
+
 /*
 update profile
 http://192.168.47.6:8080/pManager/api/profile/userId=1/update

@@ -34,6 +34,8 @@ interface DBRepository {
     // insert location
     suspend fun insertLocation(location: Location)
 
+    suspend fun insertPaymentDetails(paymentDetails: PaymentDetails)
+
     // filter properties
     fun filterProperties(fetchData: Boolean, location: String?, rooms: Int?, category: String?): Flow<List<PropertyDetails>>
 
@@ -68,6 +70,8 @@ class OfflineRepository(private val appDao: AppDao): DBRepository {
 
     override suspend fun insertProperty(property: Property) = appDao.insertProperty(property)
     override suspend fun insertLocation(location: Location) = appDao.insertLocation(location)
+    override suspend fun insertPaymentDetails(paymentDetails: PaymentDetails) = appDao.insertPaymentDetails(paymentDetails)
+
     override fun filterProperties(
         fetchData: Boolean,
         location: String?,

@@ -20,6 +20,8 @@ import com.propertymanagement.tms.network.ApiRepository
 import com.propertymanagement.tms.propEaseDataStore.DSRepository
 import com.propertymanagement.tms.utils.ReusableFunctions
 import com.propertymanagement.tms.utils.ReusableFunctions.toLoggedInUserData
+import com.tms.propertymanagement.utils.propertyCategoryData
+import com.tms.propertymanagement.utils.propertyData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,40 +48,8 @@ enum class FetchingUpdateCategoriesStatus {
     FAILURE
 }
 
-val propertyCategoryData = Category(
-    id = 0,
-    name = ""
-)
 
-val updatePropertyOwner: PropertyOwner = PropertyOwner(
-    userId = 0,
-    email = "",
-    phoneNumber = "",
-    profilePic = "",
-    fname = "",
-    lname = "",
-)
 
-val updatePropertyOwnerLocation = PropertyLocation(
-    county = "",
-    address = "",
-    latitude = 0.0,
-    longitude = 0.0
-)
-
-val updatePropertyData = PropertyData(
-    user = propertyOwner,
-    propertyId = 0,
-    title = "",
-    description = "",
-    category = "",
-    rooms = 0,
-    price = 0.0,
-    postedDate = "",
-    features = emptyList(),
-    location = propertyLocation,
-    images = emptyList()
-)
 data class PropertyUpdateScreenUiState(
     val numberOfRooms: Int = 0,
     val category: Category = propertyCategoryData,
@@ -96,7 +66,7 @@ data class PropertyUpdateScreenUiState(
     val userDetails: ReusableFunctions.LoggedInUserData = ReusableFunctions.LoggedInUserData(),
     val uploadingStatus: UploadingStatus = UploadingStatus.INITIAL,
     val fetchingUpdateCategoriesStatus: FetchingUpdateCategoriesStatus = FetchingUpdateCategoriesStatus.INITIAL,
-    val property: PropertyData = updatePropertyData,
+    val property: PropertyData = propertyData,
     val saveButtonEnabled: Boolean = false,
     val imageUpdateResponse: String = "",
     val propertyTextUpdateResponse: String = "",

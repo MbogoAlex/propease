@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.propertymanagement.tms.apiModel.PaymentDetails
 import com.propertymanagement.tms.apiModel.PropertyData
 import com.propertymanagement.tms.apiModel.PropertyLocation
 import com.propertymanagement.tms.apiModel.PropertyOwner
@@ -12,6 +13,7 @@ import com.propertymanagement.tms.propEaseDataStore.DSRepository
 import com.propertymanagement.tms.utils.ReusableFunctions
 import com.propertymanagement.tms.utils.ReusableFunctions.toLoggedInUserData
 import com.tms.propertymanagement.db.DBRepository
+import com.tms.propertymanagement.utils.propertyData
 import com.tms.propertymanagement.utils.toPropertyData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,39 +22,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class SpecificPropertyData(
-    val property: PropertyData
-)
 
-val propertyOwner: PropertyOwner = PropertyOwner(
-    userId = 0,
-    email = "",
-    phoneNumber = "",
-    profilePic = "",
-    fname = "",
-    lname = "",
-)
-
-val propertyLocation = PropertyLocation(
-    county = "",
-    address = "",
-    latitude = 0.0,
-    longitude = 0.0
-)
-
-val propertyData = PropertyData(
-    user = propertyOwner,
-    propertyId = 0,
-    title = "",
-    description = "",
-    category = "",
-    rooms = 0,
-    price = 0.0,
-    postedDate = "",
-    features = emptyList(),
-    location = propertyLocation,
-    images = emptyList()
-)
 
 enum class PropertyFetchingStatus{
     INITIAL,

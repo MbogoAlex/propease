@@ -22,9 +22,13 @@ data class PropertyData(
     val category: String,
     val rooms: Int,
     val price: Double,
+    val approved: Boolean,
+    val paid: Boolean,
     val postedDate: String,
+    val deletionTime: String?,
     val features: List<String>,
     val location: PropertyLocation,
+    val paymentDetails: PaymentDetails,
     val images: List<PropertyImage>
 )
 @Serializable
@@ -46,7 +50,8 @@ data class PropertyLocation(
 @Serializable
 data class PropertyImage(
     val id: Int,
-    val name: String
+    val name: String,
+    val approved: Boolean,
 )
 
 // fetch specific property
@@ -86,5 +91,22 @@ data class DeletePropertyResponseBody(
     val statusCode: Int,
     val message: String
 )
+
+@Serializable
+data class PaymentDetails(
+    val id: Int,
+    val partnerReferenceID: String?,
+    val transactionID: String?,
+    val msisdn: String?,
+    val partnerTransactionID: String?,
+    val payerTransactionID: String?,
+    val receiptNumber: String?,
+    val transactionAmount: Double?,
+    val transactionStatus: String,
+    val paymentComplete: Boolean,
+    val createdAt: Long,
+    val updatedAt: Long
+)
+
 
 

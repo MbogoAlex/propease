@@ -1,12 +1,14 @@
 package com.tms.propertymanagement.ui.screens.appContentPages
 
 import HomeScreenDestination
+import android.util.Log
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.propertymanagement.tms.network.ApiRepository
 import com.propertymanagement.tms.propEaseDataStore.DSRepository
+import com.propertymanagement.tms.propEaseDataStore.DSUserModel
 import com.propertymanagement.tms.utils.ReusableFunctions
 import com.propertymanagement.tms.utils.ReusableFunctions.toLoggedInUserData
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +35,8 @@ data class MainMenuItem (
 data class HomeScreenUiState(
     val userDetails: ReusableFunctions.LoggedInUserData = ReusableFunctions.LoggedInUserData(),
     val childScreen: String = "",
+    val approvalStatus: String = "",
+    val savedUserDetails: Boolean = false,
     val mainMenuItems: List<MainMenuItem> = mutableListOf<MainMenuItem>(),
     val screen: MainNavigationPages = MainNavigationPages.LISTINGS_SCREEN
 )
@@ -58,6 +62,10 @@ class HomeScreenViewModel(
                 }
             }
         }
+        if(!_uiState.value.savedUserDetails) {
+            getUser()
+        }
+
     }
 
     fun initializeMenuList(menuList: List<MainMenuItem>) {
@@ -65,6 +73,42 @@ class HomeScreenViewModel(
             it.copy(
                 mainMenuItems = menuList
             )
+        }
+    }
+
+    fun getUser() {
+        viewModelScope.launch {
+            try {
+                val response = apiRepository.getUser(
+                   userId =  _uiState.value.userDetails.userId!!,
+                    token = _uiState.value.userDetails.token
+                )
+                if(response.isSuccessful) {
+
+                    // save to datastore
+
+                    val dsUserModel = DSUserModel(
+                        userId = response.body()?.data?.profiles?.id,
+                        userName = "${response.body()?.data?.profiles?.fname} ${response.body()?.data?.profiles?.lname!!}",
+                        phoneNumber = response.body()?.data?.profiles?.phoneNumber!!,
+                        email = response.body()?.data?.profiles?.email!!,
+                        password = _uiState.value.userDetails.password,
+                        token = _uiState.value.userDetails.token,
+                        approvalStatus = response.body()?.data?.profiles?.approvalStatus!!
+                    )
+                    Log.i("SAVING_TO_DS", dsUserModel.toString())
+                    dsRepository.saveUserData(dsUserModel)
+                    _uiState.update {
+                        it.copy(
+                            savedUserDetails = true
+                        )
+                    }
+                } else {
+                    Log.e("ERROR_FETCHING_USER_PROPERTY_RESPONSE", response.toString())
+                }
+            } catch (e: Exception) {
+                Log.e("ERROR_FETCHING_USER_PROPERTY_EXCEPTION", e.toString())
+            }
         }
     }
 

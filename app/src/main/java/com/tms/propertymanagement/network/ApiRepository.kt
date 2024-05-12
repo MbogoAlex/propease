@@ -8,10 +8,12 @@ import com.propertymanagement.tms.apiModel.PropertyResponseBody
 import com.propertymanagement.tms.apiModel.PropertyUploadRequestBody
 import com.propertymanagement.tms.apiModel.PropertyUploadResponseBody
 import com.propertymanagement.tms.apiModel.SpecificPropertyResponseBody
+import com.propertymanagement.tms.apiModel.UserDetailsResponseBody
 import com.propertymanagement.tms.apiModel.UserLoginRequestBody
 import com.propertymanagement.tms.apiModel.UserLoginResponseBody
 import com.propertymanagement.tms.apiModel.UserRegistrationRequestBody
 import com.propertymanagement.tms.apiModel.UserRegistrationResponseBody
+import com.tms.propertymanagement.apiModel.DocumentUploadResponseBody
 import okhttp3.MultipartBody
 import retrofit2.Response
 
@@ -59,6 +61,17 @@ interface ApiRepository {
         token: String,
         propertyId: Int
     ): Response<DeletePropertyResponseBody>
+
+    suspend fun getUser(
+        userId: Int,
+        token: String,
+    ): Response<UserDetailsResponseBody>
+
+    suspend fun uploadUserDocuments(
+        token: String,
+        userId: Int,
+        files: List<MultipartBody.Part>
+    ): Response<DocumentUploadResponseBody>
 }
 
 class NetworkApiRepository(private val apiService: ApiService): ApiRepository {
@@ -153,6 +166,21 @@ class NetworkApiRepository(private val apiService: ApiService): ApiRepository {
     ): Response<DeletePropertyResponseBody> = apiService.deleteProperty(
         token = "Bearer $token",
         propertyId = propertyId
+    )
+
+    override suspend fun getUser(userId: Int, token: String): Response<UserDetailsResponseBody> = apiService.getUser(
+        userId = userId,
+        token = "Bearer $token"
+    )
+
+    override suspend fun uploadUserDocuments(
+        token: String,
+        userId: Int,
+        files: List<MultipartBody.Part>
+    ): Response<DocumentUploadResponseBody> = apiService.uploadUserDocuments(
+        token = "Bearer $token",
+        userId = userId,
+        files = files
     )
 
 }

@@ -22,6 +22,7 @@ import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.UserLive
 import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.UserLivePropertyDetailsScreenViewModel
 import com.tms.propertymanagement.connectivity.ConnectivityViewModel
 import com.tms.propertymanagement.ui.screens.accountManagement.ProfileUpdateScreenViewModel
+import com.tms.propertymanagement.ui.screens.accountManagement.profileVerification.ProfileVerificationScreenViewModel
 
 object PropEaseViewModelFactory {
 
@@ -177,6 +178,16 @@ object PropEaseViewModelFactory {
             val apiRepository = propEaseApplication().container.apiRepository
             ConnectivityViewModel(
                 apiRepository = apiRepository
+            )
+        }
+
+        // initialize ProfileVerificationScreenViewModel
+        initializer {
+            val apiRepository = propEaseApplication().container.apiRepository
+            val dsRepository = propEaseApplication().dsRepository
+            ProfileVerificationScreenViewModel(
+                apiRepository = apiRepository,
+                dsRepository = dsRepository
             )
         }
 

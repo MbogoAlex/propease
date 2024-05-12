@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -123,6 +124,7 @@ fun UserLiveProperties(
     if(uiState.forceLogin) {
         Toast.makeText(context, "Login first to see your adverts", Toast.LENGTH_SHORT).show()
         if(uiState.userDetails.userId != null && uiState.userDetails.userId != 0) {
+            Log.i("FORCE_LOGIN_USER", "FORCE LOGIN IN PROGRESS")
             navigateToLoginScreenWithArgs(
                 uiState.userDetails.phoneNumber,
                 uiState.userDetails.password
@@ -159,14 +161,15 @@ fun UserLiveProperties(
         )
     }
 
-    if(uiState.approvalStatus.lowercase() == "pending") {
+    if(uiState.approvalStatus.lowercase() == "pending" || uiState.approvalStatus.lowercase() == "processing") {
         ProfileVerificationCard(
+            approvalStatus = uiState.approvalStatus.lowercase(),
             navigateToProfileVerificationScreen = navigateToProfileVerificationScreen,
             enabled = uiState.approvalStatus.lowercase() != "processing"
         )
 
 
-    } else if(uiState.approvalStatus.lowercase() == "approved") {
+    } else if(uiState.approvalStatus.isEmpty() || uiState.approvalStatus.lowercase() == "approved") {
         UserLivePropertiesScreen(
             properties = uiState.properties,
             showPropertyUploadScreen = uiState.showPropertyUploadScreen,
@@ -406,6 +409,7 @@ fun ListingItem(
                     )
                 }
 
+
             }
         }
     }
@@ -413,6 +417,7 @@ fun ListingItem(
 
 @Composable
 fun ProfileVerificationCard(
+    approvalStatus: String,
     navigateToProfileVerificationScreen: () -> Unit,
     enabled: Boolean,
     modifier: Modifier = Modifier
@@ -425,13 +430,24 @@ fun ProfileVerificationCard(
        Card(
            shape = RoundedCornerShape(0.dp)
        ) {
-           Text(
-               text = "unverified".uppercase(),
-               fontWeight = FontWeight.Bold,
-               color = Color.Red,
-               modifier = Modifier
-                   .padding(5.dp)
-           )
+           if(approvalStatus == "pending") {
+               Text(
+                   text = "unverified".uppercase(),
+                   fontWeight = FontWeight.Bold,
+                   color = Color.Red,
+                   modifier = Modifier
+                       .padding(5.dp)
+               )
+           } else if(approvalStatus == "processing") {
+               Text(
+                   text = "processing".uppercase(),
+                   fontWeight = FontWeight.Bold,
+                   color = Color.Red,
+                   modifier = Modifier
+                       .padding(5.dp)
+               )
+           }
+
        }
 
        Spacer(modifier = Modifier.height(20.dp))
@@ -449,14 +465,24 @@ fun ProfileVerificationCard(
                    .padding(10.dp)
            ) {
                Icon(
-                   tint = Color.LightGray,
+                   tint = Color.Gray,
                    imageVector = Icons.Default.Person,
                    contentDescription = null,
                    modifier = Modifier
+                       .padding(10.dp)
                        .size(200.dp)
+//                       .background(Color.LightGray)
+                       .border(
+                           width = 1.dp,
+                           color = Color.LightGray,
+                           shape = RoundedCornerShape(50.dp)
+                       )
                )
                Spacer(modifier = Modifier.weight(1f))
-               Column {
+               Column(
+                   modifier = Modifier
+                       .padding(10.dp)
+               ) {
                    Divider(
                        thickness = 5.dp,
                        modifier = Modifier
@@ -476,13 +502,24 @@ fun ProfileVerificationCard(
            }
        }
        Spacer(modifier = Modifier.height(30.dp))
-       Text(
-           text = "Verify your identity to start advertising",
-           fontSize = 25.sp,
-           textAlign = TextAlign.Center,
-           modifier = Modifier
-               .align(Alignment.CenterHorizontally)
-       )
+       if(approvalStatus == "pending") {
+           Text(
+               text = "Verify your identity to start advertising",
+               fontSize = 25.sp,
+               textAlign = TextAlign.Center,
+               modifier = Modifier
+                   .align(Alignment.CenterHorizontally)
+           )
+       } else if(approvalStatus == "processing") {
+           Text(
+               text = "Your submitted documents are under verification",
+               fontSize = 25.sp,
+               textAlign = TextAlign.Center,
+               modifier = Modifier
+                   .align(Alignment.CenterHorizontally)
+           )
+       }
+
        Spacer(modifier = Modifier.weight(1f))
        Button(
            enabled = enabled,
@@ -500,6 +537,7 @@ fun ProfileVerificationCard(
 fun ProfileVerificationCardScreenPreview() {
     PropEaseTheme {
         ProfileVerificationCard(
+            approvalStatus = "pending",
             enabled = false,
             navigateToProfileVerificationScreen = {}
         )

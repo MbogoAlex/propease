@@ -8,10 +8,12 @@ import com.propertymanagement.tms.apiModel.PropertyResponseBody
 import com.propertymanagement.tms.apiModel.PropertyUploadRequestBody
 import com.propertymanagement.tms.apiModel.PropertyUploadResponseBody
 import com.propertymanagement.tms.apiModel.SpecificPropertyResponseBody
+import com.propertymanagement.tms.apiModel.UserDetailsResponseBody
 import com.propertymanagement.tms.apiModel.UserLoginRequestBody
 import com.propertymanagement.tms.apiModel.UserLoginResponseBody
 import com.propertymanagement.tms.apiModel.UserRegistrationRequestBody
 import com.propertymanagement.tms.apiModel.UserRegistrationResponseBody
+import com.tms.propertymanagement.apiModel.DocumentUploadResponseBody
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -124,4 +126,19 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Path("propertyId") propertyId: Int
     ) : Response<DeletePropertyResponseBody>
+
+    //
+    @GET("api/profile/userId={userId}/user")
+    suspend fun getUser(
+        @Header("Authorization") token: String,
+        @Path("userId") userId: Int
+    ): Response<UserDetailsResponseBody>
+
+    @Multipart
+    @POST("api/profile/userId={userId}/upload")
+    suspend fun uploadUserDocuments(
+        @Header("Authorization") token: String,
+        @Path("userId") userId: Int,
+        @Part files: List<MultipartBody.Part>
+    ): Response<DocumentUploadResponseBody>
 }

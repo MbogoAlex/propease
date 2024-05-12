@@ -6,6 +6,13 @@ import java.util.Locale
 
 object ReusableFunctions {
 
+    enum class ExecutionStatus {
+        INITIAL,
+        LOADING,
+        SUCCESS,
+        FAIL
+    }
+
     data class LoggedInUserData(
         val userId: Int? = 0,
         val userName: String = "",

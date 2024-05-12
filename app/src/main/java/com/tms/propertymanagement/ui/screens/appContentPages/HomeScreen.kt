@@ -1,4 +1,5 @@
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -163,6 +164,7 @@ fun HomeScreen(
 
 
     if(uiState.childScreen == "advertisement-screen") {
+        Log.i("NAVIGATING_TO_ADVRETS", "advertisement-screen")
         currentScreen = MainNavigationPages.ADVERTISE_SCREEN
         viewModel.resetChildScreen()
     } else if(uiState.childScreen == "profile-screen") {

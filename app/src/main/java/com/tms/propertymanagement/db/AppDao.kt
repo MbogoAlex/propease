@@ -45,6 +45,8 @@ interface AppDao {
     // insert feature
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertFeature(feature: Feature)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertPaymentDetails(paymentDetails: PaymentDetails)
 
 
     // query property details

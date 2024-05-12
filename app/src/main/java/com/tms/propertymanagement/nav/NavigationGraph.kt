@@ -29,6 +29,7 @@ import com.propertymanagement.tms.ui.screens.propertyAdvertisementPages.UserLive
 import com.tms.propertymanagement.ui.screens.accountManagement.ProfileUpdateScreen
 import com.tms.propertymanagement.ui.screens.accountManagement.ProfileUpdateScreenDestination
 import com.tms.propertymanagement.ui.screens.accountManagement.profileVerification.ProfileVerificationComposable
+import com.tms.propertymanagement.ui.screens.accountManagement.profileVerification.ProfileVerificationScreenDestination
 import kotlin.reflect.typeOf
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -162,7 +163,7 @@ fun NavigationGraph(
                     navController.navigate("${LoginScreenDestination.route}/${phoneNumber}/${password}")
                 },
                 navigateToProfileVerificationScreen = {
-                    navController.navigate(ProfileUpdateScreenDestination.route)
+                    navController.navigate(ProfileVerificationScreenDestination.route)
                 }
             )
         }
@@ -257,7 +258,7 @@ fun NavigationGraph(
                     navController.navigate("${LoginScreenDestination.route}/${phoneNumber}/${password}")
                 },
                 navigateToProfileVerificationScreen = {
-                    navController.navigate(ProfileUpdateScreenDestination.route)
+                    navController.navigate(ProfileVerificationScreenDestination.route)
                 }
             )
         }
@@ -274,7 +275,7 @@ fun NavigationGraph(
                 }
             )
         }
-        composable(ProfileUpdateScreenDestination.route) {
+        composable(ProfileVerificationScreenDestination.route) {
             ProfileVerificationComposable(
                 navigateToHomeScreenWithArgs = {
                     navController.navigate("${HomeScreenDestination.route}/${it}")

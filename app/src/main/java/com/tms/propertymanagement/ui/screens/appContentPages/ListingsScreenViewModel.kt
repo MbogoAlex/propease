@@ -13,6 +13,7 @@ import com.tms.propertymanagement.db.DBRepository
 import com.tms.propertymanagement.db.Feature
 import com.tms.propertymanagement.db.Location
 import com.tms.propertymanagement.db.Owner
+import com.tms.propertymanagement.db.PaymentDetails
 import com.tms.propertymanagement.db.Property
 import com.tms.propertymanagement.db.PropertyDetails
 import com.tms.propertymanagement.utils.toCategory
@@ -302,13 +303,32 @@ class ListingsScreenViewModel(
                     title = prop.title,
                     description = prop.description,
                     postedDate = prop.postedDate,
+                    deletionTime = prop.deletionTime ?: "",
                     propertyLocation = "${prop.location.county}, ${prop.location.address}",
                     price = prop.price,
                     rooms = prop.rooms,
                     ownerId = prop.user.userId,
+                    paid = prop.paid,
+                    approved = prop.approved,
                     categoryId = categoryId,
                     categoryName = prop.category,
                     fetchData = true
+                )
+
+                val paymentDetails = PaymentDetails(
+                    paymentId = prop.paymentDetails.id,
+                    propertyId = prop.propertyId,
+                    partnerReferenceID = prop.paymentDetails.partnerReferenceID,
+                    transactionID = prop.paymentDetails.transactionID,
+                    msisdn = prop.paymentDetails.msisdn,
+                    partnerTransactionID = prop.paymentDetails.partnerTransactionID,
+                    payerTransactionID = prop.paymentDetails.payerTransactionID,
+                    receiptNumber = prop.paymentDetails.receiptNumber,
+                    transactionAmount = prop.paymentDetails.transactionAmount,
+                    transactionStatus = prop.paymentDetails.transactionStatus,
+                    paymentComplete = prop.paymentDetails.paymentComplete,
+                    createdAt = prop.paymentDetails.createdAt,
+                    updatedAt = prop.paymentDetails.updatedAt
                 )
 
                 val location: Location = Location(
@@ -328,6 +348,8 @@ class ListingsScreenViewModel(
                     features.add(feature)
 
                 }
+
+
 
                 // insert category
 
@@ -359,6 +381,14 @@ class ListingsScreenViewModel(
                     dbRepository.insertLocation(location)
                 } catch (e: Exception) {
                     Log.e("FAILED_TO_INSERT_LOCATION", e.toString())
+                }
+
+                // insert payment details
+
+                try {
+                    dbRepository.insertPaymentDetails(paymentDetails)
+                } catch (e: Exception) {
+                    Log.e("FAILED_TO_INSERT_PAYMENT_DETAILS", e.toString())
                 }
 
                 // insert features

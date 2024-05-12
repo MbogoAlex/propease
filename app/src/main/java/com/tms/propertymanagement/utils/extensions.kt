@@ -1,16 +1,12 @@
 package com.tms.propertymanagement.utils
 
-import androidx.room.Embedded
-import androidx.room.Relation
 import com.propertymanagement.tms.apiModel.Category
 import com.propertymanagement.tms.apiModel.PropertyData
-import com.propertymanagement.tms.apiModel.PropertyImage
 import com.propertymanagement.tms.apiModel.PropertyLocation
 import com.propertymanagement.tms.apiModel.PropertyOwner
-import com.tms.propertymanagement.db.Feature
 import com.tms.propertymanagement.db.Location
 import com.tms.propertymanagement.db.Owner
-import com.tms.propertymanagement.db.Property
+import com.tms.propertymanagement.db.PaymentDetails
 import com.tms.propertymanagement.db.PropertyDetails
 
 fun com.tms.propertymanagement.db.Category.toCategory(): Category = Category(
@@ -35,24 +31,19 @@ fun Location.toPropertyLocation(): PropertyLocation = PropertyLocation(
     longitude = longitude
 )
 
-fun Property.toPropertyData(
-    property: Property,
-    category: com.tms.propertymanagement.db.Category,
-    owner: Owner,
-    features: List<Feature>,
-    location: Location
-): PropertyData = PropertyData(
-    user = owner.toPropertyOwner(),
-    propertyId = property.propertyId,
-    title = property.title,
-    description = property.description,
-    category = category.name,
-    rooms = property.rooms,
-    price = property.price,
-    postedDate = property.postedDate,
-    features = features.map { it.name },
-    location = location.toPropertyLocation(),
-    images = emptyList()
+fun PaymentDetails.toPropertyPaymentDetails(): com.propertymanagement.tms.apiModel.PaymentDetails = com.propertymanagement.tms.apiModel.PaymentDetails(
+    id = paymentId,
+    partnerReferenceID = partnerReferenceID,
+    transactionID = transactionID,
+    msisdn = msisdn,
+    partnerTransactionID = partnerTransactionID,
+    payerTransactionID = payerTransactionID,
+    receiptNumber = receiptNumber,
+    transactionAmount = transactionAmount,
+    transactionStatus = transactionStatus,
+    paymentComplete = paymentComplete,
+    createdAt = createdAt,
+    updatedAt = updatedAt
 )
 
 
@@ -67,6 +58,10 @@ fun PropertyDetails.toPropertyData(propertyDetails: PropertyDetails): PropertyDa
     postedDate = propertyDetails.property.postedDate,
     features = propertyDetails.features.map { it.name },
     location = PropertyLocation().takeIf { location == null } ?: location!!.toPropertyLocation(),
+    approved = propertyDetails.property.approved,
+    paid = propertyDetails.property.paid,
+    deletionTime = propertyDetails.property.deletionTime,
+    paymentDetails = propertyDetails.paymentDetails.toPropertyPaymentDetails(),
     images = emptyList(),
 )
 
