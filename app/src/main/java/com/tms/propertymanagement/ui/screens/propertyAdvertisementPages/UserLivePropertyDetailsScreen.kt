@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
@@ -86,7 +87,7 @@ fun UserLivePropertyDetailsScreen(
     navigateToPreviousScreen: () -> Unit,
     navigateToPropertyUpdateScreen: (propertyId: String) -> Unit,
     navigateToHomeScreenWithArgs: (childScreen: String) -> Unit,
-
+    navigateToPaymentScreen: (propertyId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -223,6 +224,18 @@ fun UserLivePropertyDetailsScreen(
                             .height(10.dp)
                     )
                 }
+                if(!uiState.property.approved) {
+                    Text(
+                        text = "* Property under review",
+                        color = Color.Red
+                    )
+                } else if(uiState.property.approved && !uiState.property.paid) {
+                    Text(
+                        text = "* Pay to make your property live",
+                        color = Color.Red
+                    )
+                }
+                Spacer(modifier = Modifier.height(5.dp))
                 UserPropertyImageSlider(
                     uiState = uiState
                 )
@@ -234,7 +247,8 @@ fun UserLivePropertyDetailsScreen(
                     uiState = uiState,
                     onDeleteButtonClicked = {
                         showDeleteDialog = !showDeleteDialog
-                    }
+                    },
+                    navigateToPaymentScreen = navigateToPaymentScreen
                 )
             }
         }
@@ -322,6 +336,7 @@ fun UserPropertyImageSlider(
 fun UserPropertyListingTextDetails(
     uiState: UserLivePropertyDetailsScreenUiState,
     onDeleteButtonClicked: () -> Unit,
+    navigateToPaymentScreen: (propertyId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -535,24 +550,65 @@ fun UserPropertyListingTextDetails(
             }
         }
         Spacer(modifier = Modifier.height(10.dp))
-        Button(
-            enabled =uiState.isConnected && uiState.internetPresent &&  uiState.deletingPropertyStatus != DeletingPropertyStatus.LOADING,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Black
-            ),
-            modifier = Modifier
-                .fillMaxWidth(),
-            onClick = {
-                onDeleteButtonClicked()
-            }
-        ) {
-            if(uiState.deletingPropertyStatus == DeletingPropertyStatus.LOADING) {
-                CircularProgressIndicator()
-            } else {
-                Text(text = "Remove")
-            }
+        if(!uiState.property.paid) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    enabled = !uiState.property.paid,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black
+                    ),
+                    modifier = Modifier
+                        .widthIn(250.dp),
+                    onClick = {
+                        navigateToPaymentScreen(uiState.property.propertyId.toString())
+                    }
+                ) {
+                    Text(text = "Pay for ad")
 
+                }
+                Spacer(modifier = Modifier.width(3.dp))
+                Button(
+                    enabled =uiState.isConnected && uiState.internetPresent &&  uiState.deletingPropertyStatus != DeletingPropertyStatus.LOADING,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Red
+                    ),
+                    modifier = Modifier
+                        .widthIn(250.dp),
+                    onClick = {
+                        onDeleteButtonClicked()
+                    }
+                ) {
+                    if(uiState.deletingPropertyStatus == DeletingPropertyStatus.LOADING) {
+                        CircularProgressIndicator()
+                    } else {
+                        Text(text = "Remove")
+                    }
+
+                }
+            }
+        } else {
+            Button(
+                enabled =uiState.isConnected && uiState.internetPresent &&  uiState.deletingPropertyStatus != DeletingPropertyStatus.LOADING,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Red
+                ),
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onClick = {
+                    onDeleteButtonClicked()
+                }
+            ) {
+                if(uiState.deletingPropertyStatus == DeletingPropertyStatus.LOADING) {
+                    CircularProgressIndicator()
+                } else {
+                    Text(text = "Remove")
+                }
+
+            }
         }
+
 
     }
 }
@@ -574,7 +630,8 @@ fun UserLivePropertyDetailsPreview() {
         UserLivePropertyDetailsScreen(
             navigateToPreviousScreen = {},
             navigateToPropertyUpdateScreen = {},
-            navigateToHomeScreenWithArgs = {}
+            navigateToHomeScreenWithArgs = {},
+            navigateToPaymentScreen = {}
         )
     }
 }

@@ -11,7 +11,10 @@ import com.propertymanagement.tms.network.ApiRepository
 import com.propertymanagement.tms.propEaseDataStore.DSRepository
 import com.propertymanagement.tms.utils.ReusableFunctions
 import com.propertymanagement.tms.utils.ReusableFunctions.toLoggedInUserData
+import com.tms.propertymanagement.apiModel.PaymentRequestBody
 import com.tms.propertymanagement.db.DBRepository
+import com.tms.propertymanagement.utils.PaymentStatus
+import com.tms.propertymanagement.utils.PaymentStatusCheck
 import com.tms.propertymanagement.utils.propertyData
 import com.tms.propertymanagement.utils.toPropertyData
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +45,7 @@ data class UserLivePropertyDetailsScreenUiState(
     val deletingPropertyStatus: DeletingPropertyStatus = DeletingPropertyStatus.INITIAL,
     val userDetails: ReusableFunctions.LoggedInUserData = ReusableFunctions.LoggedInUserData(),
     val isConnected: Boolean = false,
-    val internetPresent: Boolean = true
+    val internetPresent: Boolean = true,
 )
 
 class UserLivePropertyDetailsScreenViewModel(
@@ -179,6 +182,8 @@ class UserLivePropertyDetailsScreenViewModel(
             )
         }
     }
+
+
 
     init {
         fetchUserDetails()

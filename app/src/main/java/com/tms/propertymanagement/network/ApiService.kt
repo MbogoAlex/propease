@@ -14,6 +14,9 @@ import com.propertymanagement.tms.apiModel.UserLoginResponseBody
 import com.propertymanagement.tms.apiModel.UserRegistrationRequestBody
 import com.propertymanagement.tms.apiModel.UserRegistrationResponseBody
 import com.tms.propertymanagement.apiModel.DocumentUploadResponseBody
+import com.tms.propertymanagement.apiModel.PaymentRequestBody
+import com.tms.propertymanagement.apiModel.PaymentResponseBody
+import com.tms.propertymanagement.apiModel.PaymentStatusResponseBody
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -141,4 +144,16 @@ interface ApiService {
         @Path("userId") userId: Int,
         @Part files: List<MultipartBody.Part>
     ): Response<DocumentUploadResponseBody>
+    @POST("api/payment/initialize")
+    suspend fun payForPropertyAd(
+        @Header("Authorization") token: String,
+        @Body paymentRequestBody: PaymentRequestBody
+    ): Response<PaymentResponseBody>
+
+    @GET("api/payment/partnerTransactionID={partnerTransactionID}/status")
+    suspend fun getPaymentStatus(
+        @Header("Authorization") token: String,
+        @Path("partnerTransactionID") partnerTransactionID: String
+    ): Response<PaymentStatusResponseBody>
+
 }

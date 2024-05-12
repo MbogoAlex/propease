@@ -6,6 +6,26 @@ import com.propertymanagement.tms.apiModel.PropertyData
 import com.propertymanagement.tms.apiModel.PropertyLocation
 import com.propertymanagement.tms.apiModel.PropertyOwner
 
+enum class PaymentStatus{
+    INITIAL,
+    LOADING,
+    SUCCESS,
+    FAIL
+}
+
+enum class PaymentStatusCheck{
+    INITIAL,
+    LOADING,
+    SUCCESS,
+    FAIL
+}
+
+enum class LoadingStatus{
+    INITIAL,
+    LOADING,
+    SUCCESS,
+    FAIL
+}
 data class SpecificPropertyData(
     val property: PropertyData
 )

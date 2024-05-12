@@ -30,6 +30,8 @@ import com.tms.propertymanagement.ui.screens.accountManagement.ProfileUpdateScre
 import com.tms.propertymanagement.ui.screens.accountManagement.ProfileUpdateScreenDestination
 import com.tms.propertymanagement.ui.screens.accountManagement.profileVerification.ProfileVerificationComposable
 import com.tms.propertymanagement.ui.screens.accountManagement.profileVerification.ProfileVerificationScreenDestination
+import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.PaymentScreenComposable
+import com.tms.propertymanagement.ui.screens.propertyAdvertisementPages.PaymentScreenDestination
 import kotlin.reflect.typeOf
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -199,6 +201,9 @@ fun NavigationGraph(
                 navigateToHomeScreenWithArgs = {
                     navController.popBackStack()
                     navController.navigate("${HomeScreenDestination.route}/${it}")
+                },
+                navigateToPaymentScreen = {
+                    navController.navigate("${PaymentScreenDestination.route}/${it}")
                 }
             )
         }
@@ -282,6 +287,23 @@ fun NavigationGraph(
                 },
                 navigateToPreviousScreen = {
                     navController.popBackStack()
+                }
+            )
+        }
+        composable(
+            PaymentScreenDestination.routeWithArgs,
+            arguments = listOf(
+                navArgument(PaymentScreenDestination.propertyId) {
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            PaymentScreenComposable(
+                navigateToPreviousScreen = {
+                    navController.navigateUp()
+                },
+                navigateToHomeScreenWithArgs = {
+                    navController.navigate("${HomeScreenDestination.route}/${it}")
                 }
             )
         }

@@ -181,7 +181,7 @@ fun PropertyUploadPreviewScreen(
     }
 
     if(uiState.uploadingStatus == UploadingStatus.SUCCESS) {
-        Toast.makeText(context, "Your property is live", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Your property is under review. Pay ad fee to make your property live", Toast.LENGTH_LONG).show()
         navigateToHomeScreenWithArguments("advertisement-screen")
         viewModel.resetSavingState()
     } else if(uiState.uploadingStatus == UploadingStatus.FAILURE)  {

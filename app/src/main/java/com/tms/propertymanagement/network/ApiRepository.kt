@@ -14,6 +14,9 @@ import com.propertymanagement.tms.apiModel.UserLoginResponseBody
 import com.propertymanagement.tms.apiModel.UserRegistrationRequestBody
 import com.propertymanagement.tms.apiModel.UserRegistrationResponseBody
 import com.tms.propertymanagement.apiModel.DocumentUploadResponseBody
+import com.tms.propertymanagement.apiModel.PaymentRequestBody
+import com.tms.propertymanagement.apiModel.PaymentResponseBody
+import com.tms.propertymanagement.apiModel.PaymentStatusResponseBody
 import okhttp3.MultipartBody
 import retrofit2.Response
 
@@ -72,6 +75,16 @@ interface ApiRepository {
         userId: Int,
         files: List<MultipartBody.Part>
     ): Response<DocumentUploadResponseBody>
+
+    suspend fun payForPropertyAd(
+        token: String,
+        paymentRequestBody: PaymentRequestBody
+    ): Response<PaymentResponseBody>
+
+    suspend fun getPaymentStatus(
+        token: String,
+        partnerTransactionID: String
+    ): Response<PaymentStatusResponseBody>
 }
 
 class NetworkApiRepository(private val apiService: ApiService): ApiRepository {
@@ -181,6 +194,22 @@ class NetworkApiRepository(private val apiService: ApiService): ApiRepository {
         token = "Bearer $token",
         userId = userId,
         files = files
+    )
+
+    override suspend fun payForPropertyAd(
+        token: String,
+        paymentRequestBody: PaymentRequestBody
+    ): Response<PaymentResponseBody> = apiService.payForPropertyAd(
+        token = "Bearer $token",
+        paymentRequestBody = paymentRequestBody
+    )
+
+    override suspend fun getPaymentStatus(
+        token: String,
+        partnerTransactionID: String
+    ): Response<PaymentStatusResponseBody> = apiService.getPaymentStatus(
+        token = "Bearer $token",
+        partnerTransactionID = partnerTransactionID
     )
 
 }
