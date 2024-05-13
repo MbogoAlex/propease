@@ -20,7 +20,7 @@ data class PropertyData(
     val title: String,
     val description: String,
     val category: String,
-    val rooms: Int,
+    val rooms: String,
     val price: Double,
     val approved: Boolean,
     val paid: Boolean,
@@ -73,7 +73,7 @@ data class PropertyUploadRequestBody (
     val description: String,
     val categoryId: String,
     val price: Double,
-    val rooms: Int,
+    val rooms: String,
     val postedDate: String,
     val location: PropertyLocation,
     val features: List<String>

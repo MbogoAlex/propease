@@ -43,6 +43,7 @@ data class ListingsScreenUiState(
     val numberOfRoomsSelected: String = "",
     val categoryIdSelected: String = "",
     val categoryNameSelected: String = "",
+    val rooms: List<String> = emptyList(),
     val filteringOn: Boolean = false,
     val location: String = "",
     val offlineProperties: List<PropertyDetails> = emptyList(),
@@ -61,11 +62,24 @@ class ListingsScreenViewModel(
     val uiState: StateFlow<ListingsScreenUiState> = _uiState.asStateFlow()
 
     fun loadUserDetails() {
+        val rooms = listOf(
+            "Bedsitter - Rental, Airbnb, On sale",
+            "One bedroom - Rental, Airbnb, On sale",
+            "Two bedrooms - Rental, Airbnb, On sale",
+            "Three bedrooms - Rental, Airbnb, On sale",
+            "Four bedrooms - Rental, Airbnb, On sale",
+            "Five bedrooms - Rental, Airbnb, On sale",
+            "Single room - Shop, Office, On sale",
+            "Two rooms - Shop, Office, On sale",
+            "Three rooms - Shop, Office, On sale",
+
+            )
         viewModelScope.launch {
             dsRepository.dsUserModel.collect() {dsUserModel ->
                 _uiState.update {
                     it.copy(
-                        userDetails = dsUserModel.toLoggedInUserData()
+                        userDetails = dsUserModel.toLoggedInUserData(),
+                        rooms = rooms
                     )
                 }
 
@@ -205,13 +219,106 @@ class ListingsScreenViewModel(
         }
     }
 
-    fun fetchFilteredProperties(location: String?, rooms: Int?, categoryId: Int?, categoryName: String?) {
+    fun fetchFilteredProperties(location: String?, rooms: String?, categoryId: Int?, categoryName: String?) {
+
+        var selectableRooms: List<String> = emptyList()
+
+        val category = categoryName ?: uiState.value.categoryNameSelected
+
+        var selectedRooms = rooms ?: uiState.value.numberOfRoomsSelected
+
+        var noRooms = _uiState.value.numberOfRoomsSelected
+
+        when(selectedRooms.lowercase()) {
+            "bedsitter" -> noRooms = "Bedsitter"
+            "one bedroom" -> noRooms = "One bedroom"
+            "two bedrooms" -> noRooms = "Two bedrooms"
+            "three bedrooms" -> noRooms = "Three bedrooms"
+            "four bedrooms" -> noRooms = "Four bedrooms"
+            "five bedrooms" -> noRooms = "Five bedrooms"
+            "bedsitter - rental, airbnb, on sale" -> noRooms = "Bedsitter"
+            "one bedroom - rental, airbnb, on sale" -> noRooms = "One bedroom"
+            "two bedrooms - rental, airbnb, on sale" -> noRooms = "Two bedrooms"
+            "three bedrooms - rental, airbnb, on sale" -> noRooms = "Three bedrooms"
+            "four bedrooms - rental, airbnb, on sale" -> noRooms = "Four bedrooms"
+            "five bedrooms - rental, airbnb, on sale" -> noRooms = "Five bedrooms"
+            "single room - shop, office, on sale" -> noRooms = "Single room"
+            "two rooms - shop, office, on sale" -> noRooms = "Two rooms"
+            "three rooms - shop, office, on sale" -> noRooms = "Three rooms"
+            "single room" -> noRooms = "Single room"
+            "two rooms" -> noRooms = "Two rooms"
+            "three rooms" -> noRooms = "Three rooms"
+        }
+
+        when(category.lowercase()) {
+            "rental" -> {
+                selectableRooms = listOf(
+                    "Bedsitter",
+                    "One bedroom",
+                    "Two bedrooms",
+                    "Three bedrooms",
+                    "Four bedrooms",
+                    "Five bedrooms"
+                )
+            }
+            "arbnb" -> {
+                selectableRooms = listOf(
+                    "Bedsitter",
+                    "One bedroom",
+                    "Two bedrooms",
+                    "Three bedrooms",
+                    "Four bedrooms",
+                    "Five bedrooms"
+                )
+            }
+            "airbnb" -> {
+                selectableRooms = listOf(
+                    "Bedsitter",
+                    "One bedroom",
+                    "Two bedrooms",
+                    "Three bedrooms",
+                    "Four bedrooms",
+                    "Five bedrooms"
+                )
+            }
+            "on sale" -> {
+                selectableRooms = listOf(
+                    "Bedsitter - Rental, Airbnb, On sale",
+                    "One bedroom - Rental, Airbnb, On sale",
+                    "Two bedrooms - Rental, Airbnb, On sale",
+                    "Three bedrooms - Rental, Airbnb, On sale",
+                    "Four bedrooms - Rental, Airbnb, On sale",
+                    "Five bedrooms - Rental, Airbnb, On sale",
+                    "Single room - Shop, Office, On sale",
+                    "Two rooms - Shop, Office, On sale",
+                    "Three rooms - Shop, Office, On sale",
+                )
+
+            }
+            "shop" -> {
+                selectableRooms = listOf(
+                    "Single room ",
+                    "Two rooms",
+                    "Three rooms",
+                )
+
+            }
+            "office" -> {
+                selectableRooms = listOf(
+                    "Single room",
+                    "Two rooms",
+                    "Three rooms",
+                )
+            }
+        }
+
         _uiState.update {
             it.copy(
-                numberOfRoomsSelected = rooms.toString().takeIf { rooms != null } ?: _uiState.value.numberOfRoomsSelected,
+                numberOfRoomsSelected = noRooms,
                 categoryNameSelected = categoryName.takeIf { categoryName != null } ?: _uiState.value.categoryNameSelected,
                 categoryIdSelected = categoryId.toString().takeIf { categoryId != null } ?: _uiState.value.categoryIdSelected,
                 location = location.takeIf { location != null } ?: _uiState.value.location,
+                rooms = selectableRooms
             )
         }
         fetchProperties(
@@ -230,7 +337,18 @@ class ListingsScreenViewModel(
                 categoryNameSelected = "",
                 categoryIdSelected = "",
                 location = "",
-                filteringOn = false
+                filteringOn = false,
+                rooms = listOf(
+                    "Bedsitter - Rental, Airbnb, On sale",
+                    "One bedroom - Rental, Airbnb, On sale",
+                    "Two bedrooms - Rental, Airbnb, On sale",
+                    "Three bedrooms - Rental, Airbnb, On sale",
+                    "Four bedrooms - Rental, Airbnb, On sale",
+                    "Five bedrooms - Rental, Airbnb, On sale",
+                    "Single room - Shop, Office, On sale",
+                    "Two rooms - Shop, Office, On sale",
+                    "Three rooms - Shop, Office, On sale",
+                    )
             )
         }
 
@@ -268,6 +386,7 @@ class ListingsScreenViewModel(
     }
 
     fun loadStartupData() {
+
         loadUserDetails()
     }
 
@@ -465,14 +584,106 @@ class ListingsScreenViewModel(
 
     private val filteredCategories = mutableListOf<Category>()
 
-    fun fetchFilteredDBProperties(location: String?, rooms: Int?, categoryId: Int?, categoryName: String?) {
+    fun fetchFilteredDBProperties(location: String?, rooms: String?, categoryId: Int?, categoryName: String?) {
         Log.i("CONNECTION_STATUS", "${_uiState.value.isConnected}")
+        var selectableRooms: List<String> = emptyList()
+
+        val category = categoryName ?: uiState.value.categoryNameSelected
+
+        val selectedRooms = rooms ?: uiState.value.numberOfRoomsSelected
+
+        var noRooms = _uiState.value.numberOfRoomsSelected
+
+        when(selectedRooms.lowercase()) {
+            "bedsitter" -> noRooms = "Bedsitter"
+            "one bedroom" -> noRooms = "One bedroom"
+            "two bedrooms" -> noRooms = "Two bedrooms"
+            "three bedrooms" -> noRooms = "Three bedrooms"
+            "four bedrooms" -> noRooms = "Four bedrooms"
+            "five bedrooms" -> noRooms = "Five bedrooms"
+            "bedsitter - rental, airbnb, on sale" -> noRooms = "Bedsitter"
+            "one bedroom - rental, airbnb, on sale" -> noRooms = "One bedroom"
+            "two bedrooms - rental, airbnb, on sale" -> noRooms = "Two bedrooms"
+            "three bedrooms - rental, airbnb, on sale" -> noRooms = "Three bedrooms"
+            "four bedrooms - rental, airbnb, on sale" -> noRooms = "Four bedrooms"
+            "five bedrooms - rental, airbnb, on sale" -> noRooms = "Five bedrooms"
+            "single room - shop, office, on sale" -> noRooms = "Single room"
+            "two rooms - shop, office, on sale" -> noRooms = "Two rooms"
+            "three rooms - shop, office, on sale" -> noRooms = "Three rooms"
+            "single room" -> noRooms = "Single room"
+            "two rooms" -> noRooms = "Two rooms"
+            "three rooms" -> noRooms = "Three rooms"
+        }
+
+        when(category.lowercase()) {
+            "rental" -> {
+                selectableRooms = listOf(
+                    "Bedsitter",
+                    "One bedroom",
+                    "Two bedrooms",
+                    "Three bedrooms",
+                    "Four bedrooms",
+                    "Five bedrooms"
+                )
+            }
+            "arbnb" -> {
+                selectableRooms = listOf(
+                    "Bedsitter",
+                    "One bedroom",
+                    "Two bedrooms",
+                    "Three bedrooms",
+                    "Four bedrooms",
+                    "Five bedrooms"
+                )
+            }
+            "airbnb" -> {
+                selectableRooms = listOf(
+                    "Bedsitter",
+                    "One bedroom",
+                    "Two bedrooms",
+                    "Three bedrooms",
+                    "Four bedrooms",
+                    "Five bedrooms"
+                )
+            }
+            "on sale" -> {
+                selectableRooms = listOf(
+                    "Bedsitter - Rental, Airbnb, On sale",
+                    "One bedroom - Rental, Airbnb, On sale",
+                    "Two bedrooms - Rental, Airbnb, On sale",
+                    "Three bedrooms - Rental, Airbnb, On sale",
+                    "Four bedrooms - Rental, Airbnb, On sale",
+                    "Five bedrooms - Rental, Airbnb, On sale",
+                    "Single room - Shop, Office, On sale",
+                    "Two rooms - Shop, Office, On sale",
+                    "Three rooms - Shop, Office, On sale",
+                )
+
+            }
+            "shop" -> {
+                selectableRooms = listOf(
+                    "Single room",
+                    "Two rooms",
+                    "Three rooms",
+                )
+
+            }
+            "office" -> {
+                selectableRooms = listOf(
+                    "Single room",
+                    "Two rooms",
+                    "Three rooms",
+                )
+            }
+        }
+
         _uiState.update {
             it.copy(
-                numberOfRoomsSelected = rooms.toString().takeIf { rooms != null } ?: _uiState.value.numberOfRoomsSelected,
+                numberOfRoomsSelected = noRooms,
                 categoryNameSelected = categoryName.takeIf { categoryName != null } ?: _uiState.value.categoryNameSelected,
                 categoryIdSelected = categoryId.toString().takeIf { categoryId != null } ?: _uiState.value.categoryIdSelected,
-                location = location.takeIf { location != null } ?: _uiState.value.location
+                location = location.takeIf { location != null } ?: _uiState.value.location,
+                rooms = selectableRooms
             )
 
         }
@@ -521,6 +732,14 @@ class ListingsScreenViewModel(
 
         }
 
+    }
+
+    fun clearNumberOfRoomsSelected() {
+        _uiState.update {
+            it.copy(
+                numberOfRoomsSelected = ""
+            )
+        }
     }
 
     init {

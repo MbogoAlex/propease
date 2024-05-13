@@ -555,7 +555,7 @@ fun UserPropertyListingTextDetails(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
-                    enabled = !uiState.property.paid,
+                    enabled = uiState.isConnected && uiState.internetPresent,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Black
                     ),

@@ -85,7 +85,7 @@ fun PaymentScreenComposable(
                 timeLeft--
             }
             if(timeLeft == 0) {
-                timeLeft = 60
+                timeLeft = 40
                 viewModel.getPaymentStatus()
                 viewModel.resetPaymentStatus()
             }

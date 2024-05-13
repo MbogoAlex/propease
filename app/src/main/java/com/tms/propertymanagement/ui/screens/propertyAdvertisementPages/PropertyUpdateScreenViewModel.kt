@@ -51,7 +51,7 @@ enum class FetchingUpdateCategoriesStatus {
 
 
 data class PropertyUpdateScreenUiState(
-    val numberOfRooms: Int = 0,
+    val numberOfRooms: String = "",
     val category: Category = propertyCategoryData,
     val categoryName: String = "",
     val categories: List<Category> = emptyList(),
@@ -62,6 +62,7 @@ data class PropertyUpdateScreenUiState(
     val address: String = "",
     val features: List<String> = emptyList(),
     val images: List<Uri> = emptyList(),
+    val rooms: List<String> = emptyList(),
     val serverImages: List<PropertyImage> = emptyList(),
     val userDetails: ReusableFunctions.LoggedInUserData = ReusableFunctions.LoggedInUserData(),
     val uploadingStatus: UploadingStatus = UploadingStatus.INITIAL,
@@ -98,20 +99,106 @@ class PropertyUpdateScreenViewModel(
     val features = mutableStateListOf<String>()
     val images = mutableStateListOf<Uri>()
 
-    fun updateNumberOfRoomsSelected(numberOfRooms: Int) {
+    fun updateNumberOfRoomsSelected(numberOfRooms: String) {
+        var noRooms = ""
+        when(numberOfRooms.lowercase()) {
+            "bedsitter" -> noRooms = "Bedsitter"
+            "one bedroom" -> noRooms = "One bedroom"
+            "two bedrooms" -> noRooms = "Two bedrooms"
+            "three bedrooms" -> noRooms = "Three bedrooms"
+            "four bedrooms" -> noRooms = "Four bedrooms"
+            "five bedrooms" -> noRooms = "Five bedrooms"
+            "bedsitter - rental, airbnb, on sale" -> noRooms = "Bedsitter"
+            "one bedroom - rental, airbnb, on sale" -> noRooms = "One bedroom"
+            "two bedrooms - rental, airbnb, on sale" -> noRooms = "Two bedrooms"
+            "three bedrooms - rental, airbnb, on sale" -> noRooms = "Three bedrooms"
+            "four bedrooms - rental, airbnb, on sale" -> noRooms = "Four bedrooms"
+            "five bedrooms - rental, airbnb, on sale" -> noRooms = "Five bedrooms"
+            "single room - shop, office, on sale" -> noRooms = "Single room"
+            "two rooms - shop, office, on sale" -> noRooms = "Two rooms"
+            "three rooms - shop, office, on sale" -> noRooms = "Three rooms"
+            "single room" -> noRooms = "Single room"
+            "two rooms" -> noRooms = "Two rooms"
+            "three rooms" -> noRooms = "Three rooms"
+        }
         _uiState.update {
             it.copy(
-                numberOfRooms = numberOfRooms,
-                saveButtonEnabled = requiredFieldsFilled()
+                numberOfRooms = noRooms,
+                saveButtonEnabled = requiredFieldsFilled(),
             )
         }
     }
 
     fun updateCategoryType(category: Category) {
+        var selectableRooms: List<String> = emptyList()
+
+        when(category.name.lowercase()) {
+            "rental" -> {
+                selectableRooms = listOf(
+                    "Bedsitter",
+                    "One bedroom",
+                    "Two bedrooms",
+                    "Three bedrooms",
+                    "Four bedrooms",
+                    "Five bedrooms"
+                )
+            }
+            "arbnb" -> {
+                selectableRooms = listOf(
+                    "Bedsitter",
+                    "One bedroom",
+                    "Two bedrooms",
+                    "Three bedrooms",
+                    "Four bedrooms",
+                    "Five bedrooms"
+                )
+            }
+            "airbnb" -> {
+                selectableRooms = listOf(
+                    "Bedsitter",
+                    "One bedroom",
+                    "Two bedrooms",
+                    "Three bedrooms",
+                    "Four bedrooms",
+                    "Five bedrooms"
+                )
+            }
+            "on sale" -> {
+                selectableRooms = listOf(
+                    "Bedsitter - Rental, Airbnb, On sale",
+                    "One bedroom - Rental, Airbnb, On sale",
+                    "Two bedrooms - Rental, Airbnb, On sale",
+                    "Three bedrooms - Rental, Airbnb, On sale",
+                    "Four bedrooms - Rental, Airbnb, On sale",
+                    "Five bedrooms - Rental, Airbnb, On sale",
+                    "Single room - Shop, Office, On sale",
+                    "Two rooms - Shop, Office, On sale",
+                    "Three rooms - Shop, Office, On sale",
+                )
+
+            }
+            "shop" -> {
+                selectableRooms = listOf(
+                    "Single room",
+                    "Two rooms",
+                    "Three rooms",
+                )
+
+            }
+            "office" -> {
+                selectableRooms = listOf(
+                    "Single room",
+                    "Two rooms",
+                    "Three rooms",
+                )
+            }
+        }
         _uiState.update {
             it.copy(
                 category = category,
                 categoryName = category.name,
+                numberOfRooms = "",
+                rooms = selectableRooms,
                 saveButtonEnabled = requiredFieldsFilled()
             )
         }

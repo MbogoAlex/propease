@@ -1,6 +1,8 @@
 package com.propertymanagement.tms.ui.screens.appContentPages
 
+import android.app.Activity
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -26,6 +28,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -80,6 +84,9 @@ fun ListingsScreen(
     navigateToSpecificProperty: (propertyId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val activity = (LocalContext.current as? Activity)
+
+    BackHandler(onBack = {activity?.finish()})
 
     val context = LocalContext.current
 
@@ -246,7 +253,7 @@ fun ListingsFilterSection(
                             categoryName = categoryName
                         )
                     }
-
+                    viewModel.clearNumberOfRoomsSelected()
                     viewModel.turnOnFiltering()
                 }
             )
@@ -317,16 +324,26 @@ fun LocationSearchForm(
 @Composable
 fun NumberOfRoomsSelection(
     uiState: ListingsScreenUiState,
-    onChangeNumberOfRooms: (location: String?, rooms: Int?, categoryId: Int?, categoryName: String?) -> Unit,
+    onChangeNumberOfRooms: (location: String?, rooms: String?, categoryId: Int?, categoryName: String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val rooms = listOf<Int>(1, 2, 3, 4, 5, 6, 7, 8)
-//    var selectedRoom by remember {
-//        mutableIntStateOf(0)
-//    }
     var expanded by remember {
         mutableStateOf(false)
     }
+
+
+    val defaultRooms = listOf(
+        "Bedsitter - Rental, Airbnb, On sale",
+        "One bedroom - Rental, Airbnb, On sale",
+        "Two bedrooms - Rental, Airbnb, On sale",
+        "Three bedrooms - Rental, Airbnb, On sale",
+        "Four bedrooms - Rental, Airbnb, On sale",
+        "Five bedrooms - Rental, Airbnb, On sale",
+        "Single room - Shop, Office, On sale",
+        "Two rooms - Shop, Office, On sale",
+        "Three rooms - Shop, Office, On sale",
+
+        )
 
     var dropDownIcon: ImageVector
     if(expanded) {
@@ -336,12 +353,12 @@ fun NumberOfRoomsSelection(
     }
 
     Column {
-        Card(
+        Button(
             shape = RoundedCornerShape(10.dp),
-            modifier = Modifier
-                .clickable {
-                    expanded = !expanded
-                }
+            onClick = {
+                expanded = !expanded
+                Log.i("No_ROOMS", uiState.rooms.toString())
+            }
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -349,10 +366,9 @@ fun NumberOfRoomsSelection(
             ) {
                 Text(
                     text = "No. Rooms".takeIf { uiState.numberOfRoomsSelected.isEmpty() }
-                        ?: "${uiState.numberOfRoomsSelected} room".takeIf { uiState.numberOfRoomsSelected.toInt() == 1 }
-                        ?: "${uiState.numberOfRoomsSelected} rooms",
+                        ?: uiState.numberOfRoomsSelected,
                     modifier = Modifier
-                        .padding(10.dp)
+
 //                        .widthIn(120.dp)
                 )
                 Icon(
@@ -365,21 +381,41 @@ fun NumberOfRoomsSelection(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            rooms.forEachIndexed { index, i ->
-                DropdownMenuItem(
-                    text = {
-                           Text(
-                               text = "1 room".takeIf { i == 1 } ?: "$i rooms"
-                           )
-                    },
-                    onClick = {
-                        onChangeNumberOfRooms(
-                            null, i, null,null
-                        )
-                        
-                        expanded = !expanded
-                    }
-                )
+            if (uiState.rooms.isEmpty()) {
+                defaultRooms.forEachIndexed { index, i ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = i
+                            )
+                        },
+                        onClick = {
+                            onChangeNumberOfRooms(
+                                null, i, null,null
+                            )
+
+                            expanded = !expanded
+                        }
+                    )
+                }
+
+            } else {
+                uiState.rooms.forEachIndexed { index, i ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = i
+                            )
+                        },
+                        onClick = {
+                            onChangeNumberOfRooms(
+                                null, i, null,null
+                            )
+
+                            expanded = !expanded
+                        }
+                    )
+                }
             }
         }
     }
@@ -388,7 +424,7 @@ fun NumberOfRoomsSelection(
 @Composable
 fun CategorySelection(
     uiState: ListingsScreenUiState,
-    onChangeCategory: (location: String?, rooms: Int?, categoryId: Int?, categoryName: String?) -> Unit,
+    onChangeCategory: (location: String?, rooms: String?, categoryId: Int?, categoryName: String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -402,12 +438,9 @@ fun CategorySelection(
         dropDownIcon = Icons.Default.KeyboardArrowDown
     }
     Column {
-        Card(
+        Button(
             shape = RoundedCornerShape(10.dp),
-            modifier = Modifier
-                .clickable {
-                    expanded = !expanded
-                }
+            onClick = { expanded = !expanded }
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -417,7 +450,7 @@ fun CategorySelection(
                 Text(
                     text = "Category".takeIf { uiState.categoryNameSelected.isEmpty() } ?: uiState.categoryNameSelected,
                     modifier = Modifier
-                        .padding(10.dp)
+//                        .padding(10.dp)
 //                        .widthIn(120.dp)
                 )
                 Icon(

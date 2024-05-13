@@ -534,7 +534,7 @@ fun PropertyFeaturesUpdateSelection(
                 viewModel = viewModel,
                 uiState = uiState
             )
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(10.dp))
             CategoryUpdateSelection(
                 uiState = uiState,
                 viewModel = viewModel
@@ -586,7 +586,18 @@ fun NumberOfRoomsUpdateSelection(
     uiState: PropertyUpdateScreenUiState,
     modifier: Modifier = Modifier
 ) {
-    val rooms = listOf<Int>(1, 2, 3, 4, 5, 6, 7, 8)
+    val defaultRooms = listOf(
+        "Bedsitter - Rental, Airbnb, On sale",
+        "One bedroom - Rental, Airbnb, On sale",
+        "Two bedrooms - Rental, Airbnb, On sale",
+        "Three bedrooms - Rental, Airbnb, On sale",
+        "Four bedrooms - Rental, Airbnb, On sale",
+        "Five bedrooms - Rental, Airbnb, On sale",
+        "Single room - Shop, Office, On sale",
+        "Two rooms - Shop, Office, On sale",
+        "Three rooms - Shop, Office, On sale",
+
+        )
     var selectedRoom by remember {
         mutableIntStateOf(0)
     }
@@ -602,21 +613,17 @@ fun NumberOfRoomsUpdateSelection(
     }
 
     Column {
-        Card(
-            shape = RoundedCornerShape(10.dp)
+        Button(
+            shape = RoundedCornerShape(10.dp),
+            onClick = { expanded = !expanded }
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .clickable {
-                        expanded = !expanded
-                    }
             ) {
                 Text(
-                    text = uiState.numberOfRooms.toString(),
+                    text = uiState.numberOfRooms.ifEmpty { "No. Rooms" },
                     modifier = Modifier
-                        .padding(10.dp)
-                        .widthIn(120.dp)
                 )
                 Icon(
                     imageVector = dropDownIcon,
@@ -628,20 +635,38 @@ fun NumberOfRoomsUpdateSelection(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            rooms.forEachIndexed { index, i ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = "1 room".takeIf { i == 1 } ?: "$i rooms"
-                        )
-                    },
-                    onClick = {
+            if(uiState.rooms.isEmpty()) {
+                defaultRooms.forEachIndexed { index, i ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = i
+                            )
+                        },
+                        onClick = {
 
-                        viewModel.updateNumberOfRoomsSelected(i)
-                        expanded = !expanded
-                    }
-                )
+                            viewModel.updateNumberOfRoomsSelected(i)
+                            expanded = !expanded
+                        }
+                    )
+                }
+            } else {
+                uiState.rooms.forEachIndexed { index, i ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = i
+                            )
+                        },
+                        onClick = {
+
+                            viewModel.updateNumberOfRoomsSelected(i)
+                            expanded = !expanded
+                        }
+                    )
+                }
             }
+
         }
     }
 }
@@ -662,21 +687,17 @@ fun CategoryUpdateSelection(
         dropDownIcon = Icons.Default.KeyboardArrowDown
     }
     Column {
-        Card(
-            shape = RoundedCornerShape(10.dp)
+        Button(
+            shape = RoundedCornerShape(10.dp),
+            onClick = { expanded = !expanded }
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .clickable {
-                        expanded = !expanded
-                    }
             ) {
                 Text(
                     text = uiState.categoryName,
                     modifier = Modifier
-                        .padding(10.dp)
-                        .widthIn(120.dp)
                 )
                 Icon(
                     imageVector = dropDownIcon,

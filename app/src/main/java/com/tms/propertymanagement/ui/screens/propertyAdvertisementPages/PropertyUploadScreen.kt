@@ -433,7 +433,7 @@ fun PropertyFeaturesSelection(
                 viewModel = viewModel,
                 uiState = uiState
             )
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(10.dp))
             CategorySelection(
                 viewModel = viewModel,
                 uiState = uiState
@@ -486,7 +486,18 @@ fun NumberOfRoomsSelection(
     uiState: PropertyUploadScreenUiState,
     modifier: Modifier = Modifier
 ) {
-    val rooms = listOf<Int>(1, 2, 3, 4, 5, 6, 7, 8)
+    val defaultRooms = listOf(
+        "Bedsitter - Rental, Airbnb, On sale",
+        "One bedroom - Rental, Airbnb, On sale",
+        "Two bedrooms - Rental, Airbnb, On sale",
+        "Three bedrooms - Rental, Airbnb, On sale",
+        "Four bedrooms - Rental, Airbnb, On sale",
+        "Five bedrooms - Rental, Airbnb, On sale",
+        "Single room - Shop, Office, On sale",
+        "Two rooms - Shop, Office, On sale",
+        "Three rooms - Shop, Office, On sale",
+
+        )
     var expanded by remember {
         mutableStateOf(false)
     }
@@ -499,22 +510,19 @@ fun NumberOfRoomsSelection(
     }
 
     Column {
-        Card(
-            shape = RoundedCornerShape(10.dp)
+        Button(
+            shape = RoundedCornerShape(10.dp),
+            onClick = { expanded = !expanded }
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .clickable {
-                        expanded = !expanded
-                    }
             ) {
-                if(uiState.numberOfRooms == 0) {
+                if(uiState.numberOfRooms.isEmpty()) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .padding(10.dp)
-                            .widthIn(120.dp)
+
                     ) {
                         Text(text = "No. Rooms")
                         Spacer(modifier = Modifier.width(3.dp))
@@ -523,20 +531,10 @@ fun NumberOfRoomsSelection(
                             color = Color.Red
                         )
                     }
-                } else if(uiState.numberOfRooms == 1) {
+                }  else {
                     Text(
-                        text = "${uiState.numberOfRooms} room",
+                        text = uiState.numberOfRooms,
                         modifier = Modifier
-                            .padding(10.dp)
-                            .widthIn(120.dp)
-                    )
-
-                } else {
-                    Text(
-                        text = "${uiState.numberOfRooms} rooms",
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .widthIn(120.dp)
                     )
                 }
                 Icon(
@@ -549,18 +547,34 @@ fun NumberOfRoomsSelection(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            rooms.forEachIndexed { index, i ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = "1 room".takeIf { i == 1 } ?: "$i rooms"
-                        )
-                    },
-                    onClick = {
-                        viewModel.updateNumberOfRoomsSelected(i)
-                        expanded = !expanded
-                    }
-                )
+            if(uiState.rooms.isEmpty()) {
+                defaultRooms.forEachIndexed { index, i ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = i
+                            )
+                        },
+                        onClick = {
+                            viewModel.updateNumberOfRoomsSelected(i)
+                            expanded = !expanded
+                        }
+                    )
+                }
+            } else {
+                uiState.rooms.forEachIndexed { index, i ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = i
+                            )
+                        },
+                        onClick = {
+                            viewModel.updateNumberOfRoomsSelected(i)
+                            expanded = !expanded
+                        }
+                    )
+                }
             }
         }
     }
@@ -584,27 +598,24 @@ fun CategorySelection(
         dropDownIcon = Icons.Default.KeyboardArrowDown
     }
     Column {
-        Card(
-            shape = RoundedCornerShape(10.dp)
+        Button(
+            shape = RoundedCornerShape(10.dp),
+            onClick = { expanded = !expanded }
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .clickable {
-                        expanded = !expanded
-                    }
             ) {
                 if(uiState.category.name.isEmpty()) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .padding(10.dp)
-                            .widthIn(120.dp)
+
                     ) {
                         Text(
                             text = "Category",
 
-                        )
+                            )
                         Spacer(modifier = Modifier.width(3.dp))
                         Text(
                             text = "*",
@@ -616,8 +627,7 @@ fun CategorySelection(
                     Text(
                         text = uiState.category.name,
                         modifier = Modifier
-                            .padding(10.dp)
-                            .widthIn(120.dp)
+
                     )
 
                 }

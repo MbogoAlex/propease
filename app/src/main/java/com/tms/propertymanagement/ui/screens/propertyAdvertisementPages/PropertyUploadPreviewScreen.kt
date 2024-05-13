@@ -293,8 +293,7 @@ fun ListingTextDetails(
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    text = "${uiState.numberOfRooms} room".takeIf { uiState.numberOfRooms == 1 }
-                        ?: "${uiState.numberOfRooms} rooms",
+                    text = uiState.numberOfRooms,
                     fontSize = 14.sp
                 )
             }

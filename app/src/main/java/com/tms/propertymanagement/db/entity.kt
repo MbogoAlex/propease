@@ -22,7 +22,7 @@ data class Property(
     val postedDate: String = "",
     val price: Double = 0.0,
     val propertyLocation: String = "",
-    val rooms: Int = 0,
+    val rooms: String = "",
     val ownerId: Int = 0,
     val categoryId: Int = 0,
     val categoryName: String = "",
