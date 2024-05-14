@@ -339,6 +339,8 @@ fun UserPropertyListingTextDetails(
     navigateToPaymentScreen: (propertyId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val parts = uiState.property.postedDate.split(" ")
+    val postedDate = parts[0]
     val context = LocalContext.current
     Column(
         modifier = Modifier
@@ -379,13 +381,13 @@ fun UserPropertyListingTextDetails(
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    text = "${uiState.property.rooms} room".takeIf { it.length == 1 } ?: "${uiState.property.rooms} rooms",
+                    text = uiState.property.rooms,
                     fontSize = 14.sp
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = "Posted on ${uiState.property.postedDate}",
+                text = "Posted on $postedDate",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Light
             )

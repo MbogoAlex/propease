@@ -429,12 +429,12 @@ fun PropertyFeaturesSelection(
 ) {
     Column() {
         Row {
-            NumberOfRoomsSelection(
+            CategorySelection(
                 viewModel = viewModel,
                 uiState = uiState
             )
             Spacer(modifier = Modifier.width(10.dp))
-            CategorySelection(
+            NumberOfRoomsSelection(
                 viewModel = viewModel,
                 uiState = uiState
             )

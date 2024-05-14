@@ -74,7 +74,7 @@ fun PaymentScreenComposable(
     }
     
     var timeLeft by remember {
-        mutableIntStateOf(60)
+        mutableIntStateOf(40)
     }
 
     if(uiState.paymentStatus == PaymentStatus.SUCCESS) {

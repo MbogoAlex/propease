@@ -212,29 +212,6 @@ fun ListingsFilterSection(
                     )
                 )
         ) {
-            NumberOfRoomsSelection(
-                uiState = uiState,
-                onChangeNumberOfRooms = {location, rooms, categoryId, categoryName ->
-                    if(isConnected) {
-                        viewModel.fetchFilteredProperties(
-                            location = location,
-                            rooms = rooms,
-                            categoryId = categoryId,
-                            categoryName = categoryName
-                        )
-                    } else {
-                        viewModel.fetchFilteredDBProperties(
-                            location = location,
-                            rooms = rooms,
-                            categoryId = categoryId,
-                            categoryName = categoryName
-                        )
-                    }
-
-                    viewModel.turnOnFiltering()
-                },
-            )
-            Spacer(modifier = Modifier.width(10.dp))
             CategorySelection(
                 uiState = uiState,
                 onChangeCategory = {location, rooms, categoryId, categoryName ->
@@ -256,6 +233,29 @@ fun ListingsFilterSection(
                     viewModel.clearNumberOfRoomsSelected()
                     viewModel.turnOnFiltering()
                 }
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            NumberOfRoomsSelection(
+                uiState = uiState,
+                onChangeNumberOfRooms = {location, rooms, categoryId, categoryName ->
+                    if(isConnected) {
+                        viewModel.fetchFilteredProperties(
+                            location = location,
+                            rooms = rooms,
+                            categoryId = categoryId,
+                            categoryName = categoryName
+                        )
+                    } else {
+                        viewModel.fetchFilteredDBProperties(
+                            location = location,
+                            rooms = rooms,
+                            categoryId = categoryId,
+                            categoryName = categoryName
+                        )
+                    }
+
+                    viewModel.turnOnFiltering()
+                },
             )
             Spacer(modifier = Modifier.weight(1f))
             if(uiState.filteringOn) {

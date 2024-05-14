@@ -530,14 +530,14 @@ fun PropertyFeaturesUpdateSelection(
 ) {
     Column() {
         Row {
-            NumberOfRoomsUpdateSelection(
-                viewModel = viewModel,
-                uiState = uiState
-            )
-            Spacer(modifier = Modifier.width(10.dp))
             CategoryUpdateSelection(
                 uiState = uiState,
                 viewModel = viewModel
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            NumberOfRoomsUpdateSelection(
+                viewModel = viewModel,
+                uiState = uiState
             )
         }
     }
