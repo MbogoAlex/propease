@@ -408,7 +408,7 @@ fun ListingItem(
                             )
                     )
                 }
-                if(!property.paid || !property.approved) {
+                if(!property.approved) {
                     Spacer(modifier = Modifier.height(10.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically
@@ -432,20 +432,52 @@ fun ListingItem(
                             )
                         }
                         Spacer(modifier = Modifier.width(3.dp))
-                        if(!property.paid) {
-                            Text(
-                                text = "Pay now",
-                                fontSize = 11.sp
-                            )
-                        } else {
-                            Text(
-                                text = "Reviewing",
-                                fontSize = 11.sp
-                            )
-                        }
+
+                        Text(
+                            text = "Reviewing",
+                            fontSize = 11.sp
+                        )
 
                     }
                 }
+//                if(!property.paid || !property.approved) {
+//                    Spacer(modifier = Modifier.height(10.dp))
+//                    Row(
+//                        verticalAlignment = Alignment.CenterVertically
+//                    ) {
+//                        Card(
+//                            colors = CardDefaults.cardColors(
+//                                containerColor = Color.Gray
+//                            )
+//                        ) {
+//                            Text(
+//                                text = "not live".uppercase(),
+//                                fontSize = 11.sp,
+//                                color = Color.White,
+//                                modifier = Modifier
+//                                    .padding(
+//                                        start = 10.dp,
+//                                        top = 5.dp,
+//                                        end = 10.dp,
+//                                        bottom = 5.dp,
+//                                    )
+//                            )
+//                        }
+//                        Spacer(modifier = Modifier.width(3.dp))
+//                        if(!property.paid) {
+//                            Text(
+//                                text = "Pay now",
+//                                fontSize = 11.sp
+//                            )
+//                        } else {
+//                            Text(
+//                                text = "Reviewing",
+//                                fontSize = 11.sp
+//                            )
+//                        }
+//
+//                    }
+//                }
 
             }
         }

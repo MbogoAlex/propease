@@ -61,7 +61,7 @@ interface AppDao {
 
     @Transaction
     @Query("SELECT * FROM property WHERE (property.fetchData = :fetchData) AND (:location IS NULL OR property.propertyLocation LIKE :location) AND (:category IS NULL OR property.categoryName = :category) AND (:rooms IS NULL OR property.rooms = :rooms) GROUP BY property.propertyId")
-    fun filterProperties(fetchData: Boolean, location: String?, rooms: Int?, category: String?): Flow<List<PropertyDetails>>
+    fun filterProperties(fetchData: Boolean, location: String?, rooms: String?, category: String?): Flow<List<PropertyDetails>>
     @Transaction
     @Query("SELECT * FROM property WHERE property.ownerId = :ownerId GROUP BY property.propertyId")
     fun getUserProperties(ownerId: Int): Flow<List<PropertyDetails>>

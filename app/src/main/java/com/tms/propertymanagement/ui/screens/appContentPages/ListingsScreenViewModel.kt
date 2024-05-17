@@ -695,7 +695,7 @@ class ListingsScreenViewModel(
             try {
                 Log.i("FETCHING_FROM_DB", "Fetching from db")
                 dbRepository.filterProperties(
-                    rooms = if(_uiState.value.numberOfRoomsSelected.isEmpty()) null else _uiState.value.numberOfRoomsSelected.toInt(),
+                    rooms = _uiState.value.numberOfRoomsSelected.ifEmpty { null },
                     category = _uiState.value.categoryNameSelected.takeIf { it.isNotEmpty() },
 //                    location = "kiambu",
                     location = _uiState.value.location.takeIf { it.isNotEmpty() },

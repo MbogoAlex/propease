@@ -76,9 +76,6 @@ fun NavigationGraph(
                     navController.popBackStack(RegistrationScreenDestination.route, true)
                     navController.navigate("${LoginScreenDestination.route}/${phoneNumber}/${password}")
                 },
-                navigateToPreviousScreen = {
-                    navController.navigateUp()
-                },
                 navigateToLoginScreenWithoutArguments = {
                     navController.popBackStack(RegistrationScreenDestination.route, true)
                     navController.navigate(LoginScreenDestination.route)

@@ -1,6 +1,8 @@
 package com.propertymanagement.tms.ui.screens.accountManagement
 
+import android.app.Activity
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -50,11 +52,13 @@ object RegistrationScreenDestination: NavigationDestination {
 }
 @Composable
 fun RegistrationScreen(
-    navigateToPreviousScreen: () -> Unit,
+//    navigateToPreviousScreen: () -> Unit,
     navigateToLoginScreenWithArguments: (phoneNumber: String, password: String) -> Unit,
     navigateToLoginScreenWithoutArguments: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val activity = (LocalContext.current as? Activity)
+    BackHandler(onBack = {activity?.finish()})
     val context = LocalContext.current
     val viewModel: RegistrationScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
@@ -83,7 +87,7 @@ fun RegistrationScreen(
             .padding(16.dp)
     ) {
         Row {
-            IconButton(onClick = { navigateToPreviousScreen() }) {
+            IconButton(onClick = { activity?.finish() }) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Previous page"
@@ -268,7 +272,6 @@ fun InputFormPreview() {
 fun RegistrationScreenPreview() {
     PropEaseTheme {
         RegistrationScreen(
-            navigateToPreviousScreen = {},
             navigateToLoginScreenWithArguments = {phoneNumber: String, password: String ->  },
             navigateToLoginScreenWithoutArguments = {}
         )

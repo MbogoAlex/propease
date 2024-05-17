@@ -229,12 +229,13 @@ fun UserLivePropertyDetailsScreen(
                         text = "* Property under review",
                         color = Color.Red
                     )
-                } else if(uiState.property.approved && !uiState.property.paid) {
-                    Text(
-                        text = "* Pay to make your property live",
-                        color = Color.Red
-                    )
                 }
+//                else if(uiState.property.approved && !uiState.property.paid) {
+//                    Text(
+//                        text = "* Pay to make your property live",
+//                        color = Color.Red
+//                    )
+//                }
                 Spacer(modifier = Modifier.height(5.dp))
                 UserPropertyImageSlider(
                     uiState = uiState
@@ -552,64 +553,82 @@ fun UserPropertyListingTextDetails(
             }
         }
         Spacer(modifier = Modifier.height(10.dp))
-        if(!uiState.property.paid) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    enabled = uiState.isConnected && uiState.internetPresent,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black
-                    ),
-                    modifier = Modifier
-                        .widthIn(250.dp),
-                    onClick = {
-                        navigateToPaymentScreen(uiState.property.propertyId.toString())
-                    }
-                ) {
-                    Text(text = "Pay for ad")
-
-                }
-                Spacer(modifier = Modifier.width(3.dp))
-                Button(
-                    enabled =uiState.isConnected && uiState.internetPresent &&  uiState.deletingPropertyStatus != DeletingPropertyStatus.LOADING,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Red
-                    ),
-                    modifier = Modifier
-                        .widthIn(250.dp),
-                    onClick = {
-                        onDeleteButtonClicked()
-                    }
-                ) {
-                    if(uiState.deletingPropertyStatus == DeletingPropertyStatus.LOADING) {
-                        CircularProgressIndicator()
-                    } else {
-                        Text(text = "Remove")
-                    }
-
-                }
+        Button(
+            enabled =uiState.isConnected && uiState.internetPresent &&  uiState.deletingPropertyStatus != DeletingPropertyStatus.LOADING,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Red
+            ),
+            modifier = Modifier
+                .fillMaxWidth(),
+            onClick = {
+                onDeleteButtonClicked()
             }
-        } else {
-            Button(
-                enabled =uiState.isConnected && uiState.internetPresent &&  uiState.deletingPropertyStatus != DeletingPropertyStatus.LOADING,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Red
-                ),
-                modifier = Modifier
-                    .fillMaxWidth(),
-                onClick = {
-                    onDeleteButtonClicked()
-                }
-            ) {
-                if(uiState.deletingPropertyStatus == DeletingPropertyStatus.LOADING) {
-                    CircularProgressIndicator()
-                } else {
-                    Text(text = "Remove")
-                }
-
+        ) {
+            if(uiState.deletingPropertyStatus == DeletingPropertyStatus.LOADING) {
+                CircularProgressIndicator()
+            } else {
+                Text(text = "Remove")
             }
+
         }
+//        if(!uiState.property.paid) {
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Button(
+//                    enabled = uiState.isConnected && uiState.internetPresent,
+//                    colors = ButtonDefaults.buttonColors(
+//                        containerColor = Color.Black
+//                    ),
+//                    modifier = Modifier
+//                        .widthIn(250.dp),
+//                    onClick = {
+//                        navigateToPaymentScreen(uiState.property.propertyId.toString())
+//                    }
+//                ) {
+//                    Text(text = "Pay for ad")
+//
+//                }
+//                Spacer(modifier = Modifier.width(3.dp))
+//                Button(
+//                    enabled =uiState.isConnected && uiState.internetPresent &&  uiState.deletingPropertyStatus != DeletingPropertyStatus.LOADING,
+//                    colors = ButtonDefaults.buttonColors(
+//                        containerColor = Color.Red
+//                    ),
+//                    modifier = Modifier
+//                        .widthIn(250.dp),
+//                    onClick = {
+//                        onDeleteButtonClicked()
+//                    }
+//                ) {
+//                    if(uiState.deletingPropertyStatus == DeletingPropertyStatus.LOADING) {
+//                        CircularProgressIndicator()
+//                    } else {
+//                        Text(text = "Remove")
+//                    }
+//
+//                }
+//            }
+//        } else {
+//            Button(
+//                enabled =uiState.isConnected && uiState.internetPresent &&  uiState.deletingPropertyStatus != DeletingPropertyStatus.LOADING,
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color.Red
+//                ),
+//                modifier = Modifier
+//                    .fillMaxWidth(),
+//                onClick = {
+//                    onDeleteButtonClicked()
+//                }
+//            ) {
+//                if(uiState.deletingPropertyStatus == DeletingPropertyStatus.LOADING) {
+//                    CircularProgressIndicator()
+//                } else {
+//                    Text(text = "Remove")
+//                }
+//
+//            }
+//        }
 
 
     }
