@@ -286,10 +286,22 @@ fun HomeScreen(
 
                 }
                 if(uiState.userDetails.userName.isNotEmpty()) {
-                    Text(
-                        text = "Hey, ${uiState.userDetails.userName}",
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Hey, ${uiState.userDetails.userName}",
+                            fontWeight = FontWeight.Bold
+                        )
+                        if(uiState.userDetails.approvalStatus.lowercase() == "approved") {
+                            Icon(
+                                painter = painterResource(id = R.drawable.verified),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(15.dp)
+                            )
+                        }
+                    }
                 } else {
                     TextButton(onClick = { navigateToLoginScreenWithoutArgs() }) {
                         Text(text = "Login")
@@ -348,7 +360,8 @@ fun HomeScreen(
                         navigateToHomeScreenWithArgs = navigateToHomeScreenWithArguments,
                         navigateToLoginScreenWithoutArgs = navigateToLoginScreenWithoutArgs,
                         navigateToHomeScreen = navigateToHomeScreen,
-                        navigateToUpdateProfileScreen = navigateToUpdateProfileScreen
+                        navigateToUpdateProfileScreen = navigateToUpdateProfileScreen,
+                        navigateProfileVerificationScreen = navigateToProfileVerificationScreen
                     )
                 }
                 MainNavigationPages.SIGN_UP_SCREEN -> {

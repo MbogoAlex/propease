@@ -52,6 +52,7 @@ fun ProfileScreen(
     navigateToLoginScreenWithoutArgs: () -> Unit,
     navigateToHomeScreen: () -> Unit,
     navigateToUpdateProfileScreen: () -> Unit,
+    navigateProfileVerificationScreen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     BackHandler(onBack = {navigateToHomeScreen()})
@@ -175,6 +176,17 @@ fun ProfileScreen(
             }
         ) {
             Text(text = "Update profile")
+        }
+        if(uiState.userDetails.approvalStatus.lowercase() == "pending") {
+            Spacer(modifier = Modifier.height(20.dp))
+            OutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    navigateProfileVerificationScreen()
+                }
+            ) {
+                Text(text = "Verify identity")
+            }
         }
         Spacer(modifier = Modifier.weight(1f))
         Button(
@@ -308,7 +320,8 @@ fun ProfileScreenPreview() {
             navigateToHomeScreenWithArgs = {},
             navigateToLoginScreenWithoutArgs = {},
             navigateToHomeScreen = {},
-            navigateToUpdateProfileScreen = {}
+            navigateToUpdateProfileScreen = {},
+            navigateProfileVerificationScreen = {}
         )
     }
 }

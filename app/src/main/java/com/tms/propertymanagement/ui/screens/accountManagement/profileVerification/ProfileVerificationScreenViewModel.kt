@@ -30,6 +30,7 @@ data class ProfileVerificationScreenUiState(
     val documents: List<Uri> = emptyList(),
     val userData: ReusableFunctions.LoggedInUserData = ReusableFunctions.LoggedInUserData(),
     val saveButtonEnabled: Boolean = false,
+    val verificationFailMessage: String = "",
     val executionStatus: ReusableFunctions.ExecutionStatus = ReusableFunctions.ExecutionStatus.INITIAL,
 )
 class ProfileVerificationScreenViewModel(
@@ -129,6 +130,7 @@ class ProfileVerificationScreenViewModel(
                 } else {
                     _uiState.update {
                         it.copy(
+                            verificationFailMessage = response.body()!!.message,
                             executionStatus = ReusableFunctions.ExecutionStatus.FAIL
                         )
                     }
@@ -138,6 +140,7 @@ class ProfileVerificationScreenViewModel(
             }catch (e: Exception) {
                 _uiState.update {
                     it.copy(
+                        verificationFailMessage = "Failed. Check your connection and try again",
                         executionStatus = ReusableFunctions.ExecutionStatus.FAIL
                     )
                 }

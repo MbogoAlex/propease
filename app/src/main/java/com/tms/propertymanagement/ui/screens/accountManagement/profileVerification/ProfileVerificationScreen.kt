@@ -73,6 +73,9 @@ fun ProfileVerificationComposable(
         Toast.makeText(context, "Documents uploaded for verification", Toast.LENGTH_SHORT).show()
         navigateToHomeScreenWithArgs("advertisement-screen")
         viewModel.resetUploadingStatus()
+    } else if(uiState.executionStatus == ReusableFunctions.ExecutionStatus.FAIL) {
+        Toast.makeText(context, uiState.verificationFailMessage, Toast.LENGTH_SHORT).show()
+        viewModel.resetUploadingStatus()
     }
 
     val frontPartUpload = rememberLauncherForActivityResult(
@@ -271,9 +274,6 @@ fun ProfileVerificationScreen(
         Spacer(modifier = Modifier.weight(1f))
         Button(
             enabled = saveButtonEnabled && executionStatus != ReusableFunctions.ExecutionStatus.LOADING,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Black
-            ),
             modifier = Modifier
                 .fillMaxWidth(),
             onClick = onUploadDocuments
