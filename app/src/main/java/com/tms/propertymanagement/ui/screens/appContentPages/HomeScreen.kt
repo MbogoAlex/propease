@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
@@ -29,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -54,6 +56,7 @@ import com.tms.propertymanagement.ui.screens.accountManagement.ProfileScreen
 import com.tms.propertymanagement.ui.screens.appContentPages.HomeScreenViewModel
 import com.tms.propertymanagement.ui.screens.appContentPages.MainMenuItem
 import com.tms.propertymanagement.ui.screens.appContentPages.MainNavigationPages
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 object HomeScreenDestination: NavigationDestination {
@@ -88,7 +91,9 @@ fun HomeScreen(
         mutableStateOf("Find Properties")
     }
 
-
+    var loggingOut by remember {
+        mutableStateOf(false)
+    }
 
     var loggedInMenuItems = listOf<MainMenuItem>(
         MainMenuItem(
@@ -189,13 +194,25 @@ fun HomeScreen(
                 showLogoutDialog = !showLogoutDialog
             },
             confirmButton = {
-                Button(onClick = {
-                    viewModel.logout()
-                    showLogoutDialog = !showLogoutDialog
-                    Toast.makeText(context, "You are logged out", Toast.LENGTH_SHORT).show()
-                    navigateToHomeScreenWithArguments("logged-out")
+                Button(
+                    enabled = !loggingOut,
+                    onClick = {
+                    scope.launch {
+                        loggingOut = true
+                        viewModel.logout()
+                        delay(2000)
+                        loggingOut = false
+                        showLogoutDialog = !showLogoutDialog
+                        Toast.makeText(context, "You are logged out", Toast.LENGTH_SHORT).show()
+                        navigateToHomeScreenWithArguments("logged-out")
+                    }
+
                 }) {
-                    Text(text = "Log out")
+                    if(loggingOut) {
+                        CircularProgressIndicator()
+                    } else {
+                        Text(text = "Log out")
+                    }
                 }
             },
             dismissButton = {

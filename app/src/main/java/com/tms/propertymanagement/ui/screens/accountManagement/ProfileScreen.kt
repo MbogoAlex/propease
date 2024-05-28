@@ -17,20 +17,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -45,6 +49,8 @@ import com.propertymanagement.tms.R
 import com.propertymanagement.tms.ui.screens.accountManagement.ProfileScreenViewModel
 import com.propertymanagement.tms.ui.screens.accountManagement.UpdatingStatus
 import com.propertymanagement.tms.ui.theme.PropEaseTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(
@@ -59,7 +65,11 @@ fun ProfileScreen(
     val context = LocalContext.current
     val viewModel: ProfileScreenViewModel = viewModel(factory = PropEaseViewModelFactory.Factory)
     val uiState by viewModel.uiState.collectAsState()
+    val scope = rememberCoroutineScope()
     var showUpdateProfileScreen by remember {
+        mutableStateOf(false)
+    }
+    var loggingOut by remember {
         mutableStateOf(false)
     }
     if(uiState.updatingStatus == UpdatingStatus.SUCCESS) {
@@ -190,15 +200,27 @@ fun ProfileScreen(
         }
         Spacer(modifier = Modifier.weight(1f))
         Button(
+            enabled = !loggingOut,
             modifier = Modifier
                 .fillMaxWidth(),
             onClick = {
-                viewModel.logout()
-                Toast.makeText(context, "You are logged out", Toast.LENGTH_SHORT).show()
-                navigateToHomeScreenWithArgs("logged-out")
+                scope.launch {
+                    loggingOut = true
+                    viewModel.logout()
+                    delay(2000)
+                    loggingOut = false
+                    Toast.makeText(context, "You are logged out", Toast.LENGTH_SHORT).show()
+                    navigateToHomeScreenWithArgs("logged-out")
+                }
+
             }
         ) {
-            Text(text = "Logout")
+            if(loggingOut) {
+                CircularProgressIndicator()
+            } else {
+                Text(text = "Logout")
+            }
+
         }
 
     }
